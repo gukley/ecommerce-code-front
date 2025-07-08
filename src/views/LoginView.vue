@@ -1,208 +1,199 @@
-  <template>
-    <div class="login-page min-vh-100 d-flex align-items-center justify-content-center">
-      <div class="login-card shadow-lg p-5">
-        <div class="text-center mb-4">
-          <img src="https://i.imgur.com/your-logo.png" alt="GGTech Logo" class="mb-2" style="width: 60px; height: 60px;"> <h2 class="ggtech-title mb-1">GGtech</h2>
-          <p class="login-prompt">Faça login para continuar</p>
+<template>
+  <div class="d-flex min-vh-100">
+    <!-- Lado esquerdo -->
+    <div class="col-md-6 bg-left d-flex flex-column justify-content-center align-items-center p-5 text-white">
+      <h1 class="display-1 fw-bold logo-text">GG<span class="text-primary">TECH</span></h1>
+      <p class="fs-5 mt-4 slogan-text text-center">
+        Conectamos você à performance.<br />
+        Equipamos seu setup.<br />
+        Potencializamos seu jogo!
+      </p>
+    </div>
+
+    <!-- Lado direito -->
+    <div class="col-md-6 d-flex justify-content-center align-items-center bg-right">
+      <div class="form-card rounded-4 shadow p-5">
+        <div class="text-center mb-5">
+          <h2 class="fw-bold text-primary">Entrar</h2>
+          <small class="text-light">Acesse sua conta GGTECH</small>
         </div>
 
         <form @submit.prevent="handleLogin">
           <div class="mb-3">
-            <label for="email" class="form-label login-label">Email</label>
+            <div class="input-group">
+              <span class="input-group-text bg-secondary border-0 text-white rounded-start"> 
+                <i class="bi bi-person"></i>
+              </span>
             <input
-              v-model="loginForm.email"
+              v-model="email"
               type="email"
-              class="form-control login-input"
-              id="email"
-              placeholder="player@ggtech.com"
+              class="form-control input-custom"
+              placeholder="Email ou usuário"
               required
             />
+          </div>
           </div>
 
           <div class="mb-3">
-            <label for="password" class="form-label login-label">Senha</label>
+            <div class="input-group"> 
+              <span class="input-group-text bg-secondary border-0 text-white rounded-start"> 
+                <i class="bi bi-lock"></i>
+              </span>
             <input
-              v-model="loginForm.password"
-              :type="showPassword ? 'text' : 'password'"
-              class="form-control login-input"
-              id="password"
-              placeholder="••••••••"
+              v-model="password"
+              type="password"
+              class="form-control input-custom"
+              placeholder="Senha"
               required
             />
           </div>
+        </div>
 
-          <div class="d-grid mt-4">
-            <button class="btn login-button" type="submit" :disabled="loading">
-              <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
-              ENTRAR
-            </button>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input" id="rememberMe" />
+              <label class="form-check-label text-white-50" for="rememberMe">Lembre-me</label>
+            </div>
+            <a href="#" class="text-primary small">Esqueceu a senha?</a>
           </div>
 
-          <div class="text-center mt-3 login-divider">
-            <span>Ou</span>
-          </div>
-
-          <div class="text-center mt-3">
-            <p class="no-account-text">
-              Não tem uma conta? <router-link to="/register" class="register-link">Cadastre-se agora</router-link>
-            </p>
-          </div>
+          <button type="submit" class="btn btn-primary w-100 rounded-pill">
+            Login
+          </button>
         </form>
+
+        <p class="text-center mt-4 mb-0 text-white-50">
+          Não tem uma conta?
+          <router-link to="/register" class="text-primary text-decoration-none">Cadastre-se</router-link>
+        </p>
       </div>
     </div>
-  </template>
+  </div>
+</template>
 
-  <script setup>
-  import { ref } from 'vue'
-  import { useToast } from 'vue-toastification';
+<script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { login } from '@/services/apiService'
+import { useToast } from 'vue-toastification'
 
-  const loginForm = ref({
-    email: '',
-    password: ''
-  })
+const router = useRouter()
+const email = ref('')
+const password = ref('')
+const toast = useToast()
 
-  const showPassword = ref(false)
-  const loading = ref(false)
-  const toast = useToast();
-
-  const handleLogin = async () => {
-    loading.value = true
-    try {
-      // Simula uma chamada de API
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      toast.success('Login realizado com sucesso!', {
-        timeout: 3000 
-      })
-      loginForm.value = { email: '', password: '' }
-    } catch (err) {
-      toast.error('Erro ao fazer login! Verifique suas credenciais.', {
-        timeout: 3000 
-      })
-    } finally {
-      loading.value = false
-    }
+const handleLogin = async () => {
+  try {
+    const response = await login({ email: email.value, password: password.value })
+    localStorage.setItem('token', response.access_token)
+    toast.success('Login realizado com sucesso!')
+    router.push('/')
+  } catch (error) {
+    toast.error('Erro ao logar: ' + (error.response?.data?.message || error.message))
   }
-  </script>
+}
+</script>
 
-  <style scoped>
-  .login-page {
-    background: linear-gradient(to right, #4a008a, #7a00ff, #0056b3); 
-    color: #e0e0e0; 
-  }
+<style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
 
-  .login-card {
-    background-color: #2a0050; 
-    border-radius: 1rem; 
-    max-width: 400px;
-    width: 100%;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); 
-    padding: 2.5rem; 
-    border: 1px solid rgba(255, 255, 255, 0.1); 
-  }
+* {
+  font-family: 'Inter', sans-serif;
+}
 
-  .ggtech-title {
-    font-size: 2.5rem; 
-    font-weight: bold;
-    color: #ffffff; 
-  }
+.bg-left {
+  background: linear-gradient(135deg, #1e1e2f, #2e2e4f, #1e1e2f);
+  background-size: 400% 400%;
+  animation: gradientMove 15s ease infinite;
+}
 
-  .login-prompt {
-    color: #b0b0b0; 
-    font-size: 1rem;
-  }
+.bg-right {
+  background-color: #2b2b3d;
+}
 
-  .login-label {
-    color: #b0b0b0; 
-    font-size: 0.95rem;
-    margin-bottom: 0.5rem;
-    display: block;
-  }
+.logo-text {
+  font-size: 3.5rem;
+  letter-spacing: 1px;
+  text-shadow: 0 0 10px #8f5fe8, 0 0 20px #8f5fe8;
+}
 
-  .login-input {
-    background-color: #3b006b; /* Fundo dos inputs */
-    border: 1px solid #5a00a0; /* Borda dos inputs */
-    color: #ffffff; /* Cor do texto digitado */
-    padding: 0.75rem 1rem; /* Padding interno dos inputs */
-    border-radius: 0.5rem; /* Bordas arredondadas dos inputs */
-  }
+.text-primary {
+  color: #8f5fe8 !important;
+}
 
-  .login-input::placeholder {
-    color: #808080; /* Cor do placeholder */
-  }
+.btn-primary {
+  background-color: #8f5fe8;
+  border: none;
+}
 
-  .login-button {
-    background: linear-gradient(to right, #00c6ff, #0072ff); /* Gradiente do botão */
-    border: none;
-    color: white;
-    padding: 1rem 1.5rem;
-    font-size: 1.1rem;
-    font-weight: bold;
-    border-radius: 0.75rem; /* Bordas arredondadas do botão */
-    transition: all 0.3s ease;
-    text-transform: uppercase; /* Texto em maiúsculas */
-  }
+.btn-primary:hover {
+  background-color: #7b4fe0;
+}
 
-  .login-button:hover {
-    background: linear-gradient(to right, #00aaff, #005bbd); /* Escurece no hover */
-    transform: translateY(-2px); /* Efeito sutil no hover */
-  }
+.form-card {
+  background-color: #3b3b4d;
+  color: white;
+  width: 90%;
+  max-width: 400px;
+  animation: fadeSlide 0.8s ease-out
+}
 
-  .login-divider {
-    position: relative;
-    margin: 2rem 0;
-    color: #909090;
-    font-size: 0.9rem;
-  }
+.input-custom {
+  background-color: #4a4a5c;
+  border: none;
+  color: white;
+  border-radius: 50px;
+  padding: 12px 20px;
+}
 
-  .login-divider::before,
-  .login-divider::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    width: 40%;
-    height: 1px;
-    background-color: #505050;
-  }
+.input-custom::placeholder {
+  color: #c0c0c0;
+}
 
-  .login-divider::before {
-    left: 0;
-  }
+.slogan-text {
+  max-width: 300px;
+  font-size: 1.1rem;
+  color: #d0d0d0;
+}
 
-  .login-divider::after {
-    right: 0;
+@keyframes fadeSlide { 
+  0% { 
+    opacity: 0;
+    transform: translateY(40px);
   }
+  100% { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
-  .no-account-text {
-    color: #b0b0b0;
-    font-size: 0.95rem;
+@keyframes gradientMove { 
+  0% { 
+    background-position: 0% 50%;
   }
+  50% { 
+    background-position: 100% 50%;
+  }
+  100% { 
+    background-position: 0% 50%;
+  }
+}
 
-  .register-link {
-    color: #00c6ff; /* Cor do link "Cadastre-se agora" */
-    font-weight: bold;
-    text-decoration: none;
-  }
+.login-wrapper { 
+  background: linear-gradient(270deg, #1f1c2c, #2b1f4d, #0b2c35);
+  background-size: 600% 600%;
+  animation: gradientMove 15s ease infinite;
+}
 
-  .register-link:hover {
-    text-decoration: underline;
-    color: #0099e6;
-  }
-
-  .test-account-box {
-    background-color: #1a0033; /* Fundo da caixa de conta de teste */
-    border-radius: 0.75rem;
-    border: 1px dashed #5a00a0; /* Borda pontilhada */
-    color: #c0c0c0;
-    font-size: 0.9rem;
-    margin-top: 2rem !important; /* Ajusta a margem superior */
-  }
-
-  .test-account-box i {
-    color: #00c6ff; 
-  }
-
-  .test-account-value {
-    color: #00c6ff; 
-    font-weight: bold;
-  }
-  </style>
+.input-group-text {
+  background-color: #4a4a5c;
+  border: none;
+  color: white;
+  border-radius: 50px 0 0 50px;
+  padding: 0 15px;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>
