@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import api from '@services/api';
+import { login, getUserProfile as apiGetUserProfile } from '@/services/apiService'; 
 import { ref } from 'vue';
 
 export const useAuthStore = defineStore('auth', () => { 
@@ -7,15 +7,16 @@ export const useAuthStore = defineStore('auth', () => {
     const token = ref(localStorage.getItem('token') || null)
 
     const loginUser = async (email, password) => { 
-        const response = await api.login({ email, password})
+        const response = await login({ email, password}) 
         token.value = response.data.token
         localStorage.setItem('token', token.value)
         await getUserProfile()
     }
 
     const getUserProfile = async () => { 
-        const response = await api.getUser()
-        user.value = response.data
+        const userData = await apiGetUserProfile();
+        console.log('Perfil carregado:', userData);
+        user.value = userData;
     }
 
     const logout = () => { 
