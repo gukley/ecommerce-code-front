@@ -51,16 +51,16 @@ defineEmits(['edit', 'delete', 'upload-image']);
 
 <style scoped>
 .category-table-container {
-  background: var(--admin-bg);
+  background: var(--admin-bg-secondary);
   border-radius: 1.5rem;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+  box-shadow: 0 2px 16px var(--admin-shadow-light);
   padding: 2rem 1.5rem;
 }
 .table-dark {
-  --bs-table-bg: var(--admin-bg-dark);
-  --bs-table-striped-bg: var(--admin-bg-darker);
-  --bs-table-hover-bg: var(--admin-bg-darkest);
-  color: var(--admin-text);
+  --bs-table-bg: var(--admin-bg-secondary);
+  --bs-table-striped-bg: var(--admin-bg-tertiary);
+  --bs-table-hover-bg: rgba(255, 255, 255, 0.05);
+  color: var(--admin-text-primary);
 }
 .rounded-table {
   border-collapse: separate;
@@ -75,7 +75,7 @@ th, td {
   font-size: 1.05rem;
 }
 .text-primary-ggtech {
-  color: var(--admin-primary) !important;
+  color: var(--admin-accent-primary) !important;
   font-weight: 700;
   letter-spacing: 0.5px;
   font-size: 1.1rem;
@@ -85,91 +85,110 @@ th, td {
   height: 56px;
   object-fit: cover;
   border-radius: 50%;
-  border: 2px solid var(--admin-primary);
-  box-shadow: 0 2px 8px rgba(0,255,225,0.10);
+  border: 2px solid var(--admin-accent-primary);
+  box-shadow: 0 2px 8px rgba(0, 255, 225, 0.15);
 }
 .upload-input {
-  background: var(--admin-bg-dark);
-  color: var(--admin-primary);
-  border: 1px solid var(--admin-primary);
+  background: var(--admin-bg-tertiary);
+  color: var(--admin-accent-primary);
+  border: 1px solid var(--admin-accent-primary);
   border-radius: 1rem;
   font-size: 0.95rem;
   padding: 0.3rem 0.7rem;
   margin-right: 0.5rem;
-  font-family: 'Poppins', Arial, sans-serif;
+  font-family: 'Inter', Arial, sans-serif;
 }
 .btn-info {
-  background: var(--admin-primary-dark);
-  border: none;
-  color: var(--admin-bg);
+  background: var(--admin-accent-primary);
+  border: 1px solid var(--admin-accent-primary);
+  color: var(--admin-bg-primary);
   font-weight: 600;
-  font-family: 'Poppins', Arial, sans-serif;
+  font-family: 'Inter', Arial, sans-serif;
   border-radius: 1.2rem;
-  transition: all 0.2s cubic-bezier(.4,2,.3,1);
+  transition: all 0.3s ease;
 }
 .btn-info:hover {
-  background: #007cf0;
-  color: #fff;
+  background: var(--admin-accent-secondary);
+  border-color: var(--admin-accent-secondary);
+  transform: translateY(-1px);
 }
 .btn-danger {
   background: var(--admin-danger);
-  border: none;
-  color: var(--admin-text);
+  border: 1px solid var(--admin-danger);
+  color: #fff;
   font-weight: 600;
-  font-family: 'Poppins', Arial, sans-serif;
+  font-family: 'Inter', Arial, sans-serif;
   border-radius: 1.2rem;
-  transition: all 0.2s cubic-bezier(.4,2,.3,1);
+  transition: all 0.3s ease;
 }
 .btn-danger:hover {
-  background: var(--admin-danger-dark);
-  color: #fff;
+  background: #e53e3e;
+  border-color: #e53e3e;
+  transform: translateY(-1px);
 }
 .category-name-cell {
-  font-family: 'Poppins', Arial, sans-serif;
+  font-family: 'Inter', Arial, sans-serif;
   font-weight: 600;
   font-size: 1.1rem;
-  color: var(--admin-text);
+  color: var(--admin-text-primary);
   letter-spacing: 0.2px;
 }
 thead th {
-  background: var(--admin-bg) !important;
-  color: var(--admin-text) !important;
+  background: var(--admin-bg-secondary) !important;
+  color: var(--admin-text-primary) !important;
   font-weight: 700;
   letter-spacing: 0.5px;
   font-size: 1.1rem;
 }
 tbody tr, .table-dark tbody > tr {
-  background: var(--admin-bg-dark) !important;
+  background: var(--admin-bg-secondary) !important;
 }
 .table-dark tbody > tr > td {
-  background: var(--admin-bg-dark) !important;
-  color: var(--admin-text) !important;
+  background: var(--admin-bg-secondary) !important;
+  color: var(--admin-text-primary) !important;
 }
 .btn-info i, .btn-danger i {
   color: #fff;
   transition: color 0.2s;
 }
 .btn-info:hover i {
-  color: #007cf0;
+  color: var(--admin-accent-secondary);
 }
 .btn-danger:hover i {
-  color: #e53e3e;
+  color: #fff;
 }
 </style>
 
 <style>
+/* Sistema de Cores Padronizado para Admin */
 :root {
-  --admin-bg: #11111c;
-  --admin-bg-dark: #181828;
-  --admin-bg-darker: #23243a;
-  --admin-bg-darkest: #23243a;
-  --admin-primary: #007cf0;
-  --admin-primary-dark: #005fa3;
-  --admin-primary-gradient: linear-gradient(90deg, #007cf0 0%, #00ffe1 100%);
-  --admin-danger: #e53e3e;
-  --admin-danger-dark: #c53030;
-  --admin-text: #fff;
-  --admin-text-light: #e0e6ed;
-  --admin-border: #23243a;
+  /* Cores Principais - Harmonizadas com a Sidebar */
+  --admin-bg-primary: #0f0f23;
+  --admin-bg-secondary: #1a1a2e;
+  --admin-bg-tertiary: #24243a;
+  
+  /* Cores de Acento - Consistente com a Sidebar */
+  --admin-accent-primary: #00ffe1;
+  --admin-accent-secondary: #8f5fe8;
+  --admin-accent-tertiary: #00d4aa;
+  
+  /* Cores de Texto */
+  --admin-text-primary: #ffffff;
+  --admin-text-secondary: rgba(255, 255, 255, 0.8);
+  --admin-text-muted: rgba(255, 255, 255, 0.6);
+  
+  /* Cores de Estado */
+  --admin-success: #00d4aa;
+  --admin-warning: #ffa726;
+  --admin-danger: #ff6b6b;
+  --admin-info: #4fc3f7;
+  
+  /* Cores de Borda */
+  --admin-border-light: rgba(255, 255, 255, 0.1);
+  --admin-border-medium: rgba(255, 255, 255, 0.2);
+  
+  /* Cores de Sombra */
+  --admin-shadow-light: rgba(0, 0, 0, 0.1);
+  --admin-shadow-medium: rgba(0, 0, 0, 0.2);
 }
 </style>
