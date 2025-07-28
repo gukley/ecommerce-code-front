@@ -1,0 +1,65 @@
+/* Sistema de Cores Padronizado para Admin */
+
+:root {
+  /* Cores Principais - Harmonizadas com a Sidebar */
+  --admin-bg-primary: #0f0f23;
+  --admin-bg-secondary: #1a1a2e;
+  --admin-bg-tertiary: #24243a;
+  
+  /* Cores de Acento - Consistente com a Sidebar */
+  --admin-accent-primary: #00ffe1;
+  --admin-accent-secondary: #8f5fe8;
+  --admin-accent-tertiary: #00d4aa;
+  
+  /* Cores de Texto */
+  --admin-text-primary: #ffffff;
+  --admin-text-secondary: rgba(255, 255, 255, 0.8);
+  --admin-text-muted: rgba(255, 255, 255, 0.6);
+  
+  /* Cores de Estado */
+  --admin-success: #00d4aa;
+  --admin-warning: #ffa726;
+  --admin-danger: #ff6b6b;
+  --admin-info: #4fc3f7;
+  
+  /* Cores de Borda */
+  --admin-border-light: rgba(255, 255, 255, 0.1);
+  --admin-border-medium: rgba(255, 255, 255, 0.2);
+  
+  /* Cores de Sombra */
+  --admin-shadow-light: rgba(0, 0, 0, 0.1);
+  --admin-shadow-medium: rgba(0, 0, 0, 0.2);
+}
+
+/* Classes utilitárias para cores */
+.text-admin-primary {
+  color: var(--admin-accent-primary) !important;
+}
+
+.text-admin-secondary {
+  color: var(--admin-accent-secondary) !important;
+}
+
+.text-admin-muted {
+  color: var(--admin-text-muted) !important;
+}
+
+.bg-admin-primary {
+  background-color: var(--admin-bg-primary) !important;
+}
+
+.bg-admin-secondary {
+  background-color: var(--admin-bg-secondary) !important;
+}
+
+.bg-admin-tertiary {
+  background-color: var(--admin-bg-tertiary) !important;
+}
+
+.border-admin-light {
+  border-color: var(--admin-border-light) !important;
+}
+
+.border-admin-medium {
+  border-color: var(--admin-border-medium) !important;
+} 
