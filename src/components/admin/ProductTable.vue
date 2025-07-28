@@ -106,10 +106,10 @@
   .product-table-container {
   }
   .table-dark {
-    --bs-table-bg: var(--admin-bg-dark);
-    --bs-table-striped-bg: var(--admin-bg-darker);
-    --bs-table-hover-bg: var(--admin-bg-darkest);
-    color: var(--admin-text);
+    --bs-table-bg: var(--admin-bg-secondary);
+    --bs-table-striped-bg: var(--admin-bg-tertiary);
+    --bs-table-hover-bg: rgba(255, 255, 255, 0.05);
+    color: var(--admin-text-primary);
   }
   .rounded-table {
     border-collapse: separate;
@@ -158,80 +158,103 @@
   }
   .stock-input {
     max-width: 80px;
-    background-color: var(--admin-bg-darker);
-    color: var(--admin-text);
-    border: 1px solid #5a5a6e;
-    border-radius: 5px;
+    background-color: var(--admin-bg-tertiary);
+    color: var(--admin-text-primary);
+    border: 1px solid var(--admin-border-medium);
+    border-radius: 8px;
     text-align: center;
+    transition: all 0.3s ease;
   }
   .stock-input:focus {
-    border-color: var(--admin-primary-dark);
-    box-shadow: 0 0 0 0.25rem rgba(0,255,225,0.18);
+    border-color: var(--admin-accent-primary);
+    box-shadow: 0 0 0 0.25rem rgba(0, 255, 225, 0.18);
+    outline: none;
   }
   .btn-info {
-    background-color: var(--admin-primary-dark);
-    border-color: var(--admin-primary-dark);
-    color: var(--admin-text);
+    background-color: var(--admin-accent-primary);
+    border-color: var(--admin-accent-primary);
+    color: var(--admin-bg-primary);
+    transition: all 0.3s ease;
   }
   .btn-info:hover {
-    background-color: #007cf0;
-    border-color: #007cf0;
+    background-color: var(--admin-accent-secondary);
+    border-color: var(--admin-accent-secondary);
+    transform: translateY(-1px);
   }
   .btn-danger {
     background-color: var(--admin-danger);
     border-color: var(--admin-danger);
-    color: var(--admin-text);
+    color: #fff;
+    transition: all 0.3s ease;
   }
   .btn-danger:hover {
-    background-color: var(--admin-danger-dark);
-    border-color: var(--admin-danger-dark);
+    background-color: #e53e3e;
+    border-color: #e53e3e;
+    transform: translateY(-1px);
   }
   .spinner-border {
-    color: var(--admin-primary);
+    color: var(--admin-accent-primary);
   }
   th, .table th {
-    color: var(--admin-primary) !important;
+    color: var(--admin-accent-primary) !important;
     font-weight: 700;
     letter-spacing: 0.5px;
     font-size: 1.1rem;
     background: transparent;
   }
   thead th {
-    background: var(--admin-bg) !important;
-    color: var(--admin-text) !important;
+    background: var(--admin-bg-secondary) !important;
+    color: var(--admin-text-primary) !important;
   }
   tbody tr, .table-dark tbody > tr {
-    background: var(--admin-bg-dark) !important;
+    background: var(--admin-bg-secondary) !important;
   }
   .table-dark tbody > tr > td {
-    background: var(--admin-bg-dark) !important;
-    color: var(--admin-text) !important;
+    background: var(--admin-bg-secondary) !important;
+    color: var(--admin-text-primary) !important;
   }
   .btn-info i, .btn-danger i {
     color: #fff;
     transition: color 0.2s;
   }
   .btn-info:hover i {
-    color: #007cf0;
+    color: var(--admin-accent-secondary);
   }
   .btn-danger:hover i {
-    color: #e53e3e;
+    color: #fff;
   }
   </style>
 
 <style>
+/* Sistema de Cores Padronizado para Admin */
 :root {
-  --admin-bg: #11111c;
-  --admin-bg-dark: #181828;
-  --admin-bg-darker: #23243a;
-  --admin-bg-darkest: #23243a;
-  --admin-primary: #007cf0;
-  --admin-primary-dark: #005fa3;
-  --admin-primary-gradient: linear-gradient(90deg, #007cf0 0%, #00ffe1 100%);
-  --admin-danger: #e53e3e;
-  --admin-danger-dark: #c53030;
-  --admin-text: #fff;
-  --admin-text-light: #e0e6ed;
-  --admin-border: #23243a;
+  /* Cores Principais - Harmonizadas com a Sidebar */
+  --admin-bg-primary: #0f0f23;
+  --admin-bg-secondary: #1a1a2e;
+  --admin-bg-tertiary: #24243a;
+  
+  /* Cores de Acento - Consistente com a Sidebar */
+  --admin-accent-primary: #00ffe1;
+  --admin-accent-secondary: #8f5fe8;
+  --admin-accent-tertiary: #00d4aa;
+  
+  /* Cores de Texto */
+  --admin-text-primary: #ffffff;
+  --admin-text-secondary: rgba(255, 255, 255, 0.8);
+  --admin-text-muted: rgba(255, 255, 255, 0.6);
+  
+  /* Cores de Estado */
+  --admin-success: #00d4aa;
+  --admin-warning: #ffa726;
+  --admin-danger: #ff6b6b;
+  --admin-info: #4fc3f7;
+  
+  /* Cores de Borda */
+  --admin-border-light: rgba(255, 255, 255, 0.1);
+  --admin-border-medium: rgba(255, 255, 255, 0.2);
+  
+  /* Cores de Sombra */
+  --admin-shadow-light: rgba(0, 0, 0, 0.1);
+  --admin-shadow-medium: rgba(0, 0, 0, 0.2);
 }
 </style>
