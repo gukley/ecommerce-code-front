@@ -150,18 +150,18 @@ const handleLogin = async () => {
   position: relative;
   overflow: hidden;
 }
-.form-card {
-  background-color: #1f1f33;
+.form-card { 
+  background-color: rgba(31, 31, 51, 0.9);
   color: white;
   width: 90%;
-  max-width: 460px;
+  max-width: 455px;
   padding: 3.5rem;
   border-radius: 15px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
   animation: fadeInUp 1s ease forwards;
   animation-delay: 0.3s;
   opacity: 0;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 .register-heading {
   color: #ffffff;
@@ -189,12 +189,11 @@ const handleLogin = async () => {
   font-size: 1.1rem;
 }
 .glass-card {
-  background: rgba(255,255,255,0.13);
-  backdrop-filter: blur(14px);
-  border: 2px solid transparent;
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 1.5rem;
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
-  border-image: linear-gradient(120deg, #a362ff 0%, #00ffe1 100%) 1;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
   position: relative;
 }
 .login-avatar {
