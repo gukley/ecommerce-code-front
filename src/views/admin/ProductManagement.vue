@@ -202,44 +202,66 @@
   
   <style scoped>
   :root {
-  --admin-bg: #f4f7fa;
-  --admin-bg-dark: #ffffff;
-  --admin-primary: #007cf0;
-  --admin-primary-dark: #005fa3;
-  --admin-primary-gradient: linear-gradient(90deg, #007cf0 0%, #00ffe1 100%);
-  --admin-danger: #e53e3e;
-  --admin-danger-dark: #c53030;
-  --admin-text: #2e2e2e;
-  --admin-text-light: #6b7280;
-  --admin-border: #d1d5db;
-}
+    /* Cores Principais - Harmonizadas com a Sidebar */
+    --admin-bg-primary: #0f0f23;
+    --admin-bg-secondary: #1a1a2e;
+    --admin-bg-tertiary: #24243a;
+    
+    /* Cores de Acento - Consistente com a Sidebar */
+    --admin-accent-primary: #00ffe1;
+    --admin-accent-secondary: #8f5fe8;
+    --admin-accent-tertiary: #00d4aa;
+    
+    /* Cores de Texto */
+    --admin-text-primary: #ffffff;
+    --admin-text-secondary: rgba(255, 255, 255, 0.8);
+    --admin-text-muted: rgba(255, 255, 255, 0.6);
+    
+    /* Cores de Estado */
+    --admin-success: #00d4aa;
+    --admin-warning: #ffa726;
+    --admin-danger: #ff6b6b;
+    --admin-info: #4fc3f7;
+    
+    /* Cores de Borda */
+    --admin-border-light: rgba(255, 255, 255, 0.1);
+    --admin-border-medium: rgba(255, 255, 255, 0.2);
+    
+    /* Cores de Sombra */
+    --admin-shadow-light: rgba(0, 0, 0, 0.1);
+    --admin-shadow-medium: rgba(0, 0, 0, 0.2);
+  }
 
 .product-management {
-  background-color: var(--admin-bg);
+  background-color: var(--admin-bg-primary);
   min-height: calc(100vh - 100px);
-  color: var(--admin-text);
+  color: var(--admin-text-primary);
   padding: 2rem;
 }
 
 .text-primary-ggtech {
-  color: var(--admin-primary) !important;
+  color: var(--admin-accent-primary) !important;
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(0, 255, 225, 0.3);
 }
 
 .btn-main-action {
-  background: var(--admin-primary-gradient);
+  background: linear-gradient(135deg, var(--admin-accent-primary) 0%, var(--admin-accent-secondary) 100%);
   color: #fff;
-  border: none;
+  border: 1px solid rgba(0, 255, 225, 0.3);
   font-size: 1.15rem;
   border-radius: 50px;
-  box-shadow: 0 4px 16px rgba(0, 124, 240, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 255, 225, 0.2);
   transition: all 0.3s ease;
+  font-weight: 600;
 }
 
 .btn-main-action:hover {
-  background: linear-gradient(90deg, #00ffe1 0%, #007cf0 100%);
+  background: linear-gradient(135deg, var(--admin-accent-secondary) 0%, var(--admin-accent-primary) 100%);
   color: #fff;
-  box-shadow: 0 8px 25px rgba(0, 124, 240, 0.25);
+  box-shadow: 0 8px 25px rgba(0, 255, 225, 0.3);
   transform: translateY(-2px);
+  border-color: rgba(0, 255, 225, 0.5);
 }
 
 /* Search Bar */
@@ -247,19 +269,19 @@
   max-width: 340px;
   border-radius: 50px !important;
   overflow: hidden;
-  box-shadow: 0 2px 12px rgba(0, 124, 240, 0.16);
-  border: 2px solid var(--admin-border);
-  background: #fff;
+  box-shadow: 0 2px 12px rgba(0, 255, 225, 0.16);
+  border: 2px solid var(--admin-border-light);
+  background: var(--admin-bg-secondary);
   transition: box-shadow 0.2s, border-color 0.2s;
 }
 .search-bar:focus-within {
-  box-shadow: 0 4px 18px rgba(0, 124, 240, 0.22);
-  border-color: var(--admin-primary);
+  box-shadow: 0 4px 18px rgba(0, 255, 225, 0.22);
+  border-color: var(--admin-accent-primary);
 }
 .search-input {
-  background-color: #fff;
+  background-color: var(--admin-bg-secondary);
   border: none;
-  color: #23243a;
+  color: var(--admin-text-primary);
   border-radius: 50px 0 0 50px !important;
   padding-left: 1.5rem;
   font-size: 1.12rem;
@@ -268,20 +290,20 @@
   letter-spacing: 0.02em;
 }
 .search-input::placeholder {
-  color: #6b7280;
+  color: var(--admin-text-muted);
   opacity: 1;
   font-weight: 500;
 }
 .search-input:focus {
-  background: #f4f7fa;
+  background: var(--admin-bg-tertiary);
   box-shadow: none;
   outline: none;
-  color: #23243a;
+  color: var(--admin-text-primary);
 }
 .search-icon {
-  background-color: #f4f7fa;
+  background-color: var(--admin-bg-tertiary);
   border: none;
-  color: #007cf0;
+  color: var(--admin-accent-primary);
   border-radius: 0 50px 50px 0 !important;
   padding-right: 1.5rem;
   font-size: 1.5rem;
