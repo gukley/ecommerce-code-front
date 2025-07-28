@@ -3,8 +3,8 @@ import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore';
 import { useCartStore } from '@/stores/cartStore';
-import CartDrawer from '@/components/cart/CartDrawer.vue';
-import WishlistDrawer from '@/components/cart/WishlistDrawer.vue';
+import CartDrawer from '@/components/Cart/CartDrawer.vue';
+import WishlistDrawer from '@/components/Cart/WishlistDrawer.vue';
 import { useWishlistStore } from '@/stores/wishlistStore';
 
 const showMenu = ref(false);
@@ -148,14 +148,16 @@ onBeforeUnmount(() => {
 /* Estilos da Navbar Customizada */
 .custom-navbar {
   background-color: #1a1a2e; 
-  padding: 0.7rem 2rem; /* altura menor */
+  padding: 0.7rem 2rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); 
   border-bottom: 1px solid rgba(255, 255, 255, 0.1); 
   min-height: 56px;
+  position: relative;
+  z-index: 1000;
 }
 
 .navbar-brand {
-  font-size: 2.1rem !important; /* logo menor */
+  font-size: 2.1rem !important;
   font-weight: 700;
   letter-spacing: 1px;
   padding: 0;
@@ -178,10 +180,10 @@ onBeforeUnmount(() => {
 /* Links de Navegação */
 .custom-nav-link {
   color: #e0e0e0 !important;
-  font-size: 1.05rem; /* menor */
+  font-size: 1.05rem;
   font-weight: 500;
   transition: color 0.3s ease, transform 0.2s ease;
-  padding: 0.35rem 0.7rem; /* padding menor */
+  padding: 0.35rem 0.7rem;
   position: relative; 
 }
 
@@ -215,14 +217,14 @@ onBeforeUnmount(() => {
 /* Barra de Busca */
 .custom-search-bar {
   flex-grow: 0.7; 
-  max-width: 330px; /* mais compacta */
+  max-width: 330px;
 }
 
 .custom-search-input {
   background-color: #2b2b3d; 
   border: 1px solid #4a4a6e; 
   color: #e0e0e0; 
-  padding: 0.5rem 1rem; /* padding menor */
+  padding: 0.5rem 1rem;
   border-radius: 50px; 
   transition: all 0.3s ease;
   font-size: 0.98rem;
@@ -243,13 +245,18 @@ onBeforeUnmount(() => {
   font-size: 1rem !important;
 }
 
-/* Ícones (Carrinho, Usuário) */
+/* Ícones */
 .nav-icon-wrapper {
   position: relative;
   cursor: pointer;
   padding: 3px; 
   transition: transform 0.2s ease;
-  z-index: 1000;
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
 }
 
 .nav-icon-wrapper:hover {
@@ -258,8 +265,9 @@ onBeforeUnmount(() => {
 
 .nav-icon {
   color: #e0e0e0; 
-  font-size: 1.7rem !important; /* menor */
+  font-size: 1.7rem !important;
   transition: color 0.3s ease;
+  pointer-events: none;
 }
 
 .nav-icon-wrapper:hover .nav-icon {
@@ -271,6 +279,7 @@ onBeforeUnmount(() => {
   font-size: 0.72rem; 
   padding: 0.25em 0.5em;
   border: 1px solid rgba(255, 255, 255, 0.2);
+  pointer-events: none;
 }
 
 .user-menu-popover {
@@ -286,10 +295,12 @@ onBeforeUnmount(() => {
   border: 2px solid #8f5fe8;
   animation: fadeInMenu 0.18s;
 }
+
 @keyframes fadeInMenu {
   from { opacity: 0; transform: translateY(-10px);}
   to { opacity: 1; transform: translateY(0);}
 }
+
 .user-menu-item {
   padding: 0.6rem 1.1rem;
   color: #e0e0e0;
@@ -299,22 +310,26 @@ onBeforeUnmount(() => {
   transition: background 0.2s;
   border-bottom: 1px solid #35354d;
 }
+
 .user-menu-item:last-child {
   border-bottom: none;
 }
+
 .user-menu-item:hover {
   background: #8f5fe8;
   color: #1a1a2e;
 }
 
-/* Responsividade Bootstrap */
+/* Responsividade */
 @media (max-width: 991.98px) { 
   .custom-navbar {
     padding: 0.6rem 1rem;
   }
+  
   .navbar-brand {
     font-size: 1.3rem !important;
   }
+  
   .navbar-nav {
     flex-direction: column; 
     align-items: flex-start !important; 
@@ -322,14 +337,17 @@ onBeforeUnmount(() => {
     margin-top: 1rem;
     gap: 0.3rem !important;
   }
+  
   .custom-nav-link {
     width: 100%; 
     padding: 0.5rem 0;
   }
+  
   .custom-nav-link::after {
     left: 0;
     transform: translateX(0);
   }
+  
   .custom-search-bar {
     width: 100%;
     max-width: none;
@@ -337,6 +355,7 @@ onBeforeUnmount(() => {
     margin-right: 0 !important;
     margin-top: 1.2rem !important;
   }
+  
   .d-flex.align-items-center.gap-4.ms-lg-3 { 
     width: 100%;
     justify-content: flex-start;
