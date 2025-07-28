@@ -1,12 +1,17 @@
 <template>
   <div class="main-layout text-white">
     <Navbar />
-   <HeroSection />
+    <div v-if="authStore.user && authStore.user.role === 'ADMIN'" class="admin-panel-btn-bar d-flex justify-content-end align-items-center px-4 mt-2 mb-2">
+      <button @click="$router.push('/admin')" class="btn btn-admin-panel d-inline-flex align-items-center gap-2">
+        <i class="bi bi-speedometer2"></i> Painel Admin
+      </button>
+    </div>
+    <HeroSection />
       <div class="content-wrapper d-flex">
       <SideBar @categoria-selecionada="categoriaSelecionada = $event" />
       <div class="flex-grow-1 d-flex justify-content-center align-items-start p-4">
         <div class="products-container w-100">
-          <form class="mb-2 d-flex justify-content-center" @submit="buscarProdutos">
+          <form class="mb-2 d-flex justify-content-start" @submit="buscarProdutos">
             <input
               v-model="termoBusca"
               class="form-control custom-search-input"
@@ -133,6 +138,66 @@ function buscarProdutos(e) {
 .custom-search-input::placeholder {
   color: #e0e0e0 !important;
   opacity: 1;
+}
+.admin-panel-btn-container {
+  width: 100%;
+  z-index: 100;
+}
+.btn-warning {
+  background: linear-gradient(90deg, #ffb300 0%, #ffea00 100%);
+  color: #23243a;
+  border: none;
+  font-size: 1.08rem;
+  font-weight: 700;
+  box-shadow: 0 2px 12px rgba(255, 186, 0, 0.18);
+  transition: background 0.2s, color 0.2s;
+}
+.btn-warning:hover, .btn-warning:focus {
+  background: linear-gradient(90deg, #ffea00 0%, #ffb300 100%);
+  color: #1a1a2e;
+}
+.admin-fab {
+  position: fixed;
+  top: 24px;
+  right: 32px;
+  z-index: 3000;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(30, 32, 48, 0.85);
+  color: #00ffe1;
+  border: 2px solid #00bcd4;
+  box-shadow: 0 4px 18px rgba(0, 188, 212, 0.10);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.7rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+.admin-fab:hover, .admin-fab:focus {
+  background: #00bcd4;
+  color: #18182a;
+  border-color: #00ffe1;
+  box-shadow: 0 8px 32px rgba(0,255,225,0.18);
+}
+.admin-panel-btn-bar {
+  width: 100%;
+}
+.btn-admin-panel {
+  background: linear-gradient(90deg, #007cf0 0%, #00ffe1 100%);
+  color: #fff;
+  border: none;
+  font-size: 1.08rem;
+  font-weight: 700;
+  border-radius: 50px;
+  box-shadow: 0 2px 12px rgba(0, 188, 212, 0.10);
+  padding: 0.7rem 1.7rem;
+  transition: background 0.2s, color 0.2s;
+}
+.btn-admin-panel:hover, .btn-admin-panel:focus {
+  background: linear-gradient(90deg, #00ffe1 0%, #007cf0 100%);
+  color: #23243a;
 }
 </style>
 

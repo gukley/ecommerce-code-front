@@ -1,74 +1,96 @@
 <template> 
-    <div class="card product-card  text-white border-0 rounded-4 h-100" @click="$emit('card-click')" style="cursor:pointer;"> 
-        <div class="position-relative"> 
-            <img
-            :src="imageUrl"
-            class="card-img-top rounded-top-4"
-            :alt="produto.name"
-            style="height: 200px; object-fit: cover;"
-            />
+  <div class="card product-card text-white border-0 rounded-4 h-100 text-decoration-none" style="cursor: pointer">
+    <div class="position-relative"> 
+      <!-- router-link só na imagem -->
+      <router-link
+        :to="`/produto/${produto.id}`"
+        style="display: block"
+        class="text-decoration-none"
+      >
+        <img
+          :src="imageUrl"
+          class="card-img-top rounded-top-4"
+          :alt="produto.name"
+          style="height: 200px; object-fit: cover"
+        />
+      </router-link>
+      <!-- botao de favoritar canto superior esquerdo -->
+      <button
+        class="btn btn-fav position-absolute top-0 start-0 m-2"
+        @click.stop.prevent="toggleWishlist"
+        :aria-label="isFavorited ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
+        style="z-index: 3;"
+      >
+        <i :class="isFavorited ? 'bi bi-heart-fill' : 'bi bi-heart'" class="fs-4"></i>
+      </button>
 
-            <!-- Selos -->
-             <span
-             v-if="produto.status === 'novo'"
-             class="badge bg-success position-absolute top-0 start-0 m-2"
-             >NOVO</span>
+      <span
+        v-if="produto.status === 'novo'"
+        class="badge bg-success position-absolute top-0 end-0 m-2"
+        >NOVO</span
+      >
+      <span
+        v-if="produto.stock === 0"
+        class="badge bg-danger position-absolute top-0 end-0 m-2"
+        >Esgotado</span
+      >
+      <span
+        v-if="produto.desconto"
+        class="badge bg-danger position-absolute top-0 end-0 m-2"
+        >-{{ produto.desconto }}%</span
+      >
+    </div>
+    <div class="card-body d-flex flex-column flex-grow-1"> 
+      <!-- router-link só no título -->
+      <router-link
+        :to="`/produto/${produto.id}`"
+        class="text-decoration-none"
+      >
+        <h5 class="card-title fw-bold">{{ produto.name }}</h5>
+      </router-link>
+      <p class="text-muted mb-1 d-flex align-items-center"> 
+        <img
+          v-if="produto.category?.image_path"
+          :src="BASE_URL + produto.category.image_path"
+          alt="Categoria"
+          class="category-thumb me-2"
+          style="width: 28px; height: 28px; object-fit: cover; border-radius: 50%; border: 1.5px solid #8f5fe8"
+        />
+        {{ produto.category?.name }}
+      </p>
 
-             <span v-if="produto.stock === 0"
-             class="badge bg-secondary position-absolute top-0 start-0 m-2"
-             >ESGOTADO</span>
-
-             <span
-             v-if="produto.desconto"
-             class="badge bg-danger position-absolute top-0 end-0 m-2"
-             >-{{ produto.desconto }}%</span>
-        </div>
-        <div class="card-body d-flex flex-column flex-grow-1"> 
-            <h5 class="card-title fw-bold">{{ produto.name }}</h5>
-            <p class="text-muted mb-1 d-flex align-items-center">
-              <img
-                v-if="produto.category?.image_path"
-                :src="BASE_URL + produto.category.image_path"
-                alt="Categoria"
-                class="category-thumb me-2"
-                style="width: 28px; height: 28px; object-fit: cover; border-radius: 50%; border: 1.5px solid #8f5fe8;"
-              />
-              {{ produto.category?.name }}
-            </p>
-
-        <!-- Preço -->
-         <div class="mb-2"> 
-            <span class="fw-bold text-primary fs-5">R$ {{ precoFinal }}</span>
-            <span
-                v-if="produto.desconto"
-                class="text-muted text-decoration-line-through ms-2"
-                > 
-            R$ {{ Number(produto.price).toFixed(2) }}
-            </span> 
-         </div>
-
-         <!-- Estrelas -->
-          <div class="mb-3 text-warning"> 
-            <i class="bi bi-star-fill me-1" v-for="i in produto.estrelas" :key="i"></i>
-          </div>
-          <div class="mt-auto">
-            <button
-              class="btn btn-outline-primary w-100 rounded-pill"
-              :disabled="produto.stock === 0"
-              @click.stop="adicionarAoCarrinho"
-            > 
-              <i class="bi bi-cart-plus me-2"></i>
-              Adicionar ao Carrinho
-            </button>
-          </div>
-        </div>
+      <div class="mb-2">
+        <span class="fw-bold text-primaty fs-5">R$ {{ precoFinal }}</span>
+        <span
+          v-if="produto.desconto"
+          class="text-muted text-decoration-line-through ms-2"
+        > 
+          R$ {{ Number(produto.price).toFixed(2) }}
+      </span>
     </div>
 
+    <div class="mb-3 text-warning">
+      <i class="bi bi-star-fill me-1" v-for="i in produto.estrelas" :key="i"></i>
+    </div>
+
+    <div class="mt-auto"> 
+      <button
+        class="btn btn-outline-primary w-100 rounded-pill"
+        :disabled="produto.stock === 0"
+        @click.stop.prevent="adicionarAoCarrinho"
+      > 
+        <i class="bi bi-cart-plus me-2"></i>
+        Adicionar ao Carrinho
+      </button>
+    </div>
+  </div>
+</div>
 </template>
 
 <script setup> 
 import { computed } from 'vue'
 import { useCartStore } from '@/stores/cartStore'
+import { useWishlistStore } from '@/stores/wishlistStore';
 
 const BASE_URL = 'http://35.196.79.227:8000';
 
@@ -83,6 +105,11 @@ const imageUrl = computed(() => {
 });
 
 const cart = useCartStore()
+const wishlist = useWishlistStore();
+const isFavorited = computed(() => wishlist.isInWishlist(props.produto.id));
+const toggleWishlist = () => {
+  wishlist.toggle(props.produto);
+};
 
 const precoFinal = computed(() => { 
     if (props.produto.desconto) { 
@@ -183,5 +210,30 @@ const adicionarAoCarrinho = () => {
 
 .mb-3 {
     margin-bottom: 1.2rem !important;
+}
+
+.btn-fav {
+  background: rgba(34,34,34,0.82);
+  border: none;
+  color: #ff4f8f;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(143, 95, 232, 0.10);
+  transition: background 0.2s, color 0.2s;
+  z-index: 2;
+}
+.btn-fav:hover, .btn-fav:focus {
+  background: #ff4f8f;
+  color: #fff;
+}
+.btn-fav .bi-heart-fill {
+  color: #ff4f8f;
+}
+.btn-fav .bi-heart {
+  color: #fff;
 }
 </style>

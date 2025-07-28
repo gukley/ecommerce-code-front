@@ -30,9 +30,6 @@ export const useProductStore = defineStore('product', () => {
   // Produtos filtrados conforme lógica da view
   const filteredProducts = computed(() => {
     let filtrados = products.value;
-    if (userId.value) {
-      filtrados = filtrados.filter(p => p.category?.user_id === userId.value);
-    }
     // Filtra por categoria
     if (selectedCategory.value && selectedCategory.value !== 'Todos os Produtos') {
       filtrados = filtrados.filter(p => p.category?.name === selectedCategory.value);
@@ -40,7 +37,11 @@ export const useProductStore = defineStore('product', () => {
     // Busca
     if (searchTerm.value.trim() !== '') {
       const termo = searchTerm.value.trim().toLowerCase();
-      filtrados = filtrados.filter(p => p.name.toLowerCase().includes(termo));
+      filtrados = filtrados.filter(p =>
+        (p.name && p.name.toLowerCase().includes(termo)) ||
+        (p.description && p.description.toLowerCase().includes(termo)) ||
+        (p.category && p.category.name && p.category.name.toLowerCase().includes(termo))
+      );
     }
     // Ordenação
     if (orderBy.value === 'maior-valor') {

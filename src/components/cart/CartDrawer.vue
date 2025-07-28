@@ -49,8 +49,8 @@ const router = useRouter();
 
 const close = () => emit('close');
 const checkout = () => {
-  close();
   router.push('/checkout');
+  setTimeout(() => close(), 100);
 };
 const BASE_URL = 'http://35.196.79.227:8000';
 const getImageUrl = (product) => product.image_path ? BASE_URL + product.image_path : '/placeholder-product.png';

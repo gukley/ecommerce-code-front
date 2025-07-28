@@ -2,11 +2,28 @@
     <div class="product-management p-4">
       <h2 class="fw-bold text-primary-ggtech mb-4">Gerenciamento de Produtos</h2>
   
-      <div class="d-flex justify-content-between align-items-center mb-4">
+      <div class="d-flex flex-wrap gap-3 align-items-center mb-4">
         <button class="btn btn-main-action" @click="openProductModal()">
           <i class="bi bi-plus-circle me-2"></i> Adicionar Novo Produto
         </button>
-        <div class="input-group search-bar">
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+          <div>
+            <label class="me-2 mb-0">Categoria:</label>
+            <select v-model="selectedCategory" class="form-select d-inline-block w-auto">
+              <option value="">Todas</option>
+              <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+            </select>
+          </div>
+          <div>
+            <label class="me-2 mb-0">Estoque:</label>
+            <select v-model="selectedStock" class="form-select d-inline-block w-auto">
+              <option value="">Todos</option>
+              <option value="in">Em estoque</option>
+              <option value="out">Sem estoque</option>
+            </select>
+          </div>
+        </div>
+        <div class="input-group search-bar ms-auto">
           <input
             type="text"
             class="form-control search-input"
@@ -76,12 +93,24 @@
   
   const productFormModalRef = ref(null);
   
+  const selectedCategory = ref("");
+  const selectedStock = ref("");
+
   const filteredProducts = computed(() => {
+    let result = products.value;
+    if (selectedCategory.value) {
+      result = result.filter(product => String(product.category_id) === String(selectedCategory.value));
+    }
+    if (selectedStock.value === "in") {
+      result = result.filter(product => Number(product.stock) > 0);
+    } else if (selectedStock.value === "out") {
+      result = result.filter(product => Number(product.stock) === 0);
+    }
     if (!searchTerm.value) {
-      return products.value;
+      return result;
     }
     const lowerCaseSearchTerm = searchTerm.value.toLowerCase();
-    return products.value.filter(product =>
+    return result.filter(product =>
       product.name.toLowerCase().includes(lowerCaseSearchTerm) ||
       product.description.toLowerCase().includes(lowerCaseSearchTerm) ||
       (getCategoryName(product.category_id) || '').toLowerCase().includes(lowerCaseSearchTerm)
@@ -172,58 +201,93 @@
   </script>
   
   <style scoped>
-  .product-management {
-    background-color: #1a1a2e; /* Fundo geral da área de admin */
-    min-height: calc(100vh - 100px); 
-    color: white; 
-    padding: 2rem;
-  }
-  
-  .text-primary-ggtech {
-    color: #8f5fe8 !important; /* Roxo principal */
-  }
-  
-  .btn-main-action {
-    background: linear-gradient(90deg, #a362ff, #8f5fe8);
-    color: #fff;
-    border: 2px solid #cbb6ff;
-    font-size: 1.15rem;
-    border-radius: 50px;
-    box-shadow: 0 4px 16px rgba(163,98,255,0.18);
-    transition: all 0.3s ease;
-  }
-  
-  .btn-main-action:hover {
-    background: linear-gradient(90deg, #8f5fe8, #a362ff);
-    color: #fff;
-    box-shadow: 0 8px 25px rgba(163,98,255,0.28);
-    transform: translateY(-2px);
-  }
-  
-  /* Search Bar */
-  .search-bar {
-    max-width: 300px;
-    border-radius: 50px !important;
-    overflow: hidden;
-  }
-  
-  .search-input {
-    background-color: #4a4a5c;
-    border: none;
-    color: white;
-    border-radius: 50px 0 0 50px !important;
-    padding-left: 1.5rem;
-  }
-  
-  .search-input:focus {
-    box-shadow: 0 0 0 0.25rem rgba(143, 95, 232, 0.25);
-  }
-  
-  .search-icon {
-    background-color: #4a4a5c;
-    border: none;
-    color: white;
-    border-radius: 0 50px 50px 0 !important;
-    padding-right: 1.5rem;
-  }
-  </style>
+  :root {
+  --admin-bg: #f4f7fa;
+  --admin-bg-dark: #ffffff;
+  --admin-primary: #007cf0;
+  --admin-primary-dark: #005fa3;
+  --admin-primary-gradient: linear-gradient(90deg, #007cf0 0%, #00ffe1 100%);
+  --admin-danger: #e53e3e;
+  --admin-danger-dark: #c53030;
+  --admin-text: #2e2e2e;
+  --admin-text-light: #6b7280;
+  --admin-border: #d1d5db;
+}
+
+.product-management {
+  background-color: var(--admin-bg);
+  min-height: calc(100vh - 100px);
+  color: var(--admin-text);
+  padding: 2rem;
+}
+
+.text-primary-ggtech {
+  color: var(--admin-primary) !important;
+}
+
+.btn-main-action {
+  background: var(--admin-primary-gradient);
+  color: #fff;
+  border: none;
+  font-size: 1.15rem;
+  border-radius: 50px;
+  box-shadow: 0 4px 16px rgba(0, 124, 240, 0.2);
+  transition: all 0.3s ease;
+}
+
+.btn-main-action:hover {
+  background: linear-gradient(90deg, #00ffe1 0%, #007cf0 100%);
+  color: #fff;
+  box-shadow: 0 8px 25px rgba(0, 124, 240, 0.25);
+  transform: translateY(-2px);
+}
+
+/* Search Bar */
+.search-bar {
+  max-width: 340px;
+  border-radius: 50px !important;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 124, 240, 0.16);
+  border: 2px solid var(--admin-border);
+  background: #fff;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+.search-bar:focus-within {
+  box-shadow: 0 4px 18px rgba(0, 124, 240, 0.22);
+  border-color: var(--admin-primary);
+}
+.search-input {
+  background-color: #fff;
+  border: none;
+  color: #23243a;
+  border-radius: 50px 0 0 50px !important;
+  padding-left: 1.5rem;
+  font-size: 1.12rem;
+  font-weight: 600;
+  box-shadow: none;
+  letter-spacing: 0.02em;
+}
+.search-input::placeholder {
+  color: #6b7280;
+  opacity: 1;
+  font-weight: 500;
+}
+.search-input:focus {
+  background: #f4f7fa;
+  box-shadow: none;
+  outline: none;
+  color: #23243a;
+}
+.search-icon {
+  background-color: #f4f7fa;
+  border: none;
+  color: #007cf0;
+  border-radius: 0 50px 50px 0 !important;
+  padding-right: 1.5rem;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+</style>

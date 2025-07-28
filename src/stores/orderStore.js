@@ -2,9 +2,9 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { 
     getAllOrders,
-    getOrdersByAdmin,
+    getOrderByAdmin,
     getUsersOrders,
-    getOrderById,
+    getOrdersById,
     createOrder,
     updateOrderStatus,
     cancelOrder
@@ -36,7 +36,7 @@ export const useOrderStore = defineStore('order', () => {
     const fetchOrdersByAdmin = async (adminId) => { 
         loading.value = true
         try { 
-            const data = await getOrdersByAdmin(adminId)
+            const data = await getOrderByAdmin(adminId)
             orders.value = data
         } catch (error) { 
             toast.error('Erro ao carregar pedidos da loja')
@@ -50,7 +50,7 @@ export const useOrderStore = defineStore('order', () => {
     const fetchUsersOrders = async () => { 
         loading.value = true
         try { 
-            const data = await getUserOrders()
+            const data = await getUsersOrders()
             orders.value = data
         } catch (error) {
             toast.error('Erro ao carregar seus pedidos')
@@ -64,7 +64,7 @@ export const useOrderStore = defineStore('order', () => {
     const fetchOrderById = async (orderId) => { 
         loading.value = true
         try { 
-            const data = await getOrderById(orderId)
+            const data = await getOrdersById(orderId)
             selectedOrder.value = data
         } catch (error) { 
             toast.error('Erro ao buscar pedido')

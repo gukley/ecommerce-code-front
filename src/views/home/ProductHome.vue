@@ -8,29 +8,26 @@
           <div @click="console.log('teste clique')" style="background:#8f5fe8; color:#fff; padding:12px; border-radius:8px; margin-bottom:16px; cursor:pointer; text-align:center;">
             Clique aqui para testar o clique
           </div>
+          <div class="search-filter-bar d-flex align-items-center gap-3 mb-3" style="width:100%;">
+            <input
+              v-model="termoBusca"
+              type="text"
+              class="form-control search-bar"
+              placeholder="Buscar produtos..."
+              style="max-width: 320px; min-width: 180px;"
+            />
+            <label for="ordemSelect" class="form-label mb-0 ms-2" style="color:#00ffe1;font-weight:600;">Ordenar por:</label>
+            <select id="ordemSelect" v-model="ordemSelecionada" class="form-select filtro-ordenacao" style="width: 200px; background:#18182a; color:#fff; border:2px solid #00ffe1;">
+              <option value="">Selecione...</option>
+              <option value="maior-valor">Preço: maior para menor</option>
+              <option value="menor-valor">Preço: menor para maior</option>
+              <option value="az">Nome (A-Z)</option>
+              <option value="za">Nome (Z-A)</option>
+            </select>
+          </div>
           <h2 class="section-title text-center mb-5 animate-fade-in">
             {{ categoriaSelecionada }}
           </h2>
-          <div class="row mb-3 align-items-end">
-            <div class="col-12 col-md-6 mb-2 mb-md-0">
-              <input
-                v-model="termoBusca"
-                type="text"
-                class="form-control search-bar"
-                placeholder="Buscar produtos..."
-              />
-            </div>
-            <div class="col-12 col-md-6 d-flex flex-column flex-md-row align-items-md-center gap-2">
-              <label for="ordemSelect" class="form-label mb-0 me-2" style="color:#00bcd4;font-weight:600;">Ordenar por:</label>
-              <select id="ordemSelect" v-model="ordemSelecionada" class="form-select filtro-ordenacao">
-                <option value="">Selecione...</option>
-                <option value="maior-valor">Preço: maior para menor</option>
-                <option value="menor-valor">Preço: menor para maior</option>
-                <option value="az">Nome (A-Z)</option>
-                <option value="za">Nome (Z-A)</option>
-              </select>
-            </div>
-          </div>
           <div v-if="produtosFiltrados.length === 0" class="alert alert-info text-center">
             Nenhum produto encontrado para esta categoria.
           </div>
@@ -141,6 +138,7 @@ function irParaDetalhes(id) {
   width: 100%;
   border: 1.5px solid #23233a;
   position: relative;
+  overflow: visible;
 }
 .section-title {
   font-family: 'Orbitron', sans-serif;
@@ -149,7 +147,7 @@ function irParaDetalhes(id) {
   letter-spacing: 1px;
   text-shadow: 0 0 15px rgba(0, 255, 225, 0.5);
   margin-top: 1rem;
-  margin-bottom: 2rem !important;
+  margin-bottom: 2rem;
 }
 .animate-fade-in {
   opacity: 0;
@@ -186,22 +184,28 @@ function irParaDetalhes(id) {
   transform: translateY(-6px) scale(1.03);
 }
 .filtro-ordenacao {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  background: #fff !important;
-  color: #23272f !important;
-  border: 2px solid #00bcd4 !important;
-  border-radius: 0.7rem !important;
-  font-size: 1.08rem !important;
-  padding: 0.7rem 1.1rem !important;
-  font-weight: 500 !important;
-  box-shadow: 0 2px 8px rgba(0,188,212,0.07) !important;
-  transition: border-color 0.2s !important;
-  z-index: 1000 !important;
+  border: 2px solid #00ffe1;
+  border-radius: 0.7rem;
+  background-color: #18182a;
+  color: #fff;
+  padding: 0.6rem 1rem;
+  font-size: 1.05rem;
+  font-weight: 500;
+  box-shadow: 0 2px 6px rgba(0, 255, 225, 0.1);
+  transition: border-color 0.2s ease;
+  min-width: 180px;
+  max-width: 220px;
+  z-index: 10;
 }
 .filtro-ordenacao:focus {
-  border-color: #007cf0 !important;
-  outline: none !important;
+ outline: none;
+ border-color: #00d0ff;
+}
+@media (max-width: 576px) { 
+  .search-filter-bar { 
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
 }
 </style> 

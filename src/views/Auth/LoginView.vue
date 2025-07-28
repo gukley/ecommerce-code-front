@@ -1,13 +1,20 @@
 <template>
   <div class="d-flex min-vh-100 login-container">
-    <div class="col-md-6 bg-left d-flex flex-column justify-content-center align-items-center p-5 text-white">
-      <h1 class="display-1 fw-bold logo-text">GG<span class="text-primary-brand">TECH</span></h1>
-      <p class="fs-5 mt-4 slogan-text text-center">
-        Conecte-se à performance.<br />Equipe seu setup.<br />Potencialize seu jogo!
-      </p>
+    <div class="col-md-6 bg-left d-flex flex-column justify-content-center align-items-center p-5 text-white position-relative">
+      <div class="bg-left-image"></div>
+      <div class="bg-left-overlay"></div>
+      <div class="z-index-1 w-100 d-flex flex-column justify-content-center align-items-center">
+        <h1 class="display-1 fw-bold logo-text">GG<span class="text-primary-brand">TECH</span></h1>
+        <p class="fs-5 mt-4 slogan-text text-center">
+          Conecte-se à performance.<br />Equipe seu setup.<br />Potencialize seu jogo!
+        </p>
+      </div>
     </div>
     <div class="col-md-6 d-flex justify-content-center align-items-center bg-right">
-      <div class="form-card rounded-4 shadow p-5">
+      <div class="form-card rounded-4 shadow p-5 glass-card position-relative">
+        <div class="login-avatar mx-auto mb-3">
+          <i class="bi bi-person-circle"></i>
+        </div>
         <div class="text-center mb-4">
           <h2 class="fw-bold register-heading">Entrar na sua Conta</h2>
           <small class="register-subheading">Bem-vindo de volta à GGTECH</small>
@@ -100,6 +107,25 @@ const handleLogin = async () => {
   background-color: #1a1a2e;
   animation: fadeInUp 1s ease forwards;
   color: #e0e0e0;
+  position: relative;
+  overflow: hidden;
+}
+.bg-left-image {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: url('@/assets/gabinete gamerBranco.jpg') center center/cover no-repeat;
+  z-index: 0;
+  opacity: 0.45;
+}
+.bg-left-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(120deg, #1a1a2e 60%, #8f5fe8 100%);
+  opacity: 0.75;
+  z-index: 1;
+}
+.z-index-1 {
+  z-index: 2;
 }
 .logo-text {
   font-size: 4.5rem;
@@ -128,7 +154,7 @@ const handleLogin = async () => {
   background-color: #1f1f33;
   color: white;
   width: 90%;
-  max-width: 420px;
+  max-width: 460px;
   padding: 3.5rem;
   border-radius: 15px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
@@ -162,9 +188,34 @@ const handleLogin = async () => {
   border-bottom-left-radius: 50px;
   font-size: 1.1rem;
 }
+.glass-card {
+  background: rgba(255,255,255,0.13);
+  backdrop-filter: blur(14px);
+  border: 2px solid transparent;
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+  border-image: linear-gradient(120deg, #a362ff 0%, #00ffe1 100%) 1;
+  position: relative;
+}
+.login-avatar {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, #a362ff 60%, #00ffe1 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 12px rgba(163,98,255,0.18);
+  font-size: 2.7rem;
+  color: #fff;
+  margin-bottom: 1.2rem;
+  border: 3px solid #fff;
+  position: relative;
+  z-index: 2;
+}
 .input-custom {
-  background-color: #2c2c42;
-  border: 1px solid #3d3d5a;
+  background-color: rgba(44,44,66,0.85);
+  border: 1.5px solid #3d3d5a;
   border-left: none;
   color: white;
   padding: 0.8rem 1.2rem;
@@ -172,12 +223,12 @@ const handleLogin = async () => {
   border-top-right-radius: 50px;
   border-bottom-right-radius: 50px;
   font-size: 1rem;
-  transition: all 0.3s ease;
+  transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
 }
 .input-custom:focus {
   background-color: #35354d;
-  border-color: #8f5fe8;
-  box-shadow: 0 0 0 0.25rem rgba(143, 95, 232, 0.25);
+  border-color: #a362ff;
+  box-shadow: 0 0 0 0.18rem rgba(163, 98, 255, 0.18);
   outline: none;
 }
 .input-custom::placeholder {
@@ -190,15 +241,31 @@ const handleLogin = async () => {
   font-weight: 600;
   padding: 0.8rem 0;
   font-size: 1.1rem;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  transition: background 0.3s, box-shadow 0.3s, transform 0.2s;
   margin-top: 1.5rem;
   box-shadow: 0 4px 16px rgba(163,98,255,0.18);
+  position: relative;
+  overflow: hidden;
 }
-
+.btn-main-action::after {
+  content: '';
+  position: absolute;
+  left: -75%;
+  top: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(120deg, rgba(255,255,255,0.18) 0%, rgba(163,98,255,0.12) 100%);
+  transform: skewX(-20deg);
+  transition: left 0.4s cubic-bezier(.4,2,.3,1);
+  z-index: 1;
+}
+.btn-main-action:hover::after {
+  left: 120%;
+}
 .btn-main-action:hover {
   background: linear-gradient(90deg, #8f5fe8, #a362ff);
   color: #fff;
-  transform: translateY(-2px);
+  transform: translateY(-2px) scale(1.03);
   box-shadow: 0 8px 25px rgba(163,98,255,0.28);
 }
 .forgot-password-link, .back-home-link {

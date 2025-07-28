@@ -4,7 +4,7 @@
       <button class="btn btn-outline-warning mt-2 me-2" @click="$emit('clear')">
         Limpar Carrinho
       </button>
-      <button class="btn btn-primary mt-2">
+      <button class="btn btn-primary mt-2" @click="$emit('checkout')">
         Finalizar Compra
       </button>
     </div>
@@ -16,6 +16,6 @@
     count: Number
   })
   
-  defineEmits(['clear'])
+  defineEmits(['clear', 'checkout'])
   </script>
   

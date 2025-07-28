@@ -20,17 +20,32 @@
             Escolha sua máquina ideal com os melhores periféricos e acessórios gamers.
           </p>
 
-          <!-- Produto em destaque -->
-          <div class="hero-featured-product animate-fade-up mx-auto my-4" style="animation-delay: 0.7s; max-width: 420px;">
-            <div class="featured-product-card d-flex align-items-center p-3">
-              <img src="@/assets/5060rtx.jpg" alt="Placa de Vídeo RTX 5060" class="featured-product-img me-3" />
-              <div class="text-start">
-                <div class="featured-product-title">Placa de Vídeo RTX 5060 8GB</div>
-                <div class="featured-product-prices">
-                  <span class="old-price">R$ 3.499</span>
-                  <span class="new-price ms-2">R$ 2.799</span>
+          <!-- Produtos em destaque lado a lado -->
+          <div class="hero-featured-products-row d-flex flex-wrap justify-content-center gap-4 my-4 animate-fade-up" style="animation-delay: 0.7s;">
+            <div class="hero-featured-product" style="max-width: 420px;">
+              <div class="featured-product-card d-flex align-items-center p-3">
+                <img src="@/assets/5060rtx.jpg" alt="Placa de Vídeo RTX 5060" class="featured-product-img me-3" />
+                <div class="text-start">
+                  <div class="featured-product-title">Placa de Vídeo RTX 5060 8GB</div>
+                  <div class="featured-product-prices">
+                    <span class="old-price">R$ 4.750</span>
+                    <span class="new-price ms-2">R$ 4.300</span>
+                  </div>
+                  <router-link to="/produtos" class="btn btn-featured-buy mt-2">Comprar Agora</router-link>
                 </div>
-                <router-link to="/produtos" class="btn btn-featured-buy mt-2">Comprar Agora</router-link>
+              </div>
+            </div>
+            <div class="hero-featured-product" style="max-width: 420px;">
+              <div class="featured-product-card d-flex align-items-center p-3">
+                <img src="@/assets/teclado fizz mecanico 60.jpg" alt="Teclado Mecânico Fizz 60%" class="featured-product-img me-3" />
+                <div class="text-start">
+                  <div class="featured-product-title">Teclado Mecânico Fizz 60%</div>
+                  <div class="featured-product-prices">
+                    <span class="old-price">R$ 185</span>
+                    <span class="new-price ms-2">R$ 150</span>
+                  </div>
+                  <router-link to="/produtos" class="btn btn-featured-buy mt-2">Comprar Agora</router-link>
+                </div>
               </div>
             </div>
           </div>
@@ -214,7 +229,7 @@
 
 /* Adições para banner, produto em destaque e selos */
 .hero-discount-banner {
-  background: linear-gradient(90deg, #a362ff, #00ffe1); /* roxo-ciano */
+  background: linear-gradient(90deg, #a362ff, #00ffe1); 
   color: #1a1a2e;
   border-radius: 30px;
   padding: 0.7rem 1.5rem;
@@ -306,7 +321,7 @@
   .btn-main-action, .btn-outline-secondary-light { 
     padding: 0.8rem 1.5rem;
     font-size: 1rem;
-    min-width: unset; /* remove largura minima em telas menores */
+    min-width: unset; 
     width: 100%;
   }
   .d-flex.justify-content-center.gap-3.mt-5 { 
@@ -336,6 +351,10 @@
   .hero-discount-banner {
     font-size: 0.98rem;
     padding: 0.5rem 1rem;
+  }
+  .hero-featured-products-row {
+    flex-direction: column !important;
+    gap: 1.2rem;
   }
 }
 

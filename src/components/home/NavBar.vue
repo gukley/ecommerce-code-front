@@ -4,6 +4,8 @@ import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore';
 import { useCartStore } from '@/stores/cartStore';
 import CartDrawer from '@/components/cart/CartDrawer.vue';
+import WishlistDrawer from '@/components/cart/WishlistDrawer.vue';
+import { useWishlistStore } from '@/stores/wishlistStore';
 
 const showMenu = ref(false);
 const authStore = useAuthStore();
@@ -11,6 +13,8 @@ const router = useRouter();
 const cart = useCartStore();
 const showCartDrawer = ref(false);
 const searchTerm = ref("");
+const showWishlistDrawer = ref(false);
+const wishlist = useWishlistStore();
 
 const openCartDrawer = () => { 
   showCartDrawer.value = true; 
@@ -105,6 +109,13 @@ onBeforeUnmount(() => {
               <span class="visually-hidden">itens no carrinho</span>
             </span>
           </div>
+          <div class="position-relative nav-icon-wrapper" @click="showWishlistDrawer = true">
+            <i class="bi bi-heart fs-3 nav-icon"></i>
+            <span v-if="wishlist.total > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-gradient-purple cart-badge">
+              {{ wishlist.total }}
+              <span class="visually-hidden">itens na wishlist</span>
+            </span>
+          </div>
 
           <div class="nav-icon-wrapper position-relative" @click="handleUserClick">
             <i class="bi bi-person fs-3 nav-icon"></i>
@@ -123,6 +134,7 @@ onBeforeUnmount(() => {
       </div>
     </div>
     <CartDrawer :open="showCartDrawer" @close="closeCartDrawer" />
+    <WishlistDrawer :open="showWishlistDrawer" @close="() => showWishlistDrawer = false" />
   </nav>
 </template>
 
@@ -203,7 +215,7 @@ onBeforeUnmount(() => {
 /* Barra de Busca */
 .custom-search-bar {
   flex-grow: 0.7; 
-  max-width: 320px; /* mais compacta */
+  max-width: 330px; /* mais compacta */
 }
 
 .custom-search-input {
@@ -237,6 +249,7 @@ onBeforeUnmount(() => {
   cursor: pointer;
   padding: 3px; 
   transition: transform 0.2s ease;
+  z-index: 1000;
 }
 
 .nav-icon-wrapper:hover {

@@ -1,33 +1,22 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { authGuard } from '@/router/guard.js'
-import LoginView from '@/views/Auth/LoginView.vue'
-import RegisterView from '@/views/Auth/RegisterView.vue'
-import HomePage from '@/views/home/HomePage.vue'
-// --- Views do Painel Administrativo ---
-import AdminDashboard from '@/views/admin/AdminDashboard.vue';
-import ProductManagement from '@/views/admin/ProductManagement.vue';
-import CategoryManagement from '@/views/admin/CategoryManagement.vue';
-import UserManagement from '@/views/admin/UserManagement.vue';
-import OrderManagement from '@/views/admin/OrderManagement.vue';
-import AdminLayout from '@/layouts/AdminLayout.vue';
-import CartView from '@/views/cart/CartView.vue'
 
 const routes = [
   {
     path: '/',
     name: 'Home',
-    component: HomePage
+    component: () => import('@/views/home/HomePage.vue')
   },
   {
     path: '/login',
     name: 'Login',
-    component: LoginView,
+    component: () => import('@/views/Auth/LoginView.vue'),
     meta: { requiresAuth: false } 
   },
   {
     path: '/register',
     name: 'Register',
-    component: RegisterView,
+    component: () => import('@/views/Auth/RegisterView.vue'),
     meta: { requiresAuth: false } 
   },
   {
@@ -36,7 +25,7 @@ const routes = [
     component: () => import('@/views/admin/ProductView.vue'),
   },
   {
-    path: '/produtos/:id',
+    path: '/produto/:id',
     name: 'ProductDetail',
     component: () => import('@/views/home/ProductDetailView.vue'),
     props: true
@@ -51,10 +40,9 @@ const routes = [
     name: 'Profile',
     component: () => import('@/views/Auth/ProfileView.vue'),
   },
-
   {
     path: '/admin',
-    component: AdminLayout,
+    component: () => import('@/layouts/AdminLayout.vue'),
     meta: { requiresAuth: true }, 
     children: [
       {
@@ -64,36 +52,29 @@ const routes = [
       {
         path: 'dashboard',
         name: 'AdminDashboard',
-        component: AdminDashboard,
+        component: () => import('@/views/admin/AdminDashboard.vue'),
         meta: { roles: ['ADMIN', 'MODERATOR'] },
       },
       {
         path: 'products',
         name: 'AdminProducts',
-        component: ProductManagement,
+        component: () => import('@/views/admin/ProductManagement.vue'),
         meta: { roles: ['ADMIN', 'MODERATOR'] },
       },
       {
         path: 'categories',
         name: 'AdminCategories',
-        component: CategoryManagement,
+        component: () => import('@/views/admin/CategoryManagement.vue'),
         meta: { roles: ['ADMIN', 'MODERATOR'] },
-      },
-      {
-        path: 'users',
-        name: 'AdminUsers',
-        component: UserManagement,
-        meta: { roles: ['ADMIN'] }, 
       },
       {
         path: 'orders',
         name: 'AdminOrders',
-        component: OrderManagement,
+        component: () => import('@/views/admin/OrderManagement.vue'),
         meta: { roles: ['ADMIN', 'MODERATOR'] },
       }
     ],
   },
-  
   {
     path: '/checkout',
     name: 'Checkout',
@@ -101,6 +82,7 @@ const routes = [
     meta: { requiresAuth: true }
   },
 ]
+
 const router = createRouter({
   history: createWebHistory(),
   routes

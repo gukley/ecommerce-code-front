@@ -11,7 +11,22 @@
   
   <style scoped>
  
+  .dashboard-container {
+    background-color: #23272f;
+    min-height: 100vh;
+    color: white;
+    padding: 2rem;
+  }
+
   .text-primary-ggtech {
-    color: #8f5fe8 !important; 
+    color: #00ffe1 !important;
+  }
+
+  .card {
+    background-color: #2a2a3e;
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    color: white;
   }
   </style>

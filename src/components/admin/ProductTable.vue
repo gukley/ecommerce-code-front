@@ -29,7 +29,9 @@
             <tr v-for="product in products" :key="product.id">
               <td>{{ product.id }}</td>
               <td>
-                <img :src="product.image_url || '/placeholder-product.png'" alt="Produto" class="product-thumb" />
+                <div class="product-image-card">
+                  <img :src="product.image_url || '/placeholder-product.png'" alt="Produto" class="product-thumb" />
+                </div>
               </td>
               <td>{{ product.name }}</td>
               <td>{{ truncateText(product.description, 50) }}</td>
@@ -103,86 +105,133 @@
   <style scoped>
   .product-table-container {
   }
-  
   .table-dark {
-    --bs-table-bg: #2a2a3e; 
-    --bs-table-striped-bg: #3a3a4e; 
-    --bs-table-hover-bg: #4a4a5e; 
-    color: white;
+    --bs-table-bg: var(--admin-bg-dark);
+    --bs-table-striped-bg: var(--admin-bg-darker);
+    --bs-table-hover-bg: var(--admin-bg-darkest);
+    color: var(--admin-text);
   }
-  
   .rounded-table {
-    border-collapse: separate; 
+    border-collapse: separate;
     border-spacing: 0;
-    border-radius: 10px; 
-    overflow: hidden; 
+    border-radius: 10px;
+    overflow: hidden;
   }
-  
   .rounded-table thead th:first-child {
     border-top-left-radius: 10px;
   }
-  
   .rounded-table thead th:last-child {
     border-top-right-radius: 10px;
   }
-  
   .rounded-table tbody tr:last-child td:first-child {
     border-bottom-left-radius: 10px;
   }
-  
   .rounded-table tbody tr:last-child td:last-child {
     border-bottom-right-radius: 10px;
   }
-  
   th, td {
     padding: 1rem;
-    vertical-align: middle; 
-    border-color: #3f3f50; 
+    vertical-align: middle;
+    border-color: var(--admin-border);
+    font-size: 1.05rem;
   }
-  
+  .product-image-card {
+    background: #23243a;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(143, 95, 232, 0.10);
+    border: 1.5px solid #3f3f50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    margin: 0 auto;
+    overflow: hidden;
+  }
   .product-thumb {
-    width: 50px;
-    height: 50px;
+    width: 54px;
+    height: 54px;
     object-fit: cover;
     border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: none;
+    background: #18182a;
   }
-  
   .stock-input {
     max-width: 80px;
-    background-color: #3b3b4d;
-    color: white;
+    background-color: var(--admin-bg-darker);
+    color: var(--admin-text);
     border: 1px solid #5a5a6e;
     border-radius: 5px;
     text-align: center;
   }
-  
   .stock-input:focus {
-    border-color: #8f5fe8;
-    box-shadow: 0 0 0 0.25rem rgba(143, 95, 232, 0.25);
+    border-color: var(--admin-primary-dark);
+    box-shadow: 0 0 0 0.25rem rgba(0,255,225,0.18);
   }
-  
   .btn-info {
-    background-color: #00bcd4; 
-    border-color: #00bcd4;
-    color: white;
+    background-color: var(--admin-primary-dark);
+    border-color: var(--admin-primary-dark);
+    color: var(--admin-text);
   }
   .btn-info:hover {
-    background-color: #00acc1;
-    border-color: #00acc1;
+    background-color: #007cf0;
+    border-color: #007cf0;
   }
-  
   .btn-danger {
-    background-color: #f44336; 
-    border-color: #f44336;
-    color: white;
+    background-color: var(--admin-danger);
+    border-color: var(--admin-danger);
+    color: var(--admin-text);
   }
   .btn-danger:hover {
-    background-color: #d32f2f;
-    border-color: #d32f2f;
+    background-color: var(--admin-danger-dark);
+    border-color: var(--admin-danger-dark);
   }
-  
   .spinner-border {
-    color: #8f5fe8; 
+    color: var(--admin-primary);
+  }
+  th, .table th {
+    color: var(--admin-primary) !important;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    font-size: 1.1rem;
+    background: transparent;
+  }
+  thead th {
+    background: var(--admin-bg) !important;
+    color: var(--admin-text) !important;
+  }
+  tbody tr, .table-dark tbody > tr {
+    background: var(--admin-bg-dark) !important;
+  }
+  .table-dark tbody > tr > td {
+    background: var(--admin-bg-dark) !important;
+    color: var(--admin-text) !important;
+  }
+  .btn-info i, .btn-danger i {
+    color: #fff;
+    transition: color 0.2s;
+  }
+  .btn-info:hover i {
+    color: #007cf0;
+  }
+  .btn-danger:hover i {
+    color: #e53e3e;
   }
   </style>
+
+<style>
+:root {
+  --admin-bg: #11111c;
+  --admin-bg-dark: #181828;
+  --admin-bg-darker: #23243a;
+  --admin-bg-darkest: #23243a;
+  --admin-primary: #007cf0;
+  --admin-primary-dark: #005fa3;
+  --admin-primary-gradient: linear-gradient(90deg, #007cf0 0%, #00ffe1 100%);
+  --admin-danger: #e53e3e;
+  --admin-danger-dark: #c53030;
+  --admin-text: #fff;
+  --admin-text-light: #e0e6ed;
+  --admin-border: #23243a;
+}
+</style>
