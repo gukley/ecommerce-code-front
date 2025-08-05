@@ -53,7 +53,7 @@ defineEmits(['editar-perfil', 'salvar-edicao', 'cancelar-edicao', 'logout'])
 .header h1 { 
     margin: 0;
     font-size: 1.5rem;
-    background: linear-gradient(135deg, #00ffe1, #8f5fe8);
+    background: linear-gradient(135deg, #000000, #36186e);
     --webkit-background-clip: text;
     --web-text-fill-color: transparent;
 }
