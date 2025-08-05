@@ -37,12 +37,12 @@
             </div>
             <div class="hero-featured-product" style="max-width: 420px;">
               <div class="featured-product-card d-flex align-items-center p-3">
-                <img src="@/assets/teclado fizz mecanico 60.jpg" alt="Teclado Mecânico Fizz 60%" class="featured-product-img me-3" />
+                <img src="@/assets/watercooler categoria.jpeg" alt="Water Cooler Kalkan" class="featured-product-img me-3" />
                 <div class="text-start">
-                  <div class="featured-product-title">Teclado Mecânico Fizz 60%</div>
+                  <div class="featured-product-title">Water Cooler Kalkan Iota</div>
                   <div class="featured-product-prices">
-                    <span class="old-price">R$ 185</span>
-                    <span class="new-price ms-2">R$ 150</span>
+                    <span class="old-price">R$ 260</span>
+                    <span class="new-price ms-2">R$ 230</span>
                   </div>
                   <router-link to="/produtos" class="btn btn-featured-buy mt-2">Comprar Agora</router-link>
                 </div>

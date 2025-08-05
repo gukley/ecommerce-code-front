@@ -70,7 +70,7 @@ const currentYear = ref(new Date().getFullYear());
   border-top: 2px solid rgba(163, 98, 255, 0.3);
 }
 
-.footer-orb { /* efeitos de orber no fundo */
+.footer-orb { 
   content: '';
   position: absolute;
   border-radius: 50%;
@@ -96,12 +96,12 @@ const currentYear = ref(new Date().getFullYear());
   animation-delay: 3.5s;
 }
 
-@keyframes pulse { /* animaçao de pulso pra orbes */
+@keyframes pulse { 
   0% { transform: scale(1); }
   100% { transform: scale(1.05); }
 }
 
-.z-index-1 { /* garante que footer fique acima dos orbes */
+.z-index-1 { 
   z-index: 1;
   position: relative;
 }

@@ -64,7 +64,14 @@ const handleSearch = (e) => {
 onMounted(() => {
   document.addEventListener('mousedown', handleClickOutside);
   cart.initCart();
+
+  if (authStore.token && (!authStore.user || !authStore.user.id)) {
+    authStore.getUserProfile().catch(() => {
+      authStore.logout();
+    });
+  }
 });
+
 onBeforeUnmount(() => {
   document.removeEventListener('mousedown', handleClickOutside);
 });
@@ -120,7 +127,7 @@ onBeforeUnmount(() => {
           <div class="nav-icon-wrapper position-relative" @click="handleUserClick">
             <i class="bi bi-person fs-3 nav-icon"></i>
             <div v-if="showMenu" class="user-menu-popover">
-              <template v-if="authStore.user">
+              <template v-if="authStore.user && authStore.user.id">
                 <div class="user-menu-item" @click="goToProfile">Minha Conta</div>
                 <div class="user-menu-item" @click="logout">Sair</div>
               </template>
@@ -137,6 +144,7 @@ onBeforeUnmount(() => {
     <WishlistDrawer :open="showWishlistDrawer" @close="() => showWishlistDrawer = false" />
   </nav>
 </template>
+
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');

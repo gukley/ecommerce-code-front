@@ -5,9 +5,16 @@
       <SideBar @categoria-selecionada="categoriaSelecionada = $event" />
       <div class="flex-grow-1 d-flex justify-content-center align-items-start p-4">
         <div class="products-container w-100">
-          <div @click="console.log('teste clique')" style="background:#8f5fe8; color:#fff; padding:12px; border-radius:8px; margin-bottom:16px; cursor:pointer; text-align:center;">
+          <div
+            @click="console.log('teste clique')"
+            style="background:#8f5fe8; color:#fff; padding:12px; border-radius:8px; margin-bottom:16px; cursor:pointer; text-align:center;"
+            role="button"
+            tabindex="0"
+            @keyup.enter="console.log('teste clique via teclado')"
+          >
             Clique aqui para testar o clique
           </div>
+
           <div class="search-filter-bar d-flex align-items-center gap-3 mb-3" style="width:100%;">
             <input
               v-model="termoBusca"
@@ -15,9 +22,18 @@
               class="form-control search-bar"
               placeholder="Buscar produtos..."
               style="max-width: 320px; min-width: 180px;"
+              aria-label="Buscar produtos"
             />
-            <label for="ordemSelect" class="form-label mb-0 ms-2" style="color:#00ffe1;font-weight:600;">Ordenar por:</label>
-            <select id="ordemSelect" v-model="ordemSelecionada" class="form-select filtro-ordenacao" style="width: 200px; background:#18182a; color:#fff; border:2px solid #00ffe1;">
+            <label for="ordemSelect" class="form-label mb-0 ms-2" style="color:#00ffe1; font-weight:600;">
+              Ordenar por:
+            </label>
+            <select
+              id="ordemSelect"
+              v-model="ordemSelecionada"
+              class="form-select filtro-ordenacao"
+              style="width: 200px; background:#18182a; color:#fff; border:2px solid #00ffe1;"
+              aria-label="Ordenar produtos"
+            >
               <option value="">Selecione...</option>
               <option value="maior-valor">Preço: maior para menor</option>
               <option value="menor-valor">Preço: menor para maior</option>
@@ -25,18 +41,27 @@
               <option value="za">Nome (Z-A)</option>
             </select>
           </div>
-          <h2 class="section-title text-center mb-5 animate-fade-in">
+
+          <h2 class="section-title text-center mb-5 animate-fade-in" tabindex="0">
             {{ categoriaSelecionada }}
           </h2>
-          <div v-if="produtosFiltrados.length === 0" class="alert alert-info text-center">
+
+          <div v-if="produtosFiltrados.length === 0" class="alert alert-info text-center" role="alert" aria-live="polite">
             Nenhum produto encontrado para esta categoria.
           </div>
-          <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-            <div class="col d-flex" v-for="produto in produtosFiltrados" :key="produto.id">
+
+          <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4" v-else>
+            <div
+              class="col d-flex"
+              v-for="produto in produtosFiltrados"
+              :key="produto.id"
+              role="listitem"
+            >
+              <!-- Passa evento para fora para lidar no componente pai -->
               <ProductCard
                 :produto="produto"
                 class="flex-fill product-link"
-                @click="console.log('clicou no card', produto.id)"
+                @click.native="irParaDetalhes(produto.id)"
               />
             </div>
           </div>
@@ -60,7 +85,6 @@ const productStore = useProductStore();
 const route = useRoute();
 const router = useRouter();
 
-// Sincronizar filtros da view com a store
 onMounted(async () => {
   await productStore.fetchProducts();
   if (route.query.categoria) {
@@ -74,26 +98,17 @@ onMounted(async () => {
 watch(
   () => route.query.categoria,
   (novaCategoria) => {
-    if (novaCategoria) {
-      productStore.selectedCategory = novaCategoria;
-    } else {
-      productStore.selectedCategory = 'Todos os Produtos';
-    }
+    productStore.selectedCategory = novaCategoria || 'Todos os Produtos';
   }
 );
 
 watch(
   () => route.query.busca,
   (novoTermo) => {
-    if (novoTermo) {
-      productStore.searchTerm = novoTermo;
-    } else {
-      productStore.searchTerm = '';
-    }
+    productStore.searchTerm = novoTermo || '';
   }
 );
 
-// Ligação dos campos do filtro com a store
 const categoriaSelecionada = computed({
   get: () => productStore.selectedCategory,
   set: (val) => (productStore.selectedCategory = val)
@@ -115,18 +130,20 @@ function irParaDetalhes(id) {
 </script>
 
 <style scoped>
-.main-layout { 
+.main-layout {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   background-color: #11111c;
 }
-.content-wrapper { 
+
+.content-wrapper {
   flex: 1 1 auto;
   display: flex;
   align-items: stretch;
   min-height: 0;
 }
+
 .products-container {
   background: linear-gradient(145deg, #18182a 60%, #23233a 100%);
   border-radius: 2rem;
@@ -140,6 +157,7 @@ function irParaDetalhes(id) {
   position: relative;
   overflow: visible;
 }
+
 .section-title {
   font-family: 'Orbitron', sans-serif;
   color: #00ffe1;
@@ -149,18 +167,21 @@ function irParaDetalhes(id) {
   margin-top: 1rem;
   margin-bottom: 2rem;
 }
+
 .animate-fade-in {
   opacity: 0;
   transform: translateY(20px);
   animation: fadeIn 0.8s ease-out forwards;
-  animation-delay: 0.2s; 
+  animation-delay: 0.2s;
 }
-@keyframes fadeIn { 
-  to { 
+
+@keyframes fadeIn {
+  to {
     opacity: 1;
     transform: translateY(0);
   }
 }
+
 .search-bar {
   border-radius: 0.7rem;
   border: 1.5px solid #23233a;
@@ -171,18 +192,22 @@ function irParaDetalhes(id) {
   box-shadow: 0 2px 8px rgba(143, 95, 232, 0.07);
   transition: border-color 0.2s;
 }
+
 .search-bar:focus {
   border-color: #00ffe1;
   outline: none;
 }
+
 .product-link {
   cursor: pointer;
   transition: box-shadow 0.2s;
 }
+
 .product-link:hover .product-card {
   box-shadow: 0 8px 32px rgba(163, 98, 255, 0.25), 0 0 0 2px #8f5fe8;
   transform: translateY(-6px) scale(1.03);
 }
+
 .filtro-ordenacao {
   border: 2px solid #00ffe1;
   border-radius: 0.7rem;
@@ -197,15 +222,21 @@ function irParaDetalhes(id) {
   max-width: 220px;
   z-index: 10;
 }
+
 .filtro-ordenacao:focus {
- outline: none;
- border-color: #00d0ff;
+  outline: none;
+  border-color: #00d0ff;
 }
-@media (max-width: 576px) { 
-  .search-filter-bar { 
+
+.search-filter-bar {
+  width: 100%;
+}
+
+@media (max-width: 576px) {
+  .search-filter-bar {
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
   }
 }
-</style> 
+</style>

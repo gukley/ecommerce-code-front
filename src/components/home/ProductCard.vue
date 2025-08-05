@@ -1,7 +1,6 @@
 <template> 
   <div class="card product-card text-white border-0 rounded-4 h-100 text-decoration-none" style="cursor: pointer">
     <div class="position-relative"> 
-      <!-- router-link só na imagem -->
       <router-link
         :to="`/produto/${produto.id}`"
         style="display: block"
@@ -14,7 +13,6 @@
           style="height: 200px; object-fit: cover"
         />
       </router-link>
-      <!-- botao de favoritar canto superior esquerdo -->
       <button
         class="btn btn-fav position-absolute top-0 start-0 m-2"
         @click.stop.prevent="toggleWishlist"
@@ -120,7 +118,15 @@ const precoFinal = computed(() => {
 })
 
 const adicionarAoCarrinho = () => { 
-    cart.addItem(props.produto.id, 1, Number(precoFinal.value))
+  const productId = props.produto.id
+  const quantity = 1
+  const unitPrice = Number(precoFinal.value)
+  const productStock = props.produto.stock 
+
+  if (productStock <= 0) {
+    return
+  }
+  cart.addItem(productId, quantity, unitPrice, productStock)
 }
 </script>
 
