@@ -3,8 +3,12 @@
         <h2 class="mb-4">Carrinho de Compras</h2>
 
         <div v-if="loading">Carregando...</div>
-        <div v-else-if="items.lenght === 0">Seu carrinho está vazio</div>
-        <div v-else> 
+        <div v-if="!loading && items.length === 0"> 
+            <p>Seu carrinho está vazio</p>
+            <p><small>Debug: items.length = {{ items.length }}, loading = {{ loading }}</small></p>
+            <button class="btn btn-success mt-3" @click="adicionarItemTeste">Adicionar Item de Teste</button>
+        </div>
+        <div v-else-if="!loading && items.length > 0"> 
             <CartItem
                 v-for="item in items"
                 :key="item.id"
@@ -26,8 +30,8 @@
 <script setup> 
 import { onMounted } from 'vue'
 import { useCartStore } from '@stores/cartStore'
-import CartItem from '@/components/cart/CartItem.vue'
-import CartSummary from '@/components/cart/CartSummary.vue'
+import CartItem from '@/components/Cart/CartItem.vue'
+import CartSummary from '@/components/Cart/CartSummary.vue'
 import { useRouter } from 'vue-router'
 
 const cart = useCartStore()
@@ -43,7 +47,7 @@ const updateItem = (productId, quantity) => {
 }
 
 const removeItem = (productId) => { 
-    cart.remove(productId)
+    cart.removeItem(productId)
 }
 
 const clearCart = () => { 
@@ -52,5 +56,10 @@ const clearCart = () => {
 
 const goToCheckout = () => {
     router.push('/checkout')
+}
+
+const adicionarItemTeste = () => {
+    // Adiciona um item de teste ao carrinho
+    cart.addItem(1, 1, 29.99)
 }
 </script>
