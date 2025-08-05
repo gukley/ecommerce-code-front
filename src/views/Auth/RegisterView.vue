@@ -1,6 +1,6 @@
 <template>
   <div class="d-flex min-vh-100 register-container">
-    <div class="col-md-6 bg-left d-flex flex-column justify-content-center align-items-center p-5 text-white position-relative">
+    <div class="col-md-6 bg-left d-none d-md-flex flex-column justify-content-center align-items-center p-5 text-white position-relative">
       <div class="bg-left-image"></div>
       <div class="bg-left-overlay"></div>
       <div class="z-index-1 w-100 d-flex flex-column justify-content-center align-items-center">
