@@ -31,7 +31,7 @@
             <i class="bi bi-list-check me-2"></i> Pedidos
           </router-link>
         </li>
-        </ul>
+       </ul>
   
       <div class="sidebar-footer mt-auto pt-3">
         <button @click="logout" class="btn btn-logout w-100">
@@ -52,7 +52,7 @@
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     toast.info('Você foi desconectado.');
-    router.push({ name: 'Login' }); // Redireciona para a página de login
+    router.push({ name: 'Login' }); 
   };
   </script>
   

@@ -64,10 +64,6 @@ const isSubmitting = ref(false);
 const toast = useToast();
 const authStore = useAuthStore();
 
-console.log('authStore.user na inicialização do componente:', authStore.user);
-console.log('authStore.token na inicialização do componente:', authStore.token);
-
-
 watch(() => authStore.user, (newUser) => {
     console.log('authStore.user mudou para:', newUser);
 });
@@ -202,15 +198,18 @@ const handleSubmit = async () => {
     color: #fff;
 }
 .btn-primary { 
-    background: var(--admin-primary-gradient);
-    color: #fff;
-    border: 2px solid var(--admin-primary);
-    border-radius: 50px;
-    font-weight: 600;
-    transition: all 0.3s ease;
+  background: var(--admin-primary-gradient);
+  color: #fff !important; 
+  border: 2px solid var(--admin-primary);
+  border-radius: 50px;
+  font-weight: 600;
+  opacity: 1 !important; 
+  visibility: visible !important;
+  transition: background 0.3s ease, color 0.3s ease; 
 }
+
 .btn-primary:hover { 
-    background: linear-gradient(90deg, #007cf0 0%, #00ffe1 100%);
-    color: #fff;
+  background: linear-gradient(90deg, #007cf0 0%, #00ffe1 100%);
+  color: #fff !important;
 }
 </style>
