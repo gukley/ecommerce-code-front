@@ -72,7 +72,9 @@ const routes = [
         name: 'AdminOrders',
         component: () => import('@/views/admin/OrderManagement.vue'),
         meta: { roles: ['ADMIN', 'MODERATOR'] },
-      }
+      },
+      
+      
     ],
   },
   {

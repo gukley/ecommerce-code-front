@@ -15,15 +15,42 @@ export const useOrderStore = defineStore('order', () => {
     const orders = ref([])
     const selectedOrder = ref(null)
     const loading = ref(false)
+    const lastFetchTime = ref(null)
 
     const toast = useToast()
+
+    // Função auxiliar para processar um pedido e calcular o total
+    const processOrderData = (order) => {
+        const groupedProducts = {};
+        let total = 0;
+        if (order.products && Array.isArray(order.products)) {
+            order.products.forEach(product => {
+                const productPrice = Number(product.price)
+                if (isNaN(productPrice)) {
+                    console.error('Preço do produto inválido:', product.price, 'em:', product.name)
+                    return
+                }
+                if (!groupedProducts[product.id]) {
+                    groupedProducts[product.id] = { ...product, quantity: 0 }
+                }
+                groupedProducts[product.id].quantity++
+                total += productPrice
+            });
+        }
+     return {
+            ...order,
+            total: Number(total).toFixed(2), 
+            products: Object.values(groupedProducts)
+        }
+    }
 
     // Buscar todos pedidos
     const fetchAllOrders = async () => { 
         loading.value = true
         try { 
             const data = await getAllOrders()
-            orders.value = data
+            orders.value = data.map(processOrderData)
+            lastFetchTime.value = Date.now()
         } catch (error) { 
             toast.error('Erro ao carregar pedidos')
             console.error(error)
@@ -37,7 +64,8 @@ export const useOrderStore = defineStore('order', () => {
         loading.value = true
         try { 
             const data = await getOrderByAdmin(adminId)
-            orders.value = data
+            orders.value = data.map(processOrderData)
+            lastFetchTime.value = Date.now()
         } catch (error) { 
             toast.error('Erro ao carregar pedidos da loja')
             console.error(error)
@@ -51,13 +79,20 @@ export const useOrderStore = defineStore('order', () => {
         loading.value = true
         try { 
             const data = await getUsersOrders()
-            orders.value = data
-        } catch (error) {
+            orders.value = data.map(processOrderData)
+            lastFetchTime.value = Date.now()
+        } catch (error) { 
+            console.error('Erro ao carregar pedidos:', error)
             toast.error('Erro ao carregar seus pedidos')
-            console.error(error)
+            orders.value = []
         } finally { 
             loading.value = false
         }
+    }
+
+    // Verificar se precisa recarregar os dados
+    const shouldRefetch = () => {
+        return !lastFetchTime.value || (Date.now() - lastFetchTime.value) > 5 * 60 * 1000;
     }
 
     // buscar pedido por id
@@ -79,6 +114,8 @@ export const useOrderStore = defineStore('order', () => {
         try { 
             const data = await createOrder(orderData)
             toast.success('Pedido realizado com sucesso!')
+            // Recarregar pedidos após criar um novo
+            await fetchUsersOrders()
             return data
         } catch (error) { 
             toast.error('Erro ao criar pedido')
@@ -104,17 +141,19 @@ export const useOrderStore = defineStore('order', () => {
         try { 
             await cancelOrder(orderId)
             toast.success('Pedido cancelado')
-            await fetchAllOrders()
+            await fetchUsersOrders()
         } catch (error) { 
             toast.error('Erro ao cancelar pedido')
             console.error(error)
         }
     }
-
+    
     return { 
         orders,
         selectedOrder,
         loading,
+        lastFetchTime,
+        shouldRefetch,
         fetchAllOrders,
         fetchOrdersByAdmin,
         fetchUsersOrders,
