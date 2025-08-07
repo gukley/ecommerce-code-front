@@ -102,15 +102,15 @@
 import { reactive, ref, onMounted, watch } from 'vue';
 import { createAddress, getAllAddresses } from '@/services/apiService';
 import { useToast } from 'vue-toastification';
-import PaymentSelection from './PaymentSelection.vue'; // Importa o novo componente
+import PaymentSelection from './PaymentSelection.vue';
 
 // Define as props que este componente pode receber
 const props = defineProps({
-  etapa: Number // A etapa atual que o componente deve exibir (1 para Endereço, 2 para Pagamento)
+  etapa: Number 
 });
 
 // Define os eventos que este componente pode emitir
-const emit = defineEmits(['etapaChange', 'dadosColetados']); // 'etapaChange' para mudar a etapa no pai, 'dadosColetados' para enviar dados
+const emit = defineEmits(['etapaChange', 'dadosColetados']); 
 
 const toast = useToast();
 
@@ -130,7 +130,7 @@ const enderecoSelecionadoId = ref(null);
 const modoNovoEndereco = ref(false);
 
 // Estado para o método de pagamento selecionado (agora compartilhado com PaymentSelection)
-const metodoPagamento = ref('pix'); // Define 'pix' como padrão
+const metodoPagamento = ref('pix'); 
 
 // Carrega os endereços salvos ao montar o componente
 onMounted(async () => {
@@ -139,12 +139,10 @@ onMounted(async () => {
   } catch (e) {
     console.error("Erro ao carregar endereços:", e);
   }
-  // Se houver endereços, seleciona o primeiro por padrão
   if (enderecos.value.length > 0) {
     enderecoSelecionadoId.value = enderecos.value[0].id; 
     modoNovoEndereco.value = false;
   } else {
-    // Se não houver endereços, entra no modo de cadastro de novo endereço
     modoNovoEndereco.value = true; 
   }
 });
@@ -159,7 +157,6 @@ async function avancarEtapaEndereco() {
   let enderecoFinal = null;
   try {
     if (modoNovoEndereco.value) {
-      // Validação básica para o novo endereço
       if (!form.street || !form.number || !form.city || !form.state || !form.country || !form.zip) {
         toast.error('Por favor, preencha todos os campos do endereço.');
         return;
@@ -186,7 +183,6 @@ async function avancarEtapaEndereco() {
 
     // Emite os dados do endereço para o componente pai (CheckoutView)
     emit('dadosColetados', { endereco: enderecoFinal });
-    // Sinaliza para o componente pai avançar para a próxima etapa (Pagamento)
     emit('etapaChange', 2);
 
   } catch (error) {
@@ -197,12 +193,12 @@ async function avancarEtapaEndereco() {
 
 // Handler para eventos 'etapaChange' vindos de PaymentSelection
 function handleEtapaChangeFromPayment(newEtapa) {
-  emit('etapaChange', newEtapa); // Repassa a mudança de etapa para o CheckoutView
+  emit('etapaChange', newEtapa);
 }
 
 // Handler para eventos 'dadosColetados' vindos de PaymentSelection
 function handleDadosColetadosFromPayment(dados) {
-  emit('dadosColetados', dados); // Repassa os dados de pagamento para o CheckoutView
+  emit('dadosColetados', dados); 
 }
 </script>
 

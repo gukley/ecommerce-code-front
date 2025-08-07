@@ -33,51 +33,50 @@
       </div>
     </div>
 
-    <!-- Modal -->
-<!-- Modal -->
-<div v-if="showModal" class="modal" @click.self="fecharModal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3>
-        <i class="bi bi-geo-alt-fill me-2"></i>
-        {{ localEditingAddress.id ? 'Editar' : 'Novo' }} Endereço
-      </h3>
-      <button @click="fecharModal" class="btn-close-modal" aria-label="Fechar">
-        <i class="bi bi-x-lg"></i>
-      </button>
+    <!-- Modal para Novo/Editar Endereço -->
+    <div v-if="showModal" class="modal" @click.self="fecharModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>
+            <i class="bi bi-geo-alt-fill me-2"></i>
+            {{ localEditingAddress.id ? 'Editar' : 'Novo' }} Endereço
+          </h3>
+          <button @click="fecharModal" class="btn-close-modal" aria-label="Fechar">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+
+        <form @submit.prevent="saveAddress" class="form-grid">
+          <div class="form-row">
+            <input v-model="localEditingAddress.street" placeholder="Rua" required class="form-input" />
+            <input v-model="localEditingAddress.number" type="number" placeholder="Número" required class="form-input" />
+          </div>
+
+          <div class="form-row">
+            <input v-model="localEditingAddress.neighborhood" placeholder="Bairro" required class="form-input" />
+            <input v-model="localEditingAddress.city" placeholder="Cidade" required class="form-input" />
+          </div>
+
+          <div class="form-row">
+            <input v-model="localEditingAddress.state" placeholder="Estado" required class="form-input" />
+            <input v-model="localEditingAddress.zip" placeholder="CEP" required class="form-input" />
+          </div>
+
+          <input v-model="localEditingAddress.complement" placeholder="Complemento (opcional)" class="form-input" />
+          <input v-model="localEditingAddress.country" placeholder="País" required class="form-input" />
+
+          <div class="botoes">
+            <button type="button" @click="fecharModal" class="btn-cancelar">
+              <i class="bi bi-x-circle"></i> Cancelar
+            </button>
+            <button type="submit" class="btn-salvar">
+              <i class="bi bi-check-circle"></i> Salvar
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
-
-    <form @submit.prevent="saveAddress" class="form-grid">
-      <div class="form-row">
-        <input v-model="localEditingAddress.street" placeholder="Rua" required class="form-input" />
-        <input v-model="localEditingAddress.number" type="number" placeholder="Número" required class="form-input" />
-      </div>
-
-      <div class="form-row">
-        <input v-model="localEditingAddress.neighborhood" placeholder="Bairro" required class="form-input" />
-        <input v-model="localEditingAddress.city" placeholder="Cidade" required class="form-input" />
-      </div>
-
-      <div class="form-row">
-        <input v-model="localEditingAddress.state" placeholder="Estado" required class="form-input" />
-        <input v-model="localEditingAddress.zip" placeholder="CEP" required class="form-input" />
-      </div>
-
-      <input v-model="localEditingAddress.complement" placeholder="Complemento (opcional)" class="form-input" />
-      <input v-model="localEditingAddress.country" placeholder="País" required class="form-input" />
-
-      <div class="botoes">
-        <button type="button" @click="fecharModal" class="btn-cancelar">
-          <i class="bi bi-x-circle"></i> Cancelar
-        </button>
-        <button type="submit" class="btn-salvar">
-          <i class="bi bi-check-circle"></i> Salvar
-        </button>
-      </div>
-    </form>
   </div>
-</div>
-</div>
 </template>
 
 <script setup>
@@ -167,7 +166,7 @@ const saveAddress = () => {
     number: parseInt(localEditingAddress.value.number),
   };
 
-  const requiredFields = ['street', 'number', 'zip', 'city', 'state', 'country'];
+  const requiredFields = ['street', 'number', 'zip', 'city', 'state', 'country', 'neighborhood'];
   const missingFields = requiredFields.filter((field) => {
     const value = dataToSend[field];
     return value === '' || value === null || value === undefined || (typeof value === 'number' && isNaN(value));
@@ -183,16 +182,13 @@ const saveAddress = () => {
           number: 'Número',
           city: 'Cidade',
           state: 'Estado',
+          neighborhood: 'Bairro',
         };
         return fieldNames[f] || f;
       })
       .join(', ');
 
-    if (typeof window.showToast === 'function') {
-      window.showToast(`Por favor, preencha todos os campos obrigatórios: ${friendlyMissingFields}.`, 'error');
-    } else {
-      console.error(`Campos obrigatórios não preenchidos: ${friendlyMissingFields}.`);
-    }
+    console.error(`Por favor, preencha todos os campos obrigatórios: ${friendlyMissingFields}.`);
     return;
   }
 
@@ -226,55 +222,55 @@ const saveAddress = () => {
 
 .tab {
   animation: fadeIn 0.3s ease;
-  padding: 0 1.5rem; 
+  padding: 0 1.5rem;
 }
 
 .topo {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem; 
-  padding-bottom: 1rem; 
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 .topo h3 {
   margin: 0;
-  font-size: 1.8rem; 
+  font-size: 1.8rem;
   font-weight: 700;
   color: #e0e0e0;
-  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); 
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 .btn-adicionar {
-  background: linear-gradient(145deg, #007bff, #0056b3); 
+  background: linear-gradient(145deg, #007bff, #0056b3);
   color: #fff;
   border: none;
-  padding: 0.75rem 1.5rem; 
-  border-radius: 50px; 
+  padding: 0.75rem 1.5rem;
+  border-radius: 50px;
   cursor: pointer;
   font-weight: 600;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3); 
-  display: flex; 
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+  display: flex;
   align-items: center;
-  gap: 8px; 
+  gap: 8px;
 }
 .btn-adicionar:hover {
-  background: linear-gradient(145deg, #0056b3, #007bff); 
+  background: linear-gradient(145deg, #0056b3, #007bff);
   transform: translateY(-2px); /* Efeito de "levantar" */
-  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4); 
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
 }
 
 .vazio {
   text-align: center;
-  padding: 4rem 2rem; 
+  padding: 4rem 2rem;
   color: rgba(255, 255, 255, 0.7);
 }
 .vazio p {
-  margin: 0 0 1.5rem 0; 
-  font-size: 1.2rem; 
+  margin: 0 0 1.5rem 0;
+  font-size: 1.2rem;
   font-weight: 500;
 }
-.vazio .btn-primary { 
+.vazio .btn-primary {
   background: linear-gradient(145deg, #007bff, #0056b3);
   color: #fff;
   border: none;
@@ -297,72 +293,72 @@ const saveAddress = () => {
 }
 .endereco {
   background: #24243a;
-  border-radius: 12px; 
-  padding: 1.8rem; 
-  border: 1px solid rgba(255, 255, 255, 0.15); 
+  border-radius: 12px;
+  padding: 1.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease; 
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); 
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 .endereco:hover {
-  transform: translateY(-3px); 
-  box-shadow: 0 10px 30px rgba(0, 123, 255, 0.3); 
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(0, 123, 255, 0.3);
 }
 .endereco .info h4 {
   margin: 0 0 0.6rem 0;
-  font-size: 1.2rem; 
+  font-size: 1.2rem;
   font-weight: 700;
   color: #ffffff;
 }
 .endereco .info p {
-  margin: 0 0 0.4rem 0; 
-  color: rgba(255, 255, 255, 0.8); 
-  font-size: 1rem; 
+  margin: 0 0 0.4rem 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1rem;
 }
-.endereco .info .complemento { 
+.endereco .info .complemento {
   font-style: italic;
   color: rgba(255, 255, 255, 0.6);
   font-size: 0.95rem;
 }
 .endereco .info small {
   color: rgba(255, 255, 255, 0.6);
-  font-size: 0.9rem; 
-  display: block; 
-  margin-top: 0.5rem; 
+  font-size: 0.9rem;
+  display: block;
+  margin-top: 0.5rem;
 }
 .endereco .acoes {
   display: flex;
-  gap: 0.8rem; 
+  gap: 0.8rem;
 }
-.btn-icon { 
+.btn-icon {
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: rgba(255, 255, 255, 0.7);
   padding: 0.75rem; /* Padding maior */
-  border-radius: 8px; 
+  border-radius: 8px;
   cursor: pointer;
-  display: flex; 
+  display: flex;
   align-items: center;
   justify-content: center;
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
   font-size: 1.1rem;
 }
 .btn-icon:hover {
-  background: rgba(0, 123, 255, 0.1); 
-  color: #007bff; 
+  background: rgba(0, 123, 255, 0.1);
+  color: #007bff;
   border-color: #007bff;
   transform: translateY(-2px); /* Efeito de "levantar" */
-  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2); 
+  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
 }
 .btn-icon.danger {
-  color: #dc3545; 
-  border-color: rgba(220, 53, 69, 0.3); 
+  color: #dc3545;
+  border-color: rgba(220, 53, 69, 0.3);
 }
 .btn-icon.danger:hover {
-  background: rgba(220, 53, 69, 0.1); 
-  color: #c82333; 
+  background: rgba(220, 53, 69, 0.1);
+  color: #c82333;
   border-color: #c82333;
   box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
 }
@@ -370,66 +366,66 @@ const saveAddress = () => {
 /* Modal */
 .modal {
   position: fixed;
-  top: 0; 
+  top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.8); 
+  background: rgba(0, 0, 0, 0.8);
   display: flex;
-  align-items: center; 
-  justify-content: center; 
+  align-items: center;
+  justify-content: center;
   z-index: 1000;
-  padding: 1.5rem; 
-  animation: fadeInModal 0.3s ease-out; 
+  padding: 1.5rem;
+  animation: fadeInModal 0.3s ease-out;
 }
 .modal-content {
   background: #1a1a2e;
-  border-radius: 16px; 
-  border: 1px solid rgba(255, 255, 255, 0.15); 
-  max-width: 550px; 
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  max-width: 550px;
   width: 100%;
-  max-height: 90vh;
+  max-height: 80vh;
   overflow-y: auto;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  transform: scale(0.95); 
-  animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; 
-  padding: 1.8rem; 
+  transform: scale(0.95);
+  animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  padding: 1.8rem;
 }
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 1.2rem; 
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12); 
-  margin-bottom: 1.5rem; 
+  padding-bottom: 1.2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  margin-bottom: 1.5rem;
 }
 .modal-header h3 {
   margin: 0;
-  color: #007bff; 
-  font-size: 1.6rem; 
+  color: #007bff;
+  font-size: 1.6rem;
   font-weight: 700;
 }
-.btn-close-modal { 
+.btn-close-modal {
   background: transparent;
   border: none;
   color: rgba(255, 255, 255, 0.7);
-  font-size: 1.8rem; 
+  font-size: 1.8rem;
   cursor: pointer;
   padding: 0.5rem;
-  border-radius: 8px; 
+  border-radius: 8px;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 .btn-close-modal:hover {
-  background: rgba(220, 53, 69, 0.1); 
-  color: #dc3545; 
+  background: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
 }
 .modal-content form {
-  
+  /* Removido padding extra aqui, já que o modal-content já tem padding */
 }
 .form-input {
   width: 100%;
   padding: 0.9rem;
-  margin-bottom: 1.2rem;
+  margin-bottom: 0.8rem;
   background: #2a2a3e;
   border: 1px solid rgba(255, 255, 255, 0.25);
   color: #fff;
@@ -443,16 +439,54 @@ const saveAddress = () => {
 .form-input:focus {
   outline: none;
   border-color: #007bff;
-  box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.3); 
+  box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.3);
 }
 
 .botoes {
   display: flex;
   gap: 1.2rem;
   justify-content: flex-end;
-  margin-top: 2rem;
-  padding-top: 1.5rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Estilos para os botões Salvar e Cancelar */
+.btn-salvar,
+.btn-cancelar {
+  padding: 12px 25px;
+  border-radius: 40px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-salvar {
+  background: linear-gradient(145deg, #007bff, #0056b3); 
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+.btn-salvar:hover {
+  background: linear-gradient(145deg, #0056b3, #007bff);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+}
+
+.btn-cancelar {
+  background: transparent;
+  color: #ff4f8f; 
+  border: 1px solid #ff4f8f;
+}
+
+.btn-cancelar:hover {
+  background: rgba(255, 79, 143, 0.1);
+  color: #fff;
 }
 
 /* Animations */
@@ -482,7 +516,7 @@ const saveAddress = () => {
 
 @media (max-width: 768px) {
   .tab {
-    padding: 0 0.5rem; 
+    padding: 0 0.5rem;
   }
   .topo {
     flex-direction: column;
@@ -518,7 +552,7 @@ const saveAddress = () => {
     font-size: 1rem;
   }
   .modal-content {
-    margin: 0 0.5rem; 
+    margin: 0 0.5rem;
     padding: 1.5rem;
   }
   .modal-header {
@@ -531,11 +565,10 @@ const saveAddress = () => {
     font-size: 1.5rem;
   }
   .modal-content form {
-    padding: 1.5rem;
   }
   .form-input {
     padding: 0.8rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.8rem;
   }
   .botoes {
     flex-direction: column;
@@ -587,12 +620,12 @@ const saveAddress = () => {
 .form-grid {
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
+  gap: 0.8rem;
 }
 
 .form-row {
   display: flex;
-  gap: 1rem;
+  gap: 0.8rem;
 }
 
 @media (max-width: 768px) {

@@ -22,7 +22,7 @@ const routes = [
   {
     path: '/produtos',
     name: 'Produtos',
-    component: () => import('@/views/admin/ProductView.vue'),
+    component: () => import('@/views/home/ProductView.vue'),
   },
   {
     path: '/produto/:id',
@@ -33,7 +33,7 @@ const routes = [
   {
     path: '/categorias',
     name: 'Categorias',
-    component: () => import('@/views/admin/CategoriesView.vue'),
+    component: () => import('@/views/home/CategoriesView.vue'),
   },
   {
     path: '/profile',

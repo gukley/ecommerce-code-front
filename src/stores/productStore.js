@@ -30,7 +30,6 @@ export const useProductStore = defineStore('product', () => {
   // Produtos filtrados conforme lógica da view
   const filteredProducts = computed(() => {
     let filtrados = products.value;
-    // Filtra por categoria
     if (selectedCategory.value && selectedCategory.value !== 'Todos os Produtos') {
       filtrados = filtrados.filter(p => p.category?.name === selectedCategory.value);
     }

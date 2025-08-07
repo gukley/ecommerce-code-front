@@ -39,7 +39,7 @@ defineProps({ etapa: Number });
 <style scoped>
 .checkout-steps {
     margin-bottom: 3rem;
-    padding: 0 1rem; /* Adiciona um padding para melhor espaçamento em telas pequenas */
+    padding: 0 1rem; 
 }
 
 .steps-container {
