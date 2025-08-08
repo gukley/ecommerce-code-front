@@ -1,157 +1,177 @@
+// api.service.js
 import api from './api'
 
-// Auth
+// Função central de tratamento de requisições
+const handleRequest = async (requestFn) => {
+  try {
+    const res = await requestFn()
+    return res.data
+  } catch (error) {
+    if (error.response) {
+      // Erro vindo do servidor (4xx, 5xx)
+      throw {
+        status: error.response.status,
+        message: error.response.data?.detail || error.response.data?.message || 'Erro na requisição',
+        data: error.response.data
+      }
+    } else if (error.request) {
+      // Servidor não respondeu
+      throw { message: 'Servidor não respondeu. Verifique sua conexão.' }
+    } else {
+      // Erro interno no código
+      throw { message: `Erro inesperado: ${error.message}` }
+    }
+  }
+}
+
+// Autenticação
 export const login = (credentials) => 
-    api.post('/login', credentials).then(res => res.data)
+  handleRequest(() => api.post('/login', credentials))
 
 export const register = (data) =>
-    api.post('/register', data).then(res => res.data)
+  handleRequest(() => api.post('/register', data))
 
 export const renewToken = () =>
-    api.post('/renew-token').then(res => res.data)
+  handleRequest(() => api.post('/renew-token'))
 
 export const verifyToken = () => 
-    api.get('/verify-token').then(res => res.data)
+  handleRequest(() => api.get('/verify-token'))
 
-// Obter perfil do usuario autenticado
 export const getUserProfile = () => 
-    api.get('/users/me').then(res => res.data)
+  handleRequest(() => api.get('/users/me'))
 
 export const updateUserProfile = (data) => 
-    api.put('/users/me', data).then(res => res.data)
+  handleRequest(() => api.put('/users/me', data))
 
 export const deleteUser = () => 
-    api.delete('/users/me').then(res => res.data)
+  handleRequest(() => api.delete('/users/me'))
 
-//criar moderador
 export const createModerator = (data) => 
-    api.post('/users/create-moderator', data).then(res => res.data)
-  
+  handleRequest(() => api.post('/users/create-moderator', data))
 
 export const updateUserImage = (file) => { 
-    const formData = new FormData()
-    formData.append('image', file)
+  const formData = new FormData()
+  formData.append('image', file)
 
-    return api.put('/users/image', formData, { 
-        headers: { 'Content-Type': 'multipart/form-data' }
-    }).then(res => res.data)
+  return handleRequest(() => api.put('/users/image', formData, { 
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }))
 }
 
-//Produtos
+// Produtos
 export const getAllProducts = () =>
-    api.get('/products').then(res => res.data)
+  handleRequest(() => api.get('/products'))
 
 export const getProductById = (productId) =>
-    api.get(`/products/${productId}`).then(res => res.data)
+  handleRequest(() => api.get(`/products/${productId}`))
 
 export const getProductsByUser = (userId) =>
-    api.get(`/products/category/${userId}`).then(res => res.data)
+  handleRequest(() => api.get(`/products/category/${userId}`))
 
 export const getProductsByCategory = (categoryId) =>
-    api.get(`/products/category/${categoryId}`).then(res => res.data)
+  handleRequest(() => api.get(`/products/category/${categoryId}`))
 
-// Criar, atualizar e deletar
 export const createProduct = (data) =>
-    api.post('/products/', data).then(res => res.data)
+  handleRequest(() => api.post('/products/', data))
 
 export const updateProduct = (productId, data) =>
-    api.put(`/products/${productId}`, data).then(res => res.data)
+  handleRequest(() => api.put(`/products/${productId}`, data))
 
 export const updateProductStock = (productId, stockData) =>
-    api.put(`/products/${productId}/stock`, stockData).then(res => res.data)
+  handleRequest(() => api.put(`/products/${productId}/stock`, stockData))
 
 export const updateProductImage = (productId, formData) =>
-    api.put(`/products/${productId}/image`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data'}
-    }).then(res => res.data)
-
+  handleRequest(() => api.put(`/products/${productId}/image`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data'}
+  }))
 
 export const deleteProduct = (productId) =>
-    api.delete(`/products/${productId}`).then(res => res.data)
+  handleRequest(() => api.delete(`/products/${productId}`))
 
-//categorias
+// Categorias
 export const getCategories = () =>
-    api.get('/categories/').then(res => res.data);
+  handleRequest(() => api.get('/categories/'))
 
 export const getCategoryById = (categoryId) =>
-    api.get(`/categories/${categoryId}`).then(res => res.data);
+  handleRequest(() => api.get(`/categories/${categoryId}`))
 
 export const getCategoriesByUser = (userId) =>
-    api.get(`/categories/user/${userId}`).then(res => res.data);
+  handleRequest(() => api.get(`/categories/user/${userId}`))
 
 export const createCategory = (data) =>
-    api.post('/categories/', data).then(res => res.data);
+  handleRequest(() => api.post('/categories/', data))
 
 export const updateCategory = (categoryId, data) =>
-    api.put(`/categories/${categoryId}`, data).then(res => res.data);
+  handleRequest(() => api.put(`/categories/${categoryId}`, data))
 
 export const deleteCategory = (categoryId) =>
-    api.delete(`/categories/${categoryId}`).then(res => res.data);
+  handleRequest(() => api.delete(`/categories/${categoryId}`))
 
 export const updateCategoryImage = (categoryId, file) => { 
-    const formData = new FormData();
-    formData.append('image', file);
+  const formData = new FormData()
+  formData.append('image', file)
 
-    return api.put(`/categories/${categoryId}/image`, formData, { 
-        headers: { 'Content-Type': 'multipart/form-data' }
-    }).then(res => res.data);
+  return handleRequest(() => api.put(`/categories/${categoryId}/image`, formData, { 
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }))
 }
 
-// Cart
-export const getCart = () => api.get('/cart/')
-export const createCart = () => api.post('/cart/')
-export const getCartItems = () => api.get('/cart/items')
+// Carrinho
+export const getCart = () => 
+  handleRequest(() => api.get('/cart/'))
+
+export const createCart = () => 
+  handleRequest(() => api.post('/cart/'))
+
+export const getCartItems = () => 
+  handleRequest(() => api.get('/cart/items'))
 
 export const addItemToCart = (productId, quantity = 1, unitPrice) =>
-    api.post('/cart/items', { product_id: productId, quantity, unit_price: unitPrice });
+  handleRequest(() => api.post('/cart/items', { product_id: productId, quantity, unit_price: unitPrice }))
 
 export const updateCartItem = (productId, quantity) =>
-    api.put('/cart/items', { product_id: productId, quantity })
+  handleRequest(() => api.put('/cart/items', { product_id: productId, quantity }))
 
 export const removeCartItem = (productId) =>
-    api.delete('/cart/items', { data: { product_id: productId }})
+  handleRequest(() => api.delete('/cart/items', { data: { product_id: productId }}))
 
-export const clearCart = () => api.delete('/cart/clear')
+export const clearCart = () => 
+  handleRequest(() => api.delete('/cart/clear'))
 
-// Address
-export const getAllAddresses = () => { 
-    return api.get('/addresses/').then(res => res.data)
-}
+// Endereços
+export const getAllAddresses = () => 
+  handleRequest(() => api.get('/addresses/'))
 
-export const createAddress = (addressData) => { 
-    return api.post('/addresses/', addressData).then(res => res.data)
-}
+export const createAddress = (addressData) => 
+  handleRequest(() => api.post('/addresses/', addressData))
 
-export const getAddressById = (addressId) => { 
-    return api.get(`/addresses/${addressId}`).then(res => res.data)
-}
+export const getAddressById = (addressId) => 
+  handleRequest(() => api.get(`/addresses/${addressId}`))
 
-export const updateAddress = (addressId, updateData) => { 
-    return api.put(`/addresses/${addressId}`, updateData).then(res => res.data)
-}
+export const updateAddress = (addressId, updateData) => 
+  handleRequest(() => api.put(`/addresses/${addressId}`, updateData))
 
-export const deleteAddress = (addressId) => { 
-    return api.delete(`/addresses/${addressId}`).then(res => res.data)  
-}
+export const deleteAddress = (addressId) => 
+  handleRequest(() => api.delete(`/addresses/${addressId}`))
 
-// Orders
+// Pedidos
 export const getAllOrders = () =>
-    api.get('/orders/all').then(res => res.data)
+  handleRequest(() => api.get('/orders/all'))
 
 export const getOrderByAdmin = (adminId) =>
-    api.get(`/orders/all/${adminId}`).then(res => res.data)
+  handleRequest(() => api.get(`/orders/all/${adminId}`))
 
 export const getUsersOrders = () =>
-    api.get('/orders/').then(res => res.data)
+  handleRequest(() => api.get('/orders/'))
 
 export const getOrdersById = (orderId) =>
-    api.get(`/orders/${orderId}`).then(res => res.data)
+  handleRequest(() => api.get(`/orders/${orderId}`))
 
 export const createOrder = (orderData) =>
-    api.post('/orders/', orderData).then(res => res.data)
+  handleRequest(() => api.post('/orders/', orderData))
 
 export const updateOrderStatus = (orderId, statusData) =>
-    api.put(`/orders/${orderId}`, statusData).then(res => res.data)
+  handleRequest(() => api.put(`/orders/${orderId}`, statusData))
 
 export const cancelOrder = (orderId) =>
-    api.delete(`/orders/${orderId}`).then(res => res.data)
+  handleRequest(() => api.delete(`/orders/${orderId}`))
