@@ -1,17 +1,14 @@
 import { defineStore } from 'pinia';
 import { login, getUserProfile as apiGetUserProfile } from '@/services/apiService'; 
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 
 export const useAuthStore = defineStore('auth', () => { 
     const user = ref(null)
     const token = ref(localStorage.getItem('token') || null)
 
-    // Getter para saber se o usuário está autenticado
-    const isAuthenticated = computed(() => !!token.value)
-
     const loginUser = async (email, password) => { 
-        const response = await login({ email, password }) 
-        token.value = response.token 
+        const response = await login({ email, password}) 
+        token.value = response.data.token
         localStorage.setItem('token', token.value)
         await getUserProfile()
     }
@@ -31,7 +28,6 @@ export const useAuthStore = defineStore('auth', () => {
     return { 
         user,
         token,
-        isAuthenticated,
         loginUser,
         logout,
         getUserProfile,
