@@ -16,6 +16,7 @@ const searchTerm = ref("");
 const showWishlistDrawer = ref(false);
 const wishlist = useWishlistStore();
 
+
 const openCartDrawer = () => { 
   showCartDrawer.value = true; 
 };
@@ -107,7 +108,8 @@ onBeforeUnmount(() => {
             <i class="bi bi-search"></i>
           </button>
         </form>
-
+        
+    
         <div class="d-flex align-items-center gap-4 ms-lg-3 mt-2 mt-lg-0">
           <div class="position-relative nav-icon-wrapper" @click="openCartDrawer">
             <i class="bi bi-cart3 fs-3 nav-icon"></i>
@@ -372,4 +374,5 @@ onBeforeUnmount(() => {
     gap: 0.7rem !important;
   }
 }
+
 </style>

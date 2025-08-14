@@ -60,91 +60,94 @@
   });
   
   const emit = defineEmits(['close', 'saved']);
+  
   const form = ref({ name: '', description: '' });
   const isSubmitting = ref(false);
   const toast = useToast();
   const authStore = useAuthStore();
   
-  watch(() => authStore.user, (newUser) => {
-    console.log('authStore.user mudou para:', newUser);
-  });
-  
-  watch(() => authStore.token, (newToken) => {
-    console.log('authStore.token mudou para:', newToken ? 'Token presente' : 'Token ausente');
-    if (newToken && !authStore.user) {
-      authStore.getUserProfile();
-    }
-  });
-  
-  onMounted(() => {
-    if (authStore.token && !authStore.user) {
-      console.log('Token presente na montagem, tentando carregar perfil do usuário...');
-      authStore.getUserProfile();
-    }
-  });
-  
-  
+  // Inicializa o formulário quando props.category muda
   watch(
     () => props.category,
     (val) => {
+      // Se 'val' existir (edição), preenche o form. Senão (criação), zera o form.
       form.value = val ? { ...val } : { name: '', description: '' };
     },
-    { immediate: true }
+    { immediate: true, deep: true } // 'deep: true' garante a reatividade se o objeto for complexo
   );
   
+  // Carrega o perfil do usuário se houver token, mas o usuário não estiver carregado
+  onMounted(() => {
+    if (authStore.token && !authStore.user) {
+      authStore.getUserProfile();
+    }
+  });
+  
   const handleSubmit = async () => {
+    // 1. Validação do formulário no frontend
     if (!form.value.name || form.value.name.trim() === '') {
       toast.warning('O campo "nome" é obrigatório.');
       return;
     }
   
+    // 2. Validação de autenticação do usuário
     if (!authStore.user || !authStore.user.id) {
-      console.warn('Usuário não logado ou ID de usuário não disponível no authStore.');
-      toast.error('Você precisa estar logado para criar uma categoria. Por favor, faça login.');
-      isSubmitting.value = false;
+      toast.error('Você precisa estar logado para realizar esta ação.');
       return;
     }
   
     isSubmitting.value = true;
   
-    const baseData = {
-      name: form.value.name.trim(),
-      description: form.value.description.trim() || '',
-    };
-  
-    let dataToSend;
-  
     try {
-      if (props.category) {
-        dataToSend = { ...baseData, user_id: 211 };
-        console.log('Payload para atualização:', dataToSend);
-        await updateCategory(props.category.id, dataToSend);
+      if (props.category && props.category.id) {
+        // --- LÓGICA DE ATUALIZAÇÃO ---
+        // O payload para atualização pode ser diferente.
+        // Neste exemplo, enviamos apenas os campos que podem ser alterados.
+        const updatePayload = {
+          name: form.value.name.trim(),
+          description: form.value.description.trim() || '',
+        };
+        await updateCategory(props.category.id, updatePayload);
         toast.success('Categoria atualizada com sucesso!');
       } else {
-        const formData = new FormData();
-        formData.append('name', form.value.name.trim());
-        formData.append('description', form.value.description.trim() || '');
-        console.log('Payload para criação (FormData):', formData);
-        await createCategory(formData);
+        // --- LÓGICA DE CRIAÇÃO ---
+        // CORREÇÃO APLICADA AQUI:
+        // O 'user_id' foi removido. A API (FastAPI) deve usar o token de
+        // autenticação para identificar o usuário e associá-lo à nova categoria.
+        // Enviar 'user_id' do frontend causa o erro 422, pois a API não espera
+        // este campo no corpo da requisição de criação.
+        const createPayload = {
+          name: form.value.name.trim(),
+          description: form.value.description.trim() || '',
+        };
+        await createCategory(createPayload);
         toast.success('Categoria criada com sucesso!');
       }
-      emit('saved');
+      
+      emit('saved'); // Sinaliza que a operação foi bem-sucedida
+      emit('close'); // Fecha o modal
     } catch (err) {
-      if (err.response && err.response.data) {
+      // Tratamento de erro aprimorado para dar feedback claro ao usuário
+      let errorMessage = 'Ocorreu um erro inesperado. Tente novamente.';
+      if (err.response && err.response.data && err.response.data.detail) {
         console.error('Erro API detalhado:', JSON.stringify(err.response.data, null, 2));
-        const errorMessage = err.response.data.detail?.[0]?.msg || 'Erro ao salvar categoria. Verifique os dados.';
-        toast.error(errorMessage);
+        // Pega a primeira mensagem de erro da lista de detalhes da validação do FastAPI
+        if (Array.isArray(err.response.data.detail)) {
+          errorMessage = err.response.data.detail[0].msg || 'Erro de validação nos dados enviados.';
+        } else if (typeof err.response.data.detail === 'string') {
+          errorMessage = err.response.data.detail;
+        }
       } else {
         console.error('Erro desconhecido:', err);
-        toast.error('Erro ao salvar categoria. Verifique os dados.');
       }
+      toast.error(errorMessage);
     } finally {
       isSubmitting.value = false;
     }
   };
   </script>
   
-  <style scoped>
+<style scoped>
   :root {
     --admin-bg-primary: #0f0f23;
     --admin-bg-secondary: #181828;

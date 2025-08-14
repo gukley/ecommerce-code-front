@@ -73,9 +73,13 @@ const routes = [
         component: () => import('@/views/admin/OrderManagement.vue'),
         meta: { roles: ['ADMIN', 'MODERATOR'] },
       },
-      
-      
-    ],
+      { 
+        path: 'coupon',
+        name: 'AdminCoupon',
+        component: () => import('@/views/admin/CouponManagement.vue'),
+        meta: { roles: ['ADMIN', 'MODERATOR'] },
+      }
+  ],
   },
   {
     path: '/checkout',
@@ -83,6 +87,12 @@ const routes = [
     component: () => import('@/views/cart/CheckoutView.vue'),
     meta: { requiresAuth: true }
   },
+  {
+    path: '/unauthorized',
+    name: 'Unauthorized',
+    component: () => import('@/views/errors/UnauthorizedView.vue'),
+    meta: { requiresAuth: false }
+  }
 ]
 
 const router = createRouter({

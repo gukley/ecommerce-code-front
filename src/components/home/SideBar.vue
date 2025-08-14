@@ -47,20 +47,23 @@
   const authStore = useAuthStore();
   
   const carregarCategorias = async () => {
-    try {
-      const apiCategories = await getCategories();
-      categorias.value = [
-        { nome: 'Todos os Produtos', icone: 'bi bi-grid-fill' },
-        ...apiCategories
-          .filter(cat => cat.user_id === 211)
-          .map(cat => ({ nome: cat.name }))
-      ];
-    } catch (err) {
-      categorias.value = [
-        { nome: 'Todos os Produtos', icone: 'bi bi-grid-fill' }
-      ];
-    }
-  };
+  try {
+    const apiCategories = await getCategories();
+
+    const userId = authStore.user?.id;
+
+    categorias.value = [
+      { nome: 'Todos os Produtos', icone: 'bi bi-grid-fill' },
+      ...apiCategories
+        .filter(cat => !userId || cat.user_id === userId)
+        .map(cat => ({ nome: cat.name }))
+    ];
+  } catch (err) {
+    categorias.value = [
+      { nome: 'Todos os Produtos', icone: 'bi bi-grid-fill' }
+    ];
+  }
+};
   
   onMounted(() => {
     carregarCategorias();

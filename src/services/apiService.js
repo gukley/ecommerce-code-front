@@ -51,8 +51,16 @@ export const getProductsByCategory = (categoryId) =>
     api.get(`/products/category/${categoryId}`).then(res => res.data)
 
 // Criar, atualizar e deletar
-export const createProduct = (data) =>
-    api.post('/products/', data).then(res => res.data)
+export const createProduct = (data) => {
+  // If data is FormData (for image upload), use multipart/form-data
+  if (data instanceof FormData) {
+    return api.post('/products/', data, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    }).then(res => res.data)
+  }
+  // Otherwise, send as JSON
+  return api.post('/products/', data).then(res => res.data)
+}
 
 export const updateProduct = (productId, data) =>
     api.put(`/products/${productId}`, data).then(res => res.data)

@@ -90,7 +90,7 @@ import { computed } from 'vue'
 import { useCartStore } from '@/stores/cartStore'
 import { useWishlistStore } from '@/stores/wishlistStore';
 
-const BASE_URL = 'http://35.196.79.227:8000';
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 const props = defineProps({ 
     produto: Object
@@ -98,7 +98,7 @@ const props = defineProps({
 
 const imageUrl = computed(() => {
   return props.produto.image_path
-    ? BASE_URL + props.produto.image_path
+    ? BASE_URL + (props.produto.image_path.startsWith('/') ? '' : '/') + props.produto.image_path
     : '/placeholder-product.png';
 });
 

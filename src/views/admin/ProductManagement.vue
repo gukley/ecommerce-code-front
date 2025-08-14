@@ -92,7 +92,7 @@ const currentProduct = ref(null);
 const isEditing = ref(false);
 const currentPage = ref(1);
 const pageSize = 10;
-const baseUrl = 'http://35.196.79.227:8000'; 
+const baseUrl = import.meta.env.VITE_API_URL;
 
 const selectedCategory = ref('');
 const selectedStock = ref('');
@@ -151,12 +151,13 @@ const fetchProducts = async () => {
   isLoading.value = true;
   try {
     const response = await getAllProducts();
-    // Filtra produtos pelo user_id da categoria e constrói a URL da imagem
     products.value = response
-      .filter(p => p.category?.user_id === authStore.user.id)
-      .map(p => ({
-        ...p,
-        image_url: p.image_path ? `${baseUrl}${p.image_path}` : null 
+    .filter(p => p.category?.user_id === authStore.user.id)
+    .map(p => ({
+    ...p,
+    image_url: p.image_path
+      ? `${baseUrl}${p.image_path.startsWith('/') ? '' : '/'}${p.image_path}`
+      : null
       }));
   } catch (error) {
     toast.error('Erro ao carregar produtos: ' + (error.response?.data?.message || error.message));

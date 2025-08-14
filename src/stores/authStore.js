@@ -7,11 +7,13 @@ export const useAuthStore = defineStore('auth', () => {
     const token = ref(localStorage.getItem('token') || null)
 
     const loginUser = async (email, password) => { 
-        const response = await login({ email, password}) 
-        token.value = response.data.token
+        const response = await login({ email, password })
+        token.value = response.token  // não response.data.token
         localStorage.setItem('token', token.value)
-        await getUserProfile()
-    }
+        user.value = response.user
+        localStorage.setItem('user', JSON.stringify(user.value))
+      }
+      
 
     const getUserProfile = async () => { 
         const userData = await apiGetUserProfile();

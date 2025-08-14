@@ -1,47 +1,5 @@
-<template>
-  <div v-show="open" class="cart-drawer-backdrop" @click.self="close">
-    <div class="cart-drawer">
-      <div class="cart-drawer-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Seu Carrinho</h5>
-        <button class="btn-close btn-close-white" @click="close"></button>
-      </div>
-      <div class="cart-drawer-body">
-        <div v-if="open && Array.isArray(validItems) && validItems.length === 0" class="text-center text-muted py-5 empty-text">
-          Seu carrinho está vazio.
-        </div>
-        <div v-else-if="open && validItems.length > 0">
-          <div v-for="item in validItems" :key="item.product?.id || item.id" class="cart-item d-flex align-items-start mb-3">
-            <img :src="getImageUrl(item.product ? item.product : item)" class="cart-item-img me-3" />
-            <div class="flex-grow-1">
-              <div class="fw-bold product-name">
-                {{ item.product ? item.product.name : item.name }}
-              </div>
-              <div class="d-flex align-items-center mb-1">
-                <button class="btn btn-sm btn-outline-secondary" @click="alterarQuantidade(item, item.quantity - 1)" :disabled="item.quantity <= 1">−</button>
-                <span class="mx-2">{{ item.quantity }}</span>
-                <button class="btn btn-sm btn-outline-secondary" @click="alterarQuantidade(item, item.quantity + 1)" :disabled="item.quantity >= (item.product?.stock ?? 99)">+</button>
-              </div>
-              <div class="text-primary">R$ {{ ((item.product ? item.product.price : item.price) * item.quantity).toFixed(2) }}</div>
-            </div>
-            <button class="btn btn-outline-danger btn-sm ms-2" @click="cart.removeItem(item.product.id)">
-              <i class="bi bi-trash"></i>
-            </button>
-          </div>
-          <div class="cart-drawer-footer mt-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <span class="fw-bold">Total:</span>
-              <span class="fw-bold text-primary fs-5">R$ {{ cart.totalPrice.toFixed(2) }}</span>
-            </div>
-            <button class="btn btn-main-action w-100" @click="checkout">Finalizar Compra</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup>
-import { computed, watch } from 'vue';
+import { storeToRefs } from 'pinia';
 import { useCartStore } from '@/stores/cartStore';
 import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
@@ -52,28 +10,83 @@ const cart = useCartStore();
 const router = useRouter();
 const toast = useToast();
 
+// Use storeToRefs para garantir reatividade
+const { detailedItems, loading, totalPrice } = storeToRefs(cart);
+
 const close = () => emit('close');
 const checkout = () => {
   router.push('/checkout');
   setTimeout(() => close(), 100);
 };
 
-const BASE_URL = 'http://35.196.79.227:8000';
-const getImageUrl = (product) => product.image_path ? BASE_URL + product.image_path : '/placeholder-product.png';
+const BASE_URL = import.meta.env.VITE_API_URL;
+const getImageUrl = (product) =>
+  product.image_path
+    ? BASE_URL + (product.image_path.startsWith('/') ? '' : '/') + product.image_path
+    : '/placeholder-product.png';
 
-const validItems = computed(() =>
-  Array.isArray(cart.detailedItems) ? cart.detailedItems.filter(item => item && item.product) : []
-);
-
-function alterarQuantidade(item, novaQtd) {
-  if (novaQtd >= 1 && novaQtd <= (item.product?.stock ?? 99)) {
-    cart.updateItem(item.product.id, novaQtd);
-  }
-}
-
+// Inicializa carrinho ao montar
+cart.initCart();
 </script>
 
+<template>
+  <div v-show="open" class="cart-drawer-backdrop" @click.self="close">
+    <div class="cart-drawer">
+      <div class="cart-drawer-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Seu Carrinho</h5>
+        <button class="btn-close btn-close-white" @click="close"></button>
+      </div>
+      <div class="cart-drawer-body">
+        <div v-if="loading" class="text-center text-muted py-5 empty-text">
+          A carregar itens do carrinho...
+        </div>
+        <div v-else-if="detailedItems.length === 0" class="text-center text-muted py-5 empty-text">
+          Seu carrinho está vazio.
+        </div>
+        <div v-else>
+          <div v-for="item in detailedItems" :key="item.product?.id || item.product_id" class="cart-item d-flex align-items-start mb-3">
+            <template v-if="item.product">
+              <img :src="getImageUrl(item.product)" class="cart-item-img me-3" />
+              <div class="flex-grow-1">
+                <div class="fw-bold product-name">
+                  {{ item.product.name }}
+                </div>
+                <div class="d-flex align-items-center mb-1">
+                  <button class="btn btn-sm btn-outline-secondary" @click="cart.updateItemQuantity(item.product.id, item.quantity - 1)" :disabled="item.quantity <= 1">−</button>
+                  <span class="mx-2">{{ item.quantity }}</span>
+                  <button class="btn btn-sm btn-outline-secondary" @click="cart.updateItemQuantity(item.product.id, item.quantity + 1)">+</button>
+                </div>
+                <div class="text-primary">R$ {{ (item.product.price * item.quantity).toFixed(2) }}</div>
+              </div>
+              <button class="btn btn-outline-danger btn-sm ms-2" @click="cart.removeItem(item.product.id)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </template>
+            <template v-else>
+              <div class="flex-grow-1">
+                <div class="fw-bold product-name text-danger">Erro ao carregar o produto</div>
+                <div class="text-muted">Item com ID: {{ item.product_id }}</div>
+              </div>
+              <button class="btn btn-outline-danger btn-sm ms-2" @click="cart.removeItem(item.product_id)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </template>
+          </div>
+          <div class="cart-drawer-footer mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <span class="fw-bold">Total:</span>
+              <span class="fw-bold text-primary fs-5">R$ {{ totalPrice.toFixed(2) }}</span>
+            </div>
+            <button class="btn btn-main-action w-100" @click="checkout">Finalizar Compra</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
 <style scoped>
+/* O estilo não foi alterado */
 .cart-drawer-backdrop {
   position: fixed;
   inset: 0;

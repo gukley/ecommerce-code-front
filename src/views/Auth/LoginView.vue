@@ -75,6 +75,12 @@ const toast = useToast()
 const handleLogin = async () => {
   try {
     const response = await login({ email: email.value, password: password.value })
+    
+    console.log('Resposta da API no login:', response) // LOG para inspecionar tudo
+    
+    // Confirma o role vindo do backend
+    console.log('Role do usuário:', response.user.role)
+    
     localStorage.setItem('token', response.token)
     localStorage.setItem('user', JSON.stringify(response.user))
 
@@ -90,6 +96,7 @@ const handleLogin = async () => {
     toast.error('Erro ao logar: ' + (error.response?.data?.message || error.message || 'Credenciais inválidas.'))
   }
 }
+
 </script>
 
 <style scoped>

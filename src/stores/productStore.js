@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { getAllProducts } from '@/services/apiService';
+import { useAuthStore } from './authStore';
 
 export const useProductStore = defineStore('product', () => {
   const products = ref([]);
@@ -8,10 +9,16 @@ export const useProductStore = defineStore('product', () => {
   const error = ref(null);
   const searchTerm = ref('');
   const selectedCategory = ref('Todos os Produtos');
-  const orderBy = ref(''); 
-  const userId = ref(211); 
+  const orderBy = ref('');
 
-  // Busca produtos da API
+  const authStore = useAuthStore();
+  const userId = ref(authStore.user?.id || null);
+
+  // Atualiza userId caso o usuário seja alterado
+  watch(() => authStore.user, (newUser) => {
+    userId.value = newUser?.id || null;
+  });
+
   const fetchProducts = async () => {
     loading.value = true;
     try {
@@ -27,13 +34,32 @@ export const useProductStore = defineStore('product', () => {
     }
   };
 
-  // Produtos filtrados conforme lógica da view
+  // Produtos do usuário (admin)
+  const productsByUser = computed(() => {
+    if (!userId.value) return [];
+    // Certifique-se que cada produto tem o campo category.user_id!
+    return products.value.filter(p => p.category?.user_id === userId.value);
+  });
+
+  // Getter para total de produtos do usuário
+  const totalProdutos = computed(() => productsByUser.value.length);
+
+  // Getter para produtos recentes do usuário
+  const ultimosProdutos = computed(() => {
+    return productsByUser.value
+      .slice()
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      .slice(0, 5);
+  });
+
+  // Filtro de busca e ordenação para telas de listagem
   const filteredProducts = computed(() => {
-    let filtrados = products.value;
+    let filtrados = productsByUser.value;
+
     if (selectedCategory.value && selectedCategory.value !== 'Todos os Produtos') {
       filtrados = filtrados.filter(p => p.category?.name === selectedCategory.value);
     }
-    // Busca
+
     if (searchTerm.value.trim() !== '') {
       const termo = searchTerm.value.trim().toLowerCase();
       filtrados = filtrados.filter(p =>
@@ -42,7 +68,7 @@ export const useProductStore = defineStore('product', () => {
         (p.category && p.category.name && p.category.name.toLowerCase().includes(termo))
       );
     }
-    // Ordenação
+
     if (orderBy.value === 'maior-valor') {
       filtrados = [...filtrados].sort((a, b) => b.price - a.price);
     } else if (orderBy.value === 'menor-valor') {
@@ -52,6 +78,7 @@ export const useProductStore = defineStore('product', () => {
     } else if (orderBy.value === 'za') {
       filtrados = [...filtrados].sort((a, b) => b.name.localeCompare(a.name));
     }
+
     return filtrados;
   });
 
@@ -64,6 +91,9 @@ export const useProductStore = defineStore('product', () => {
     orderBy,
     userId,
     fetchProducts,
-    filteredProducts
+    filteredProducts,
+    productsByUser,
+    totalProdutos,
+    ultimosProdutos
   };
 });

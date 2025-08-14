@@ -129,27 +129,37 @@ const tituloPagina = computed(() => {
 const produtosFiltrados = computed(() => {
   let filtrados = produtos.value;
 
+  // Filtra pela categoria selecionada
   if (categoriaSelecionada.value !== 'Todos os Produtos') {
     filtrados = filtrados.filter(
-      p => p.category?.name === categoriaSelecionada.value && p.category?.user_id === 211
+      p => p.category?.name === categoriaSelecionada.value
     );
-  } else {
-    filtrados = filtrados.filter(p => p.category?.user_id === 211);
   }
 
+  // Filtra pelo termo de busca
   if (termoBusca.value.trim() !== '') {
     const termo = termoBusca.value.trim().toLowerCase();
-    filtrados = filtrados.filter(p => p.name.toLowerCase().includes(termo) || (p.description && p.description.toLowerCase().includes(termo)));
+    filtrados = filtrados.filter(
+      p =>
+        p.name.toLowerCase().includes(termo) ||
+        (p.description && p.description.toLowerCase().includes(termo))
+    );
   }
-  
+
+  // Ordena os produtos
   if (ordemSelecionada.value) {
     filtrados = [...filtrados].sort((a, b) => {
       switch (ordemSelecionada.value) {
-        case 'maior-valor': return b.price - a.price;
-        case 'menor-valor': return a.price - b.price;
-        case 'az': return a.name.localeCompare(b.name);
-        case 'za': return b.name.localeCompare(a.name);
-        default: return 0;
+        case 'maior-valor':
+          return b.price - a.price;
+        case 'menor-valor':
+          return a.price - b.price;
+        case 'az':
+          return a.name.localeCompare(b.name);
+        case 'za':
+          return b.name.localeCompare(a.name);
+        default:
+          return 0;
       }
     });
   }
@@ -158,9 +168,10 @@ const produtosFiltrados = computed(() => {
 });
 
 function buscarProdutos() {
-  
+  // Você pode implementar busca personalizada aqui, se quiser
 }
 </script>
+
 
 <style scoped>
 .main-layout {

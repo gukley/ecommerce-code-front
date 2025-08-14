@@ -1,6 +1,6 @@
 export const authGuard = (to, from, next) => {
   const token = localStorage.getItem('token');
-  let isAuthenticated = !!token; // Verifica se existe um token
+  let isAuthenticated = !!token;
 
   let userRole = null;
 
@@ -17,11 +17,9 @@ export const authGuard = (to, from, next) => {
     }
   }
 
-  // Define os papéis necessários para a rota atual
   const requiredRoles = to.meta.roles;
   const requiresAuth = to.meta.requiresAuth;
 
-  // 1. Rota requer autenticação?
   if (requiresAuth) {
     if (!isAuthenticated) {
       console.log(`Guard: Não autenticado. Redirecionando para login. (${to.path})`);

@@ -1,24 +1,40 @@
 <template>
   <div class="checkout-form">
+    <!-- Indicador de etapas -->
+    <div class="steps-indicator">
+      <div :class="['step', etapa === 1 ? 'active' : '', etapa > 1 ? 'done' : '']">
+        <i class="bi bi-geo-alt"></i>
+        <span>Endereço</span>
+      </div>
+      <div :class="['step', etapa === 2 ? 'active' : '', etapa > 2 ? 'done' : '']">
+        <i class="bi bi-credit-card"></i>
+        <span>Pagamento</span>
+      </div>
+      <div :class="['step', etapa === 3 ? 'active' : '', etapa > 3 ? 'done' : '']">
+        <i class="bi bi-check2-circle"></i>
+        <span>Confirmação</span>
+      </div>
+    </div>
+
     <!-- Etapa 1: Endereço -->
     <div v-if="etapa === 1" class="form-section">
       <div class="section-header">
         <i class="bi bi-geo-alt"></i>
         <h4>Endereço de Entrega</h4>
       </div>
-      
+
+      <!-- Lista de endereços salvos -->
       <div v-if="enderecos.length > 0 && !modoNovoEndereco" class="address-selection">
         <div class="selection-header">
           <label class="form-label">Selecione um endereço salvo:</label>
         </div>
-        
         <div class="address-options">
           <div v-for="end in enderecos" :key="end.id" class="address-option">
-            <input 
-              class="address-radio" 
-              type="radio" 
-              :id="'endereco-'+end.id" 
-              :value="end.id" 
+            <input
+              class="address-radio"
+              type="radio"
+              :id="'endereco-'+end.id"
+              :value="end.id"
               v-model="enderecoSelecionadoId"
             >
             <label class="address-label" :for="'endereco-'+end.id">
@@ -30,46 +46,41 @@
             </label>
           </div>
         </div>
-        
+
         <button class="btn-secondary" @click="modoNovoEndereco = true">
           <i class="bi bi-plus-circle"></i>
           Cadastrar novo endereço
         </button>
       </div>
-      
+
+      <!-- Formulário para novo endereço -->
       <form v-if="modoNovoEndereco || enderecos.length === 0" @submit.prevent="avancarEtapaEndereco" class="address-form">
         <div class="form-grid">
           <div class="form-group full-width">
-            <label class="form-label">Rua</label>
-            <input type="text" class="form-input" v-model="form.street" required />
+            <label class="form-label" for="street">Rua</label>
+            <input id="street" type="text" class="form-input" v-model="form.street" required />
           </div>
-          
           <div class="form-group">
-            <label class="form-label">Número</label>
-            <input type="number" class="form-input" v-model.number="form.number" required />
+            <label class="form-label" for="number">Número</label>
+            <input id="number" type="number" class="form-input" v-model.number="form.number" required />
           </div>
-          
           <div class="form-group">
-            <label class="form-label">Cidade</label>
-            <input type="text" class="form-input" v-model="form.city" required />
+            <label class="form-label" for="city">Cidade</label>
+            <input id="city" type="text" class="form-input" v-model="form.city" required />
           </div>
-          
           <div class="form-group">
-            <label class="form-label">Estado</label>
-            <input type="text" class="form-input" v-model="form.state" required />
+            <label class="form-label" for="state">Estado</label>
+            <input id="state" type="text" class="form-input" v-model="form.state" required />
           </div>
-          
           <div class="form-group">
-            <label class="form-label">País</label>
-            <input type="text" class="form-input" v-model="form.country" required />
+            <label class="form-label" for="country">País</label>
+            <input id="country" type="text" class="form-input" v-model="form.country" required />
           </div>
-          
           <div class="form-group">
-            <label class="form-label">CEP</label>
-            <input type="text" class="form-input" v-model="form.zip" required />
+            <label class="form-label" for="zip">CEP</label>
+            <input id="zip" type="text" class="form-input" v-model="form.zip" required />
           </div>
         </div>
-        
         <div class="form-actions">
           <button v-if="enderecos.length > 0" type="button" class="btn-secondary" @click="modoNovoEndereco = false">
             <i class="bi bi-arrow-left"></i>
@@ -81,20 +92,23 @@
           </button>
         </div>
       </form>
-      
+
+      <!-- Botão continuar quando endereço já existe -->
       <button v-else class="btn-primary w-100" @click="avancarEtapaEndereco">
         <i class="bi bi-check-circle"></i>
         Continuar
       </button>
     </div>
 
-    <!-- Etapa 2: Pagamento (usando o novo componente) -->
+    <!-- Etapa 2: Pagamento -->
     <PaymentSelection
       v-if="etapa === 2"
       v-model="metodoPagamento"
       @etapaChange="handleEtapaChangeFromPayment"
       @dadosColetados="handleDadosColetadosFromPayment"
     />
+    <!-- Etapa 3: Confirmação (Sugestão para adicionar!) -->
+    <!-- <OrderSummary v-if="etapa === 3" ... /> -->
   </div>
 </template>
 
@@ -104,17 +118,14 @@ import { createAddress, getAllAddresses } from '@/services/apiService';
 import { useToast } from 'vue-toastification';
 import PaymentSelection from './PaymentSelection.vue';
 
-// Define as props que este componente pode receber
 const props = defineProps({
-  etapa: Number 
+  etapa: Number
 });
 
-// Define os eventos que este componente pode emitir
-const emit = defineEmits(['etapaChange', 'dadosColetados']); 
+const emit = defineEmits(['etapaChange', 'dadosColetados']);
 
 const toast = useToast();
 
-// Estado para o formulário de novo endereço
 const form = reactive({
   street: '',
   number: null,
@@ -124,15 +135,11 @@ const form = reactive({
   zip: '',
 });
 
-// Estados para endereços e seleção
 const enderecos = ref([]);
-const enderecoSelecionadoId = ref(null); 
+const enderecoSelecionadoId = ref(null);
 const modoNovoEndereco = ref(false);
+const metodoPagamento = ref('pix');
 
-// Estado para o método de pagamento selecionado (agora compartilhado com PaymentSelection)
-const metodoPagamento = ref('pix'); 
-
-// Carrega os endereços salvos ao montar o componente
 onMounted(async () => {
   try {
     enderecos.value = await getAllAddresses();
@@ -140,19 +147,17 @@ onMounted(async () => {
     console.error("Erro ao carregar endereços:", e);
   }
   if (enderecos.value.length > 0) {
-    enderecoSelecionadoId.value = enderecos.value[0].id; 
+    enderecoSelecionadoId.value = enderecos.value[0].id;
     modoNovoEndereco.value = false;
   } else {
-    modoNovoEndereco.value = true; 
+    modoNovoEndereco.value = true;
   }
 });
 
-// Observa mudanças na prop 'etapa' (útil para depuração ou lógica futura)
 watch(() => props.etapa, (newVal) => {
-  console.log('CheckoutForm - Etapa atual:', newVal);
+  // Use para animações de etapa se quiser
 });
 
-// Função para avançar a etapa de Endereço
 async function avancarEtapaEndereco() {
   let enderecoFinal = null;
   try {
@@ -161,15 +166,15 @@ async function avancarEtapaEndereco() {
         toast.error('Por favor, preencha todos os campos do endereço.');
         return;
       }
-      const addressPayload = {
-        street: form.street,
-        number: form.number,
-        city: form.city,
-        state: form.state,
-        country: form.country,
-        zip: form.zip,
-      };
+
+      const addressPayload = { ...form };
       enderecoFinal = await createAddress(addressPayload);
+
+      if (!enderecoFinal?.id) {
+        toast.error('Erro: O backend não retornou o ID do endereço.');
+        return;
+      }
+
       toast.success('Novo endereço cadastrado com sucesso!');
     } else {
       enderecoFinal = enderecos.value.find(
@@ -181,8 +186,11 @@ async function avancarEtapaEndereco() {
       }
     }
 
-    // Emite os dados do endereço para o componente pai (CheckoutView)
-    emit('dadosColetados', { endereco: enderecoFinal });
+    emit('dadosColetados', {
+      endereco: enderecoFinal,
+      metodoPagamento: metodoPagamento.value
+    });
+
     emit('etapaChange', 2);
 
   } catch (error) {
@@ -191,14 +199,12 @@ async function avancarEtapaEndereco() {
   }
 }
 
-// Handler para eventos 'etapaChange' vindos de PaymentSelection
 function handleEtapaChangeFromPayment(newEtapa) {
   emit('etapaChange', newEtapa);
 }
 
-// Handler para eventos 'dadosColetados' vindos de PaymentSelection
 function handleDadosColetadosFromPayment(dados) {
-  emit('dadosColetados', dados); 
+  emit('dadosColetados', dados);
 }
 </script>
 
@@ -206,15 +212,56 @@ function handleDadosColetadosFromPayment(dados) {
 .checkout-form {
   max-width: 520px;
   margin: 0 auto;
-  font-family: 'Inter', sans-serif; 
+  font-family: 'Inter', sans-serif;
+  background: transparent;
+}
+.steps-indicator {
+  display: flex;
+  justify-content: center;
+  gap: 2.2rem;
+  margin-bottom: 2.2rem;
+}
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 1.03rem;
+  color: #bbb;
+  font-weight: 600;
+  opacity: 0.7;
+  position: relative;
+  transition: color 0.3s, opacity 0.3s;
+}
+.step i {
+  font-size: 1.8rem;
+  margin-bottom: 0.15rem;
+  opacity: 0.85;
+}
+.step.active, .step.done {
+  color: #00ffe1;
+  opacity: 1;
+}
+.step.active i, .step.done i {
+  color: #00ffe1;
+  filter: drop-shadow(0 0 10px #00ffe1);
+}
+.step.done span::after {
+  content: '';
+  display: block;
+  margin: 3px auto 0 auto;
+  width: 22px;
+  height: 3px;
+  background: linear-gradient(90deg, #00ffe1 0%, #8f5fe8 100%);
+  border-radius: 2px;
 }
 .form-section {
   background: #1e1e2d;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  border-radius: 15px;
+  box-shadow: 0 12px 40px rgba(0,255,225,0.09);
   padding: 2.5rem 2rem;
   margin-bottom: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(0,255,225,0.06);
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -224,17 +271,18 @@ function handleDadosColetadosFromPayment(dados) {
   align-items: center;
   gap: 16px;
   padding-bottom: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(0,255,225,0.08);
 }
 .section-header i {
-  font-size: 24px;
-  color: #007bff; 
+  font-size: 25px;
+  color: #00ffe1;
 }
 .section-header h4 {
   margin: 0;
   color: #ffffff;
-  font-weight: 600;
-  font-size: 20px;
+  font-weight: 700;
+  font-size: 21px;
+  letter-spacing: 0.01em;
 }
 .address-selection {
   display: flex;
@@ -242,14 +290,15 @@ function handleDadosColetadosFromPayment(dados) {
   gap: 20px;
 }
 .selection-header label {
-  font-weight: 500;
+  font-weight: 600;
   font-size: 16px;
-  color: #b0b0b0; 
+  color: #b0b0b0;
+  margin-bottom: 8px;
 }
 .address-options {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 13px;
 }
 .address-option {
   position: relative;
@@ -264,53 +313,55 @@ function handleDadosColetadosFromPayment(dados) {
   display: flex;
   flex-direction: column;
   padding: 16px 20px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0,255,225,0.03);
+  border: 1.5px solid rgba(0,255,225,0.08);
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
 }
 .address-radio:checked + .address-label {
-  border-color: #007bff;
-  background: rgba(0, 123, 255, 0.15);
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+  border-color: #00ffe1;
+  background: rgba(0,255,225,0.09);
+  box-shadow: 0 4px 22px rgba(0,255,225,0.11);
 }
 .address-radio:checked + .address-label::before {
   content: '';
   position: absolute;
-  top: 10px;
-  right: 12px;
-  width: 18px;
-  height: 18px;
-  background: #007bff;
+  top: 12px;
+  right: 16px;
+  width: 19px;
+  height: 19px;
+  background: linear-gradient(135deg, #00ffe1 0%, #8f5fe8 100%);
   border-radius: 50%;
   transition: all 0.2s ease;
+  box-shadow: 0 0 10px #00ffe1;
 }
 .address-radio:checked + .address-label::after {
   content: '✓';
   position: absolute;
-  top: 8px;
-  right: 14px;
+  top: 10px;
+  right: 20px;
   color: #fff;
   font-weight: bold;
-  font-size: 12px;
+  font-size: 14px;
+  text-shadow: 0 0 7px #00ffe1;
 }
 .address-info {
   color: #ffffff;
 }
 .address-street {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 16px;
   margin-bottom: 4px;
 }
 .address-details {
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 14px;
+  color: rgba(255, 255, 255, 0.67);
+  font-size: 15px;
 }
 .address-country {
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 12px;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 13px;
   margin-top: 4px;
 }
 .address-form {
@@ -324,28 +375,31 @@ function handleDadosColetadosFromPayment(dados) {
 .form-group {
   display: flex;
   flex-direction: column;
+  gap: 0.3rem;
 }
 .form-label {
-  color: #ffffff;
-  font-weight: 500;
-  font-size: 14px;
-  margin-bottom: 8px;
+  color: #8fd6fb;
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 7px;
+  margin-left: 2px;
+  letter-spacing: 0.01em;
 }
 .form-input {
-  background: #2a2a3e; 
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #23233a;
+  border: 1.5px solid rgba(0,255,225,0.09);
   border-radius: 8px;
   padding: 12px 16px;
-  color: #ffffff;
+  color: #fff;
   font-size: 16px;
   transition: all 0.2s ease;
   min-width: 0;
 }
 .form-input:focus {
   outline: none;
-  border-color: #007bff;
-  background: #2a2a3e;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.3);
+  border-color: #00ffe1;
+  background: #23233a;
+  box-shadow: 0 0 0 2px rgba(0,255,225,0.18);
 }
 .form-input::placeholder {
   color: rgba(255, 255, 255, 0.4);
@@ -356,13 +410,13 @@ function handleDadosColetadosFromPayment(dados) {
   justify-content: flex-end;
   align-items: center;
   gap: 16px;
-  grid-column: 1 / -1; 
+  grid-column: 1 / -1;
   margin-top: 8px;
 }
 .btn-primary,
 .btn-secondary {
   border-radius: 50px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
@@ -370,27 +424,27 @@ function handleDadosColetadosFromPayment(dados) {
   gap: 8px;
 }
 .btn-primary {
-  background: linear-gradient(145deg, #007bff, #0056b3);
-  color: #fff;
+  background: linear-gradient(145deg, #00ffe1 0%, #8f5fe8 100%);
+  color: #181828;
   border: none;
   padding: 14px 28px;
-  font-size: 16px;
-  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+  font-size: 17px;
+  box-shadow: 0 4px 15px rgba(0,255,225,0.14);
 }
 .btn-primary:hover {
-  background: linear-gradient(145deg, #0056b3, #007bff);
+  background: linear-gradient(145deg, #8f5fe8 0%, #00ffe1 100%);
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+  box-shadow: 0 6px 20px rgba(0,255,225,0.22);
 }
 .btn-secondary {
   background: transparent;
-  color: #007bff;
-  border: 1px solid #007bff;
+  color: #00ffe1;
+  border: 1.5px solid #00ffe1;
   padding: 12px 24px;
-  font-size: 15px;
+  font-size: 16px;
 }
 .btn-secondary:hover {
-  background: rgba(0, 123, 255, 0.1);
+  background: rgba(0,255,225,0.09);
 }
 .w-100 {
   width: 100%;
@@ -417,6 +471,35 @@ function handleDadosColetadosFromPayment(dados) {
   }
   .section-header h4 {
     font-size: 18px;
+  }
+  .steps-indicator {
+    gap: 1.2rem;
+    margin-bottom: 1.1rem;
+  }
+  .step i {
+    font-size: 1.4rem;
+  }
+}
+@media (max-width: 480px) {
+  .checkout-form {
+    padding: 0.5rem;
+  }
+  .form-section {
+    padding: 1.2rem 0.5rem;
+  }
+  .steps-indicator {
+    gap: 0.7rem;
+  }
+  .step i {
+    font-size: 1.05rem;
+  }
+  .address-form {
+    gap: 8px;
+  }
+  .btn-primary,
+  .btn-secondary {
+    font-size: 15px;
+    padding: 12px 10px;
   }
 }
 </style>

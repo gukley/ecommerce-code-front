@@ -24,12 +24,13 @@
               :aria-label="`Ver produtos da categoria ${cat.name}`"
               type="button"
             >
-              <img
-                v-if="cat.image_path"
-                :src="BASE_URL + cat.image_path"
-                alt="Imagem da Categoria"
-                class="category-thumb mb-3"
-                loading="lazy"
+            <img
+            v-if="cat.image_path"
+            :src="BASE_URL + (cat.image_path.startsWith('/') ? '' : '/') + cat.image_path"
+            alt="Imagem da Categoria"
+            class="category-thumb mb-3"
+              />
+
               />
               <h3 class="fw-bold mb-2 category-name">{{ cat.name }}</h3>
               <p class="text-muted small category-description">{{ cat.description }}</p>
@@ -49,15 +50,15 @@ import Navbar from '@/components/home/NavBar.vue'
 import Footer from '@/components/home/Footer.vue'
 import { getCategories } from '@/services/apiService'
 
-const BASE_URL = 'http://35.196.79.227:8000'
+const BASE_URL = import.meta.env.VITE_API_URL
 const categorias = ref([])
 const router = useRouter()
 
 onMounted(async () => {
   try {
     const apiCategories = await getCategories()
-    // Filtra só categorias do usuário 211
-    categorias.value = apiCategories.filter(cat => cat.user_id === 211)
+    const userId = authStore.user?.id
+    categorias.value = userId ? apiCategories.filter(cat => cat.user_id === userId) : apiCategories
   } catch (error) {
     console.error('Erro ao buscar categorias:', error)
   }

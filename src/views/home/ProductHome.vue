@@ -5,6 +5,7 @@
       <SideBar @categoria-selecionada="categoriaSelecionada = $event" />
       <div class="flex-grow-1 d-flex justify-content-center align-items-start p-4">
         <div class="products-container w-100">
+          <!-- Exemplo: clique test -->
           <div
             @click="console.log('teste clique')"
             style="background:#8f5fe8; color:#fff; padding:12px; border-radius:8px; margin-bottom:16px; cursor:pointer; text-align:center;"
@@ -15,31 +16,46 @@
             Clique aqui para testar o clique
           </div>
 
+          <!-- Barra de busca + filtro aprimorados -->
           <div class="search-filter-bar d-flex align-items-center gap-3 mb-3" style="width:100%;">
-            <input
-              v-model="termoBusca"
-              type="text"
-              class="form-control search-bar"
-              placeholder="Buscar produtos..."
-              style="max-width: 320px; min-width: 180px;"
-              aria-label="Buscar produtos"
-            />
-            <label for="ordemSelect" class="form-label mb-0 ms-2" style="color:#00ffe1; font-weight:600;">
-              Ordenar por:
-            </label>
-            <select
-              id="ordemSelect"
-              v-model="ordemSelecionada"
-              class="form-select filtro-ordenacao"
-              style="width: 200px; background:#18182a; color:#fff; border:2px solid #00ffe1;"
-              aria-label="Ordenar produtos"
-            >
-              <option value="">Selecione...</option>
-              <option value="maior-valor">Preço: maior para menor</option>
-              <option value="menor-valor">Preço: menor para maior</option>
-              <option value="az">Nome (A-Z)</option>
-              <option value="za">Nome (Z-A)</option>
-            </select>
+            <div class="search-bar-box position-relative">
+              <input
+                v-model="termoBusca"
+                type="text"
+                class="form-control search-bar"
+                placeholder="Buscar produtos..."
+                aria-label="Buscar produtos"
+                @keyup.enter="buscarProdutos"
+              />
+              <span class="search-icon">
+                <i class="bi bi-search"></i>
+              </span>
+              <button
+                class="btn btn-search"
+                type="button"
+                @click="buscarProdutos"
+                aria-label="Buscar"
+              >
+                <i class="bi bi-arrow-right"></i>
+              </button>
+            </div>
+            <div class="dropdown filtro-ordenacao-box">
+              <label for="ordemSelect" class="form-label mb-0 ms-2 filtro-label">
+                <i class="bi bi-funnel"></i> Ordenar por:
+              </label>
+              <select
+                id="ordemSelect"
+                v-model="ordemSelecionada"
+                class="form-select filtro-ordenacao"
+                aria-label="Ordenar produtos"
+              >
+                <option value="">Selecione...</option>
+                <option value="maior-valor">Preço: maior para menor</option>
+                <option value="menor-valor">Preço: menor para maior</option>
+                <option value="az">Nome (A-Z)</option>
+                <option value="za">Nome (Z-A)</option>
+              </select>
+            </div>
           </div>
 
           <h2 class="section-title text-center mb-5 animate-fade-in" tabindex="0">
@@ -57,7 +73,6 @@
               :key="produto.id"
               role="listitem"
             >
-              <!-- Passa evento para fora para lidar no componente pai -->
               <ProductCard
                 :produto="produto"
                 class="flex-fill product-link"
@@ -127,6 +142,11 @@ const produtosFiltrados = computed(() => productStore.filteredProducts);
 function irParaDetalhes(id) {
   router.push(`/produtos/${id}`);
 }
+
+function buscarProdutos() {
+  // Se quiser buscar por API, chame aqui.
+  // Ou só atualiza o filtro (v-model já faz isso!)
+}
 </script>
 
 <style scoped>
@@ -182,41 +202,103 @@ function irParaDetalhes(id) {
   }
 }
 
-.search-bar {
-  border-radius: 0.7rem;
-  border: 1.5px solid #23233a;
-  background: #18182a;
-  color: #fff;
-  padding: 0.7rem 1.2rem;
-  font-size: 1.1rem;
-  box-shadow: 0 2px 8px rgba(143, 95, 232, 0.07);
-  transition: border-color 0.2s;
+/* --- Estilo aprimorado --- */
+.search-filter-bar {
+  width: 100%;
+  flex-wrap: wrap;
 }
 
-.search-bar:focus {
-  border-color: #00ffe1;
+.search-bar-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-width: 350px;
+  flex: 1 0 180px;
+  background: rgba(22,22,36,0.84);
+  border-radius: 1.1rem;
+  box-shadow: 0 8px 32px rgba(143, 95, 232, 0.10);
+  border: 1.5px solid #23233a;
+}
+
+.search-bar {
+  border-radius: 1.1rem;
+  border: none;
+  background: transparent;
+  color: #fff;
+  padding: 0.7rem 1.2rem 0.7rem 2.7rem;
+  font-size: 1.1rem;
+  width: 100%;
   outline: none;
 }
 
-.product-link {
-  cursor: pointer;
-  transition: box-shadow 0.2s;
+.search-bar:focus {
+  border: none;
+  background: rgba(0,255,225,0.08);
+  box-shadow: 0 0 0 2px #00ffe1;
 }
 
-.product-link:hover .product-card {
-  box-shadow: 0 8px 32px rgba(163, 98, 255, 0.25), 0 0 0 2px #8f5fe8;
-  transform: translateY(-6px) scale(1.03);
+.search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #00ffe1;
+  font-size: 1.32rem;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.btn-search {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: linear-gradient(90deg,#00ffe1 0%,#8f5fe8 100%);
+  border: none;
+  color: #23233a;
+  border-radius: 22px;
+  font-weight: 700;
+  padding: 0.28rem 0.98rem;
+  font-size: 1.09rem;
+  box-shadow: 0 2px 8px #8f5fe866;
+  transition: background 0.22s, box-shadow 0.18s;
+}
+.btn-search i {
+  transition: transform 0.2s;
+}
+.btn-search:active i,
+.btn-search:hover i {
+  transform: translateX(2px) scale(1.18);
+}
+.btn-search:hover {
+  background: linear-gradient(90deg,#8f5fe8 0%,#00ffe1 100%);
+  box-shadow: 0 4px 14px #00ffe1cc;
+}
+
+.filtro-ordenacao-box {
+  min-width: 200px;
+  margin-left: 14px;
+}
+
+.filtro-label {
+  color: #00ffe1;
+  font-weight: 600;
+  font-size: 1.07rem;
+  margin-right: 6px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
 }
 
 .filtro-ordenacao {
   border: 2px solid #00ffe1;
-  border-radius: 0.7rem;
+  border-radius: 1rem;
   background-color: #18182a;
   color: #fff;
-  padding: 0.6rem 1rem;
-  font-size: 1.05rem;
+  padding: 0.58rem 1.1rem;
+  font-size: 1.07rem;
   font-weight: 500;
-  box-shadow: 0 2px 6px rgba(0, 255, 225, 0.1);
+  box-shadow: 0 2px 6px rgba(0, 255, 225, 0.13);
   transition: border-color 0.2s ease;
   min-width: 180px;
   max-width: 220px;
@@ -225,18 +307,24 @@ function irParaDetalhes(id) {
 
 .filtro-ordenacao:focus {
   outline: none;
-  border-color: #00d0ff;
+  border-color: #8f5fe8;
+  background: rgba(143,95,232,0.07);
 }
 
-.search-filter-bar {
-  width: 100%;
-}
-
+/* Responsivo */
 @media (max-width: 576px) {
   .search-filter-bar {
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
+  }
+  .search-bar-box {
+    max-width: 100%;
+    margin-bottom: 1rem;
+  }
+  .filtro-ordenacao-box {
+    margin-left: 0;
+    min-width: 100%;
   }
 }
 </style>

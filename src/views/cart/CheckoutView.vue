@@ -4,9 +4,12 @@
       <div class="checkout-header">
         <button @click="voltarParaHome" class="btn-back">
           <i class="bi bi-arrow-left"></i>
-          Voltar para Home
+          <span>Voltar para Home</span>
         </button>
-        <h1 class="checkout-title">Finalizar Pedido</h1>
+        <h1 class="checkout-title">
+          <i class="bi bi-cart-check gradient-icon"></i>
+          Finalizar Pedido
+        </h1>
       </div>
 
       <div class="checkout-content">
@@ -40,7 +43,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 
 import CheckoutSteps from '@/components/Checkout/CheckoutSteps.vue';
@@ -49,89 +52,84 @@ import OrderReview from '@/components/Checkout/OrderReview.vue';
 import ConfirmationSuccess from '@/components/Checkout/ConfirmationSuccess.vue';
 
 import { useCartStore } from '@/stores/cartStore';
-import { createOrder } from '@/services/apiService'; 
+import { createOrder } from '@/services/apiService';
 
 const etapaAtual = ref(1);
 const router = useRouter();
 const cartStore = useCartStore();
 
-// Estados para guardar os dados do formulário
+const cart = computed(() => cartStore.detailedItems);
+
+// >>> ADICIONE ESTES CAMPOS <<<
+const frete = ref(15);
+const total = computed(() =>
+  cart.value.reduce((sum, item) => {
+    const price = item.product?.price || 0;
+    return sum + price * item.quantity;
+  }, 0) + frete.value
+);
+
 const enderecoSelecionado = ref(null);
 const metodoPagamento = ref(null);
 
-// Usar os itens detalhados com dados do produto para exibir e calcular
-const cart = computed(() => cartStore.detailedItems);
-
-// Valor fixo do frete (pode futuramente ser calculado)
-const frete = ref(15);
-
-// Calcular total: soma quantidade * preço + frete
-const total = computed(() => {
-  return cart.value.reduce((sum, item) => {
-    const price = item.product?.price || 0;
-    return sum + price * item.quantity;
-  }, 0) + frete.value;
-});
-
-cartStore.initCart();
-
-// Função para coletar os dados do formulário (Etapa 1 e 2)
 function handleDadosColetados(dados) {
+  // Você recebe { endereco, metodoPagamento } do emit do CheckoutForm
   enderecoSelecionado.value = dados.endereco;
-  metodoPagamento.value = dados.metodoPagamento; 
+  metodoPagamento.value = dados.metodoPagamento;
+}
+
+function verificarEnderecoSelecionado() {
+  if (!enderecoSelecionado.value) {
+    alert('Por favor, selecione um endereço antes de confirmar o pedido.');
+    return false;
+  }
+  return true;
 }
 
 async function confirmarPedido() {
   try {
-    // Adicione esta verificação para garantir que o carrinho não esteja vazio
     if (cart.value.length === 0) {
-      alert('Seu carrinho está vazio. Adicione produtos antes de finalizar o pedido.');
-      return; // Interrompe a execução da função
+      alert('Seu carrinho está vazio.');
+      return;
     }
 
-    // 1. Coletar os dados para enviar à API
+    if (!verificarEnderecoSelecionado()) {
+      return;
+    }
+
     const orderData = {
       items: cart.value.map(item => ({
-        product_id: item.product_id,
+        product_id: item.product?.id,
         quantity: item.quantity,
         unit_price: parseFloat(item.product.price)
       })),
-      address_id: enderecoSelecionado.value?.id,
+      address_id: enderecoSelecionado.value.id,
       payment_method: metodoPagamento.value,
       total_amount: total.value,
       shipping_cost: frete.value
     };
 
-    console.log('Dados do pedido sendo enviados:', orderData);
-
-    // 2. Chamar a API para criar o pedido
     const response = await createOrder(orderData);
 
-    // 3. Lidar com a resposta
     if (response) {
-      console.log('Pedido criado com sucesso:', response);
       cartStore.clearCart();
       etapaAtual.value = 4;
     }
 
   } catch (error) {
-    console.error('Erro ao criar o pedido:', error);
-    alert('Ocorreu um erro ao finalizar o pedido. Tente novamente.');
+    alert('Erro ao finalizar o pedido.');
   }
 }
 
 function voltarParaHome() {
   router.push('/');
 }
-
-watch(cart, (newVal) => {
-});
 </script>
 
 <style scoped>
 .checkout-page {
   min-height: 100vh;
-  background: #12121c; 
+  background: linear-gradient(135deg, #181828 0%, #23233a 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -140,58 +138,81 @@ watch(cart, (newVal) => {
 }
 .checkout-container {
   background: #1e1e2d;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 3rem;
+  border-radius: 20px;
+  box-shadow: 0 12px 40px rgba(0,255,225,0.10);
+  border: 1.5px solid rgba(0,255,225,0.09);
+  padding: 3rem 2.5rem;
   width: 100%;
   max-width: 900px;
   backdrop-filter: blur(8px);
-  animation: slideIn 0.6s ease-out;
+  animation: slideIn 0.6s cubic-bezier(0.4,0.2,0.2,1);
 }
 .checkout-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 2.5rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 2.7rem;
+  padding-bottom: 1.6rem;
+  border-bottom: 1px solid rgba(0,255,225,0.09);
 }
 .btn-back {
-  background: transparent;
-  color: #a0a0a0;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 50px;
-  padding: 10px 20px;
-  font-size: 14px;
-  font-weight: 500;
+  background: linear-gradient(90deg, #00ffe1 0%, #8f5fe8 100%);
+  color: #181828;
+  border: none;
+  border-radius: 30px;
+  padding: 10px 22px;
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: filter 0.15s, box-shadow 0.20s;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
+  box-shadow: 0 2px 10px rgba(0,255,225,0.11);
 }
 .btn-back:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #ffffff;
-  border-color: #ffffff;
+  filter: brightness(1.07);
+  box-shadow: 0 4px 18px rgba(0,255,225,0.18);
 }
 .checkout-title {
-  color: #ffffff;
-  font-weight: 600;
-  font-size: 28px;
+  color: #fff;
+  font-weight: 800;
+  font-size: 2.1rem;
   margin: 0;
   text-align: center;
   flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  background: linear-gradient(120deg, #15fbe3 0%, #8f5fe8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+  letter-spacing: 0.03em;
+}
+.gradient-icon {
+  font-size: 2.1rem;
+  background: linear-gradient(120deg, #00ffe1 0%, #8f5fe8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
 }
 .checkout-content {
   display: flex;
   flex-direction: column;
-  gap: 2.5rem;
+  gap: 2.4rem;
 }
 .checkout-main {
-  animation: fadeIn 0.5s ease-out;
+  animation: fadeIn 0.5s cubic-bezier(.4,.2,.2,1);
 }
+
+/* Steps (visualização) - se quiser customizar aqui */
+.checkout-content ::v-deep .steps-indicator {
+  margin-bottom: 1.7rem;
+}
+
 /* Animações */
 @keyframes slideIn {
   from {
@@ -214,24 +235,37 @@ watch(cart, (newVal) => {
   }
 }
 /* Responsividade */
-@media (max-width: 768px) {
-  .checkout-page {
-    padding: 1rem;
-  }
+@media (max-width: 900px) {
   .checkout-container {
-    padding: 2rem 1.5rem;
-    border-radius: 12px;
+    padding: 2rem 1rem;
+    border-radius: 15px;
+    max-width: 99vw;
   }
   .checkout-header {
     flex-direction: column;
-    gap: 16px;
+    gap: 20px;
     text-align: center;
+    padding-bottom: 1.2rem;
   }
   .checkout-title {
-    font-size: 24px;
+    font-size: 1.5rem;
   }
   .btn-back {
     align-self: flex-start;
+    font-size: 14px;
+    padding: 8px 17px;
+  }
+}
+@media (max-width: 600px) {
+  .checkout-page {
+    padding: 0.7rem;
+  }
+  .checkout-container {
+    padding: 1rem 0.3rem;
+    border-radius: 10px;
+  }
+  .checkout-title {
+    font-size: 1.05rem;
   }
 }
 </style>

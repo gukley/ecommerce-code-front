@@ -30,6 +30,11 @@
           <router-link :to="{ name: 'AdminOrders' }" class="nav-link-custom">
             <i class="bi bi-list-check me-2"></i> Pedidos
           </router-link>
+        <li class="nav-item mb-2">
+          <router-link :to="{ name: 'AdminCoupon' }" class="nav-link-custom">
+          <i class="bi bi-ticket-perforated me-2"></i> Cupons
+        </router-link>
+        </li>
         </li>
        </ul>
   
