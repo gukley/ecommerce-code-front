@@ -55,13 +55,30 @@ function irParaProdutos(nomeCategoria) {
 }
 </script>
 
-<style scoped>
+<style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+:root, [data-theme="dark"] {
+  --bg-main: #18182a;
+  --bg-card: rgba(28, 30, 53, 0.94);
+  --text-main: #fff;
+  --border-main: #23233a;
+  --category-card: rgba(35, 35, 58, 0.95);
+  --category-border: #8f5fe8;
+}
+[data-theme="light"] {
+  --bg-main: #f6f7fb;
+  --bg-card: #e9eaf3;
+  --text-main: #23233a;
+  --border-main: #cfd8dc;
+  --category-card: #f3f6fa;
+  --category-border: #64b5f6;
+}
 .main-layout { 
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: radial-gradient(ellipse at 20% 5%, #18182a 0%, #23233a 55%, #18182a 100%);
+  background: var(--bg-main);
+  color: var(--text-main);
   position: relative;
   box-shadow: 0 0 120px #00ffe122;
   overflow-x: hidden;
@@ -73,7 +90,7 @@ function irParaProdutos(nomeCategoria) {
   min-height: 0;
 }
 .categories-container {
-  background: rgba(28, 30, 53, 0.94);
+  background: var(--bg-card);
   border-radius: 2.3rem;
   box-shadow: 0 16px 56px #8f5fe844, 0 4px 24px #00ffe133;
   padding: 2.8rem 2.2rem 2.2rem 2.2rem;
@@ -81,7 +98,7 @@ function irParaProdutos(nomeCategoria) {
   min-height: 540px;
   max-width: 1400px;
   width: 100%;
-  border: 2px solid #23233a;
+  border: 2px solid var(--border-main);
   position: relative;
   backdrop-filter: blur(8px);
   animation: glassPopIn 0.9s;
@@ -105,12 +122,12 @@ function irParaProdutos(nomeCategoria) {
 }
 
 .category-card {
-  background: rgba(35, 35, 58, 0.95);
-  border: 2.2px solid #8f5fe8;
+  background: var(--category-card);
+  border: 2.2px solid var(--category-border);
   border-radius: 1.6rem;
   box-shadow: 0 4px 28px #8f5fe822, 0 1px 14px #a362ff22;
   padding: 2.2rem 1.6rem;
-  color: #fff;
+  color: var(--text-main);
   position: relative;
   transition: box-shadow 0.2s, border-color 0.2s, transform 0.22s;
   z-index: 1;
