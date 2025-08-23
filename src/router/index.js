@@ -78,6 +78,18 @@ const routes = [
         name: 'AdminCoupon',
         component: () => import('@/views/admin/CouponManagement.vue'),
         meta: { roles: ['ADMIN', 'MODERATOR'] },
+      },
+      {
+        path: '/admin/create-moderator',
+        name: 'CreateModerator',
+        component: () => import('@/views/admin/CreateModerator.vue'),
+        meta: { requiresAdmin: true }
+      },
+      {
+        path: '/admin/clientes',
+        name: 'admin-clients',
+        component: () => import('@/views/admin/AdminClients.vue'),
+        meta: { requiresAuth: true, requiresAdmin: true }
       }
   ],
   },
