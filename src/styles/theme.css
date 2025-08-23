@@ -1,0 +1,15 @@
+:root {
+  --bg-main: #18182a;
+  --bg-card: #23233a;
+  --text-main: #e8eaed;
+  --accent: #64b5f6;
+  /* ...outras variáveis... */
+}
+
+[data-theme="light"] {
+  --bg-main: #f6f7fb;
+  --bg-card: #e9eaf3;
+  --text-main: #23233a;
+  --accent: #64b5f6;
+  /* ...outras variáveis para light... */
+}
