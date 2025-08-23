@@ -1,20 +1,6 @@
 <template>
   <div class="main-layout text-white">
     <Navbar />
-    <div
-      v-if="authStore.user && authStore.user.role === 'ADMIN'"
-      class="admin-panel-btn-bar d-flex justify-content-end align-items-center px-4 mt-2 mb-2"
-    >
-      <button
-        @click="$router.push('/admin')"
-        class="btn btn-admin-panel d-inline-flex align-items-center gap-2"
-        aria-label="Ir para painel de administração"
-        type="button"
-      >
-        <i class="bi bi-speedometer2" aria-hidden="true"></i> Painel Admin
-      </button>
-    </div>
-
     <HeroSection />
 
     <main class="content-wrapper d-md-flex">
@@ -29,38 +15,48 @@
       >
         <div class="products-container w-100" role="region" aria-live="polite">
 
+          <!-- Barra de busca e filtros aprimorada -->
           <div class="search-filter-bar d-flex flex-wrap justify-content-center justify-content-md-between align-items-center gap-3 mb-5">
-              <div class="search-input-group flex-grow-1">
-                  <input
-                      v-model="termoBusca"
-                      type="text"
-                      class="form-control search-bar"
-                      placeholder="Buscar produtos..."
-                      aria-label="Buscar produtos"
-                  />
-                  <button class="search-button" @click="buscarProdutos" type="button" aria-label="Pesquisar">
-                      <i class="bi bi-search" aria-hidden="true"></i>
-                  </button>
-              </div>
-
-              <div class="d-flex align-items-center gap-3">
-                  <label for="ordemSelect" class="form-label mb-0 d-none d-lg-block" style="color:#00ffe1; font-weight:600;">
-                      Ordenar por:
-                  </label>
-                  <select
-                      id="ordemSelect"
-                      v-model="ordemSelecionada"
-                      class="form-select filtro-ordenacao"
-                      aria-label="Ordenar produtos"
-                  >
-                      <option value="">Padrão</option>
-                      <option value="maior-valor">Preço: maior para menor</option>
-                      <option value="menor-valor">Preço: menor para maior</option>
-                      <option value="az">Nome (A-Z)</option>
-                      <option value="za">Nome (Z-A)</option>
-                  </select>
-              </div>
+            <div class="search-bar-box position-relative flex-grow-1">
+              <input
+                v-model="termoBusca"
+                type="text"
+                class="form-control search-bar"
+                placeholder="Buscar produtos..."
+                aria-label="Buscar produtos"
+                @keyup.enter="buscarProdutos"
+              />
+              <span class="search-icon">
+                <i class="bi bi-search"></i>
+              </span>
+              <button
+                class="btn btn-search"
+                type="button"
+                @click="buscarProdutos"
+                aria-label="Buscar"
+              >
+                <i class="bi bi-arrow-right"></i>
+              </button>
+            </div>
+            <div class="dropdown filtro-ordenacao-box">
+              <label for="ordemSelect" class="form-label mb-0 ms-2 filtro-label">
+                <i class="bi bi-funnel"></i> Ordenar por:
+              </label>
+              <select
+                id="ordemSelect"
+                v-model="ordemSelecionada"
+                class="form-select filtro-ordenacao"
+                aria-label="Ordenar produtos"
+              >
+                <option value="">Padrão</option>
+                <option value="maior-valor">Preço: maior para menor</option>
+                <option value="menor-valor">Preço: menor para maior</option>
+                <option value="az">Nome (A-Z)</option>
+                <option value="za">Nome (Z-A)</option>
+              </select>
+            </div>
           </div>
+
           <h2 class="section-title text-center mb-4 animate-fade-in" tabindex="0">
             {{ tituloPagina }}
           </h2>
@@ -71,7 +67,11 @@
 
           <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4" v-else>
             <div class="col d-flex" v-for="produto in produtosFiltrados" :key="produto.id">
-              <ProductCard :produto="produto" class="flex-fill" />
+              <ProductCard
+                :produto="produto"
+                class="flex-fill"
+                :show-discount="true"
+              />
             </div>
           </div>
         </div>
@@ -90,7 +90,7 @@ import HeroSection from '@/components/home/HeroSection.vue';
 import SideBar from '@/components/home/SideBar.vue';
 import ProductCard from '@/components/home/ProductCard.vue';
 import Footer from '@/components/home/Footer.vue';
-import { getAllProducts } from '@/services/apiService';
+import { getAllProducts, getAllDiscounts } from '@/services/apiService';
 import { useAuthStore } from '@/stores/authStore';
 import BrandsCarousel from '@/components/home/BrandsCarousel.vue';
 
@@ -100,15 +100,34 @@ const termoBusca = ref('');
 const ordemSelecionada = ref('');
 const authStore = useAuthStore();
 const route = useRoute();
+const descontos = ref([]);
 
 onMounted(async () => {
   try {
-    produtos.value = await getAllProducts();
+    const produtosApi = await getAllProducts();
+    const descontosApi = await getAllDiscounts();
+    // Associa desconto ao produto
+    produtos.value = produtosApi.map(prod => {
+      const desconto = descontosApi.find(d => Number(d.product_id) === Number(prod.id));
+      return {
+        ...prod,
+        discount: desconto
+          ? {
+              discount_percentage: Number(desconto.discount_percentage),
+              description: desconto.description,
+              start_date: desconto.start_date,
+              end_date: desconto.end_date,
+              id: desconto.id
+            }
+          : null
+      }
+    });
+    descontos.value = descontosApi;
     if (route.query.categoria) {
       categoriaSelecionada.value = route.query.categoria;
     }
   } catch (error) {
-    console.error('Erro ao carregar produtos:', error);
+    console.error('Erro ao carregar produtos/descontos:', error);
   }
 });
 
@@ -167,11 +186,28 @@ const produtosFiltrados = computed(() => {
   return filtrados;
 });
 
+const descontoDestaque = computed(() => {
+  const now = new Date();
+  // Filtra descontos ativos
+  const ativos = descontos.value.filter(d => {
+    const ini = new Date(d.start_date)
+    const fim = new Date(d.end_date)
+    return ini <= now && fim >= now
+  });
+  // Retorna o maior percentual
+  if (ativos.length === 0) return null;
+  return ativos.reduce((a, b) => (a.discount_percentage > b.discount_percentage ? a : b));
+});
+
 function buscarProdutos() {
   // Você pode implementar busca personalizada aqui, se quiser
 }
-</script>
 
+function getProductName(id) {
+  const p = produtos.value.find(x => x.id === id)
+  return p ? p.name : '-'
+}
+</script>
 
 <style scoped>
 .main-layout {
@@ -233,103 +269,124 @@ function buscarProdutos() {
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
-.search-input-group {
+
+.search-bar-box {
   position: relative;
   display: flex;
-  flex-grow: 1;
+  align-items: center;
   max-width: 400px;
-  background-color: #18182a;
-  border: 2px solid #9e64e8;
-  border-radius: 2rem;
-  padding: 5px;
-  box-shadow: 0 4px 15px rgba(143, 95, 232, 0.2);
+  flex: 1 0 180px;
+  background: rgba(22,22,36,0.84);
+  border-radius: 1.1rem;
+  box-shadow: 0 8px 32px rgba(143, 95, 232, 0.10);
+  border: 1.5px solid #23233a;
 }
+
 .search-bar {
-  background-color: transparent;
+  border-radius: 1.1rem;
   border: none;
+  background: transparent;
   color: #fff;
-  padding: 0.8rem 1rem;
+  padding: 0.7rem 1.2rem 0.7rem 2.7rem;
   font-size: 1.1rem;
   width: 100%;
   outline: none;
 }
-.search-bar:focus {
-  box-shadow: none;
-}
+
+/* Torna o placeholder mais visível */
 .search-bar::placeholder {
-  color: #999;
+  color: #00ffe1;
+  opacity: 1;
+  font-weight: 500;
+  letter-spacing: 0.5px;
 }
-.search-button {
-  background: linear-gradient(145deg, #00ffe1, #00bfff);
+
+.search-bar:focus {
   border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  background: rgba(0,255,225,0.08);
+  box-shadow: 0 0 0 2px #00ffe1;
+}
+
+.search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #00ffe1;
+  font-size: 1.32rem;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.btn-search {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: linear-gradient(90deg,#00ffe1 0%,#8f5fe8 100%);
+  border: none;
+  color: #23233a;
+  border-radius: 22px;
+  font-weight: 700;
+  padding: 0.28rem 0.98rem;
+  font-size: 1.09rem;
+  box-shadow: 0 2px 8px #8f5fe866;
+  transition: background 0.22s, box-shadow 0.18s;
+}
+.btn-search i {
+  transition: transform 0.2s;
+}
+.btn-search:active i,
+.btn-search:hover i {
+  transform: translateX(2px) scale(1.18);
+}
+.btn-search:hover {
+  background: linear-gradient(90deg,#8f5fe8 0%,#00ffe1 100%);
+  box-shadow: 0 4px 14px #00ffe1cc;
+}
+
+.filtro-ordenacao-box {
+  min-width: 200px;
+  margin-left: 14px;
+}
+
+.filtro-label {
+  color: #00ffe1;
+  font-weight: 600;
+  font-size: 1.07rem;
+  margin-right: 6px;
   display: flex;
-  justify-content: center;
   align-items: center;
-  cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0, 255, 225, 0.3);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  gap: 7px;
 }
-.search-button:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 12px rgba(0, 255, 225, 0.5);
-}
-.search-button i {
-  color: #11111c;
-  font-size: 1.2rem;
-}
+
+/* Select de ordenação */
 .filtro-ordenacao {
   border: 2px solid #00ffe1;
-  border-radius: 0.7rem;
+  border-radius: 1rem;
   background-color: #18182a;
-  color: #fff;
-  padding: 0.6rem 1rem;
-  font-size: 1.05rem;
+  color: #00ffe1;
+  padding: 0.58rem 1.1rem;
+  font-size: 1.07rem;
   font-weight: 500;
-  box-shadow: 0 2px 6px rgba(0, 255, 225, 0.1);
+  box-shadow: 0 2px 6px rgba(0, 255, 225, 0.13);
   transition: border-color 0.2s ease;
   min-width: 180px;
   max-width: 220px;
   z-index: 10;
 }
-.filtro-ordenacao:focus {
-  outline: none;
-  border-color: #00d0ff;
-}
-.admin-panel-btn-bar {
-  width: 100%;
-}
-.btn-admin-panel {
-  background: linear-gradient(90deg, #007cf0 0%, #00ffe1 100%);
-  color: #fff;
-  border: none;
-  font-size: 1.08rem;
-  font-weight: 700;
-  border-radius: 50px;
-  box-shadow: 0 2px 12px rgba(0, 188, 212, 0.10);
-  padding: 0.7rem 1.7rem;
-  transition: background 0.2s ease, color 0.2s ease;
-  cursor: pointer;
-}
-.btn-admin-panel:hover,
-.btn-admin-panel:focus {
-  background: linear-gradient(90deg, #00ffe1 0%, #007cf0 100%);
-  color: #23243a;
-  outline: none;
-  box-shadow: 0 4px 20px rgba(0, 255, 225, 0.3);
+
+.filtro-ordenacao option {
+  background: #18182a;
+  color: #00ffe1;
+  font-weight: 500;
 }
 
-/* Responsividade */
-@media (max-width: 768px) {
-  .products-container {
-    padding: 2rem 1rem 1.5rem;
-    min-height: auto;
-  }
-  .section-title {
-    font-size: 2rem;
-    margin-bottom: 1.5rem !important;
-  }
+.filtro-ordenacao:focus {
+  outline: none;
+  border-color: #8f5fe8;
+  background: rgba(143,95,232,0.07);
 }
+
+/* Remover os estilos do .home-discount-banner, .discount-highlight, .see-offer-link se desejar */
 </style>

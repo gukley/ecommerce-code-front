@@ -1,60 +1,63 @@
-<template> 
-  <section class="hero-section text-white py-5 d-flex align-items-center"> 
-    <div class="container position-relative z-index-1"> 
-      <div class="row justify-content-center text-center"> 
-        <div class="col-lg-10 col-xl-9"> 
+<template>
+  <section class="hero-section text-white py-5 d-flex align-items-center">
+    <div class="container position-relative z-index-1">
+      <div class="row justify-content-center text-center">
+        <div class="col-lg-10 col-xl-9">
           <!-- Banner de desconto -->
           <div class="hero-discount-banner mb-3 animate-fade-up" style="animation-delay: 0.1s;">
-            <span class="discount-badge">🎉 SUPER OFERTA: 20% OFF em GPUs selecionadas! <router-link to="/produtos" class="see-offers-link">Ver ofertas</router-link></span>
+            <span class="discount-badge">
+              🎉 SUPER OFERTA: 20% OFF em GPUs selecionadas!
+              <router-link to="/produtos" class="see-offers-link">Ver ofertas</router-link>
+            </span>
           </div>
 
-          <div class="badge-new-gen mb-4 px-4 py-2 fw-medium animate-fade-up" style="animation-delay: 0.2s;"> 
+          <div class="badge-new-gen mb-4 px-4 py-2 fw-medium animate-fade-up" style="animation-delay: 0.2s;">
             🚀 NOVA GERAÇÃO DISPONÍVEL
-          </div> 
+          </div>
 
-          <h1 class="display-3 fw-bold mb-4 main-heading animate-fade-up" style="animation-delay: 0.4s;"> <span class="text-gradient-main">EVOLUA SEU</span><br />
+
+          <!-- Swiper Banner full width (maior e centralizado) -->
+          <Swiper
+            :modules="[Navigation, Pagination, Autoplay]"
+            :slides-per-view="1"
+            :loop="true"
+            :autoplay="{ delay: 4000 }"
+            navigation
+            pagination
+            class="hero-swiper-full mb-5 animate-fade-up hero-swiper-clean"
+            style="animation-delay: 0.3s;"
+          >
+            <SwiperSlide v-for="(banner, idx) in banners" :key="idx">
+              <div class="swiper-banner-full">
+                <img :src="banner.img" alt="Banner" class="banner-img-full" />
+                <div class="banner-overlay">
+                  <h2 class="banner-title">{{ banner.title }}</h2>
+                  <p class="banner-desc">{{ banner.desc }}</p>
+                  <router-link :to="banner.link" class="btn btn-main-action">Ver produto</router-link>
+                </div>
+              </div>
+            </SwiperSlide>
+          </Swiper>
+
+          <h1 class="display-3 fw-bold mb-4 main-heading animate-fade-up" style="animation-delay: 0.4s;">
+            <span class="text-gradient-main">EVOLUA SEU</span><br />
             <span class="text-secondary-highlight">SETUP GAMER</span>
           </h1>
 
-          <p class="hero-description mt-4 fs-5 animate-fade-up" style="max-width: 700px; margin: 0 auto; animation-delay: 0.6s;"> 
+          <p class="hero-description mt-4 fs-5 animate-fade-up" style="max-width: 700px; margin: 0 auto; animation-delay: 0.6s;">
             Escolha sua máquina ideal com os melhores periféricos e acessórios gamers.
           </p>
 
-          <!-- Produtos em destaque lado a lado -->
-          <div class="hero-featured-products-row d-flex flex-wrap justify-content-center gap-4 my-4 animate-fade-up" style="animation-delay: 0.7s;">
-            <div class="hero-featured-product" style="max-width: 420px;">
-              <div class="featured-product-card d-flex align-items-center p-3">
-                <img src="@/assets/5060rtx.jpg" alt="Placa de Vídeo RTX 5060" class="featured-product-img me-3" />
-                <div class="text-start">
-                  <div class="featured-product-title">Placa de Vídeo RTX 5060 8GB</div>
-                  <div class="featured-product-prices">
-                    <span class="old-price">R$ 4.750</span>
-                    <span class="new-price ms-2">R$ 4.300</span>
-                  </div>
-                  <router-link to="/produtos" class="btn btn-featured-buy mt-2">Comprar Agora</router-link>
-                </div>
-              </div>
-            </div>
-            <div class="hero-featured-product" style="max-width: 420px;">
-              <div class="featured-product-card d-flex align-items-center p-3">
-                <img src="@/assets/watercooler categoria.jpeg" alt="Water Cooler Kalkan" class="featured-product-img me-3" />
-                <div class="text-start">
-                  <div class="featured-product-title">Water Cooler Kalkan Iota</div>
-                  <div class="featured-product-prices">
-                    <span class="old-price">R$ 260</span>
-                    <span class="new-price ms-2">R$ 230</span>
-                  </div>
-                  <router-link to="/produtos" class="btn btn-featured-buy mt-2">Comprar Agora</router-link>
-                </div>
-              </div>
-            </div>
+          <!-- Selo de avaliação -->
+          <div class="hero-rating-badge animate-fade-up mx-auto mb-3" style="animation-delay: 0.65s;">
+            <i class="bi bi-star-fill"></i> 4.9/5 &nbsp;|&nbsp; +2.000 avaliações de clientes reais
           </div>
 
-          <div class="d-flex justify-content-center gap-3 mt-4 animate-fade-up" style="animation-delay: 0.8s;"> 
-            <router-link to="/produtos" class="btn btn-main-action px-5 py-3 fw-bold"> 
+          <div class="d-flex justify-content-center gap-4 mt-5 animate-fade-up hero-main-actions" style="animation-delay: 0.8s;">
+            <router-link to="/produtos" class="btn btn-main-action px-5 py-3 fw-bold">
               ⚡ Explorar Produtos
             </router-link>
-            <router-link to="/produtos" class="btn btn-outline-secondary-light px-5 py-3 fw-bold"> 
+            <router-link to="/produtos" class="btn btn-outline-secondary-light px-5 py-3 fw-bold">
               Ver Ofertas
             </router-link>
           </div>
@@ -68,10 +71,46 @@
         </div>
       </div>
     </div>
-  </section> 
+  </section>
 </template>
 
-<style scoped> 
+<script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { Swiper, SwiperSlide } from 'swiper/vue';
+import { Navigation, Pagination, Autoplay } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import 'swiper/css/autoplay';
+
+const router = useRouter()
+const search = ref('')
+
+function onSearch() {
+  if (search.value.trim()) {
+    router.push({ path: '/produtos', query: { busca: search.value } })
+  }
+}
+
+// Use new URL para importar imagens em Vite/Vue 3!
+const banners = [
+  {
+    img: new URL('@/assets/banner1.jpg', import.meta.url).href,
+    title: 'Monte seu Setup Gamer',
+    desc: 'Computadores de alta performance para todos os estilos de jogo.',
+    link: '/produtos'
+  },
+  {
+    img: new URL('@/assets/banner2.jpg', import.meta.url).href,
+    title: 'Ofertas em Peças e Periféricos',
+    desc: 'Aproveite descontos especiais em hardware e acessórios.',
+    link: '/produtos'
+  }
+];
+</script>
+
+<style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap');
 
@@ -120,28 +159,25 @@
   animation-delay: 3s;
 }
 
-/* animaçao de pulso para pseudo elementos */
-@keyframes pulse { 
+@keyframes pulse {
   0% { transform: scale(1); }
   100% { transform: scale(1.1); }
 }
 
-/* pra garantir que o conteudo fique acima dos efeitos */
-.z-index-1 { 
+.z-index-1 {
   z-index: 1;
 }
 
-/* Badge "NOVA GERAÇAO" */
 .badge-new-gen {
   background: linear-gradient(90deg, #a362ff, #8f5fe8) !important;
   color: white;
   font-size: 0.95rem;
   letter-spacing: 0.5px;
-  box-shadow: 0 0 15px rgba(163, 98, 255, 0.5); /* sombra mais brilhante */
+  box-shadow: 0 0 15px rgba(163, 98, 255, 0.5);
   animation: fadeInDown 0.8s ease forwards;
 }
-/* Titulo principal */
-.main-heading { 
+
+.main-heading {
   font-family: 'Orbitron', sans-serif;
   font-size: 3.8rem;
   line-height: 1.2;
@@ -168,8 +204,7 @@
   animation: fadeUp 1s ease-out forwards;
 }
 
-/*botoes */
-.btn-main-action { 
+.btn-main-action {
   background: linear-gradient(90deg, #a362ff, #8f5fe8);
   color: #fff;
   border: 2px solid #cbb6ff;
@@ -204,8 +239,7 @@
   box-shadow: 0 8px 25px rgba(0, 255, 225, 0.4);
 }
 
-/*Animaçoes */
-.animate-fade-up { 
+.animate-fade-up {
   opacity: 0;
   transform: translateY(20px);
   animation: fadeUp 0.8s ease-out forwards;
@@ -227,7 +261,6 @@
   }
 }
 
-/* Adições para banner, produto em destaque e selos */
 .hero-discount-banner {
   background: linear-gradient(90deg, #a362ff, #00ffe1); 
   color: #1a1a2e;
@@ -248,66 +281,99 @@
   padding: 0 0.3rem;
 }
 
-.hero-featured-product {
-  background: rgba(26,26,46,0.85);
-  border-radius: 18px;
-  box-shadow: 0 2px 18px rgba(163,98,255,0.10);
-  margin-top: 1.5rem;
-  margin-bottom: 1.5rem;
+/* Swiper Custom - Banner grande (maior e mais clean) */
+.hero-swiper-full.hero-swiper-clean {
+  max-width: 1200px;
+  min-height: 340px;
+  margin: 0 auto 3rem auto;
+  border-radius: 32px;
+  overflow: hidden;
+  box-shadow: 0 2px 24px rgba(163,98,255,0.18);
 }
-.featured-product-card {
-  gap: 1rem;
+.swiper-banner-full {
+  position: relative;
+  width: 100%;
+  height: 340px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.featured-product-img {
-  width: 80px;
-  height: 80px;
+.banner-img-full {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border-radius: 12px;
-  border: 2px solid #a362ff;
-  background: #fff;
+  display: block;
+  border-radius: 32px;
 }
-.featured-product-title {
-  font-size: 1.1rem;
-  font-weight: 700;
+.banner-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(26,26,46,0.78) 60%, rgba(26,26,46,0.35) 100%);
   color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2rem 3rem;
+  box-sizing: border-box;
 }
-.featured-product-prices {
-  margin-top: 0.2rem;
+.banner-title {
+  font-size: 2.4rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 0 25px rgba(0,0,0,0.36);
 }
-.old-price {
-  color: #c0c0d0;
-  text-decoration: line-through;
-  font-size: 1rem;
-}
-.new-price {
-  color: #00ffe1;
+.banner-desc {
   font-size: 1.2rem;
-  font-weight: 700;
-}
-.btn-featured-buy {
-  background: linear-gradient(90deg, #a362ff, #00ffe1);
-  color: #1a1a2e;
-  border-radius: 20px;
-  padding: 0.3rem 1.2rem;
-  font-size: 1rem;
-  font-weight: 600;
-  margin-top: 0.2rem;
-  transition: all 0.2s;
-  display: inline-block;
-}
-.btn-featured-buy:hover {
-  background: linear-gradient(90deg, #00ffe1, #a362ff);
-  color: #fff;
+  color: #c0c0d0;
+  margin-bottom: 1.2rem;
+  text-shadow: 0 0 12px rgba(0,0,0,0.24);
 }
 
+/* Selo de avaliação */
+.hero-rating-badge {
+  background: rgba(0,255,225,0.13);
+  color: #00ffe1;
+  border-radius: 18px;
+  font-size: 1.08rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0.5rem 1.2rem;
+  box-shadow: 0 2px 12px rgba(0,255,225,0.10);
+  margin-bottom: 0.5rem;
+  margin-top: 0.5rem;
+  letter-spacing: 0.2px;
+  border: 1.5px solid #00ffe1;
+  transition: background 0.18s;
+}
+.hero-rating-badge i {
+  color: #ffe066;
+  font-size: 1.2rem;
+}
+
+/* Ajuste nos botões principais para maior destaque */
+.hero-main-actions .btn {
+  min-width: 220px;
+  font-size: 1.18rem;
+  padding-top: 1.1rem !important;
+  padding-bottom: 1.1rem !important;
+  margin-bottom: 0.5rem;
+}
+
+/* Selos de confiança */
 .hero-trust {
   font-size: 1.05rem;
   color: #b0f7f7;
   gap: 2rem;
 }
 
-/* responsividade com media queries */
-@media (max-width: 991.98px) { 
+/* Responsividade para Swiper e Hero */
+@media (max-width: 991.98px) {
   .hero-section { 
     min-height: 70vh;
     padding: 3rem 1rem;
@@ -334,14 +400,26 @@
   .badge-new-gen { 
     font-size: 0.85rem;
   }
-  .hero-featured-product {
-    max-width: 100%;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
+  .hero-swiper-full.hero-swiper-clean {
+    min-height: 200px;
+    border-radius: 18px;
   }
-  .featured-product-img {
-    width: 60px;
-    height: 60px;
+  .swiper-banner-full {
+    height: 200px;
+  }
+  .banner-img-full {
+    height: 200px;
+    border-radius: 18px;
+  }
+  .banner-title { font-size: 1.3rem; }
+  .banner-desc { font-size: 0.98rem; }
+  .banner-overlay { padding: 1rem 1rem;}
+  .hero-main-actions .btn {
+    min-width: unset;
+    width: 100%;
+    font-size: 1rem;
+    padding-top: 0.8rem !important;
+    padding-bottom: 0.8rem !important;
   }
   .hero-trust {
     flex-direction: column;
@@ -352,12 +430,7 @@
     font-size: 0.98rem;
     padding: 0.5rem 1rem;
   }
-  .hero-featured-products-row {
-    flex-direction: column !important;
-    gap: 1.2rem;
-  }
 }
-
 @media (max-width: 575.98px) {
   .main-heading {
     font-size: 2.2rem;
@@ -365,5 +438,68 @@
   .hero-description {
     font-size: 0.95rem;
   }
+  .hero-swiper-full.hero-swiper-clean {
+    min-height: 120px;
+    border-radius: 10px;
+  }
+  .swiper-banner-full {
+    height: 120px;
+  }
+  .banner-img-full {
+    height: 120px;
+    border-radius: 10px;
+  }
+  .banner-title { font-size: 1rem; }
+  .banner-desc { font-size: 0.87rem; }
+}
+
+/* Barra de busca hero */
+.hero-search-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: rgba(26,26,46,0.92);
+  border-radius: 40px;
+  box-shadow: 0 2px 12px rgba(163,98,255,0.10);
+  padding: 0.25rem 0.5rem;
+  margin-bottom: 1.5rem;
+  max-width: 540px;
+  width: 100%;
+}
+.hero-search-input {
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-size: 1.13rem;
+  padding: 0.9rem 1.2rem;
+  border-radius: 40px;
+  width: 100%;
+  outline: none;
+  box-shadow: none;
+}
+.hero-search-input::placeholder {
+  color: #b0b0c0;
+  opacity: 1;
+  font-size: 1.05rem;
+}
+.hero-search-btn {
+  background: linear-gradient(90deg, #a362ff, #00ffe1);
+  border: none;
+  color: #181e2a;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  margin-left: 0.3rem;
+  transition: background 0.2s, color 0.2s;
+  box-shadow: 0 2px 8px rgba(163,98,255,0.18);
+  cursor: pointer;
+}
+.hero-search-btn:hover {
+  background: linear-gradient(90deg, #00ffe1, #a362ff);
+  color: #fff;
 }
 </style>
