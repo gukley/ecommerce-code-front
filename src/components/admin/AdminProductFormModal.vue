@@ -36,6 +36,15 @@
                 </select>
               </div>
             </div>
+            <div class="mb-3">
+              <label for="productDiscount" class="form-label">Desconto</label>
+              <select class="form-select modern-input" id="productDiscount" v-model="productFormData.discount_id">
+                <option :value="null">Sem desconto</option>
+                <option v-for="d in discounts" :key="d.id" :value="d.id">
+                  {{ d.name }} - {{ d.value }}%
+                </option>
+              </select>
+            </div>
 
             <div class="mb-3" v-if="!isEditing">
               <label for="productStock" class="form-label">Estoque Inicial</label>
@@ -64,7 +73,7 @@
 <script setup>
 import { ref, watch, defineProps, defineEmits, onMounted, nextTick, defineExpose } from 'vue';
 import { useToast } from 'vue-toastification';
-import { createProduct, updateProduct, updateProductImage } from '@/services/apiService';
+import { createProduct, updateProduct, updateProductImage, getAllDiscounts } from '@/services/apiService';
 import { Modal } from 'bootstrap'; 
   
 const props = defineProps({
@@ -87,6 +96,7 @@ const props = defineProps({
   
   const productFormData = ref({});
   const selectedFile = ref(null);
+  const discounts = ref([]);
   let bootstrapModalInstance = null; 
   
   // Observa a prop 'product' e atualiza o formulário quando ela muda pra ediçao
@@ -95,6 +105,9 @@ const props = defineProps({
       productFormData.value = { ...newVal };
       if (productFormData.value.stock === undefined || productFormData.value.stock === null) {
         productFormData.value.stock = 0;
+      }
+      if (newVal.discount_id === undefined) {
+        productFormData.value.discount_id = null;
       }
     } else {
       productFormData.value = {
@@ -120,7 +133,8 @@ const props = defineProps({
           name: productFormData.value.name,
           description: productFormData.value.description,
           price: productFormData.value.price,
-          category_id: productFormData.value.category_id
+          category_id: productFormData.value.category_id,
+          discount_id: productFormData.value.discount_id
         };
         response = await updateProduct(productFormData.value.id, updateData);
         if (selectedFile.value) {
@@ -137,6 +151,7 @@ const props = defineProps({
         formData.append('price', String(productFormData.value.price));
         formData.append('stock', String(productFormData.value.stock));
         formData.append('category_id', String(productFormData.value.category_id));
+        formData.append('discount_id', productFormData.value.discount_id ?? '');
         if (selectedFile.value) {
           formData.append('image', selectedFile.value);
         }
@@ -160,13 +175,14 @@ const props = defineProps({
     showModal
   });
   
-  onMounted(() => {
+  onMounted(async () => {
     const modalElement = document.getElementById('productModal');
     if (modalElement) {
       bootstrapModalInstance = new Modal(modalElement);
     } else {
       console.error("Elemento 'productModal' não encontrado no DOM. O modal pode não funcionar.");
     }
+    discounts.value = await getAllDiscounts();
   });
   </script>
   

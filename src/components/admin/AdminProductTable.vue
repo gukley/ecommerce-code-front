@@ -35,7 +35,16 @@
             </td>
             <td>{{ product.name }}</td>
             <td>{{ truncateText(product.description, 50) }}</td>
-            <td>R$ {{ Number(product.price).toFixed(2) }}</td>
+            <td>
+              <span v-if="product.discount">
+                <del>R$ {{ Number(product.price).toFixed(2) }}</del>
+                <span class="text-success ms-2">R$ {{ getDiscountedPrice(product) }}</span>
+                <span class="badge bg-info ms-2">{{ product.discount.name }} ({{ product.discount.value }}%)</span>
+              </span>
+              <span v-else>
+                R$ {{ Number(product.price).toFixed(2) }}
+              </span>
+            </td>
             <td>
               <input
                 type="number"
@@ -95,6 +104,13 @@ const truncateText = (text, maxLength) => {
   }
   return text;
 };
+
+const getDiscountedPrice = (product) => {
+  if (product.discount && product.discount.value) {
+    return (product.price * (1 - product.discount.value / 100)).toFixed(2)
+  }
+  return Number(product.price).toFixed(2)
+}
 
 // Emite o evento update-stock com o produto atualizado
 const emitUpdateStock = (product) => {
