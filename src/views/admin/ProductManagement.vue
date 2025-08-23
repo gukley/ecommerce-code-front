@@ -7,6 +7,10 @@
         <i class="bi bi-plus-circle me-2"></i> Adicionar Novo Produto
       </button>
 
+      <button class="btn btn-discount-action" @click="openDiscountModal()">
+        <i class="bi bi-percent me-2"></i> Gerenciar Descontos
+      </button>
+
       <div class="d-flex flex-wrap gap-3 align-items-center">
         <div>
           <label class="me-2 mb-0">Categoria:</label>
@@ -64,6 +68,14 @@
       @product-saved="handleProductSaved"
       ref="productFormModalRef"
     />
+
+    <DiscountModal
+      v-if="showDiscountModal"
+      :products="products"
+      :discounts="discounts"
+      @discount-saved="handleDiscountSaved"
+      @close="showDiscountModal = false"
+    />
   </div>
 </template>
 
@@ -74,11 +86,16 @@ import { useAuthStore } from '@/stores/authStore';
 
 import ProductTable from '@/components/Admin/AdminProductTable.vue';
 import ProductFormModal from '@/components/Admin/AdminProductFormModal.vue';
+import DiscountModal from '@/components/Admin/AdminDiscountModal.vue';
 import {
   getAllProducts,
   getCategories,
   deleteProduct,
-  updateProductStock
+  updateProductStock,
+  getAllDiscounts,
+  createDiscount,
+  updateDiscount,
+  deleteDiscount
 } from '@/services/apiService';
 
 const toast = useToast();
@@ -86,6 +103,7 @@ const authStore = useAuthStore();
 
 const products = ref([]);
 const categories = ref([]);
+const discounts = ref([]);
 const isLoading = ref(true);
 const searchTerm = ref('');
 const currentProduct = ref(null);
@@ -96,6 +114,7 @@ const baseUrl = import.meta.env.VITE_API_URL;
 
 const selectedCategory = ref('');
 const selectedStock = ref('');
+const showDiscountModal = ref(false);
 
 const productFormModalRef = ref(null);
 
@@ -152,12 +171,13 @@ const fetchProducts = async () => {
   try {
     const response = await getAllProducts();
     products.value = response
-    .filter(p => p.category?.user_id === authStore.user.id)
-    .map(p => ({
-    ...p,
-    image_url: p.image_path
-      ? `${baseUrl}${p.image_path.startsWith('/') ? '' : '/'}${p.image_path}`
-      : null
+      .filter(p => p.category?.user_id === authStore.user.id)
+      .map(p => ({
+        ...p,
+        image_url: p.image_path
+          ? `${baseUrl}${p.image_path.startsWith('/') ? '' : '/'}${p.image_path}`
+          : null,
+        discount: p.discount // <-- Garante que o desconto está presente
       }));
   } catch (error) {
     toast.error('Erro ao carregar produtos: ' + (error.response?.data?.message || error.message));
@@ -173,6 +193,10 @@ const fetchCategories = async () => {
   } catch (error) {
     toast.error('Erro ao carregar categorias: ' + (error.response?.data?.message || error.message));
   }
+};
+
+const fetchDiscounts = async () => {
+  discounts.value = await getAllDiscounts()
 };
 
 // --- Orquestração ---
@@ -193,9 +217,18 @@ const openProductModal = (product = null) => {
   productFormModalRef.value?.showModal?.();
 };
 
+const openDiscountModal = () => {
+  showDiscountModal.value = true
+}
+
 const handleProductSaved = async () => {
   await fetchProducts();
 };
+
+const handleDiscountSaved = async () => {
+  await fetchDiscounts()
+  await fetchProducts()
+}
 
 const confirmDelete = async (productId) => {
   if (confirm('Tem certeza que deseja excluir este produto?')) {
@@ -236,192 +269,145 @@ onMounted(() => {
 async function loadData() {
   await fetchCategories();
   await fetchProducts();
+  await fetchDiscounts()
 }
 </script>
 
 <style scoped>
-:root {
-  --admin-bg-primary: #0f0f23;
-  --admin-bg-secondary: #1a1a2e;
-  --admin-bg-tertiary: #24243a;
-
-  /* Cores de Acento */
-  --admin-accent-primary: #00ffe1;
-  --admin-accent-secondary: #8f5fe8;
-
-  /* Cores de Texto */
-  --admin-text-primary: #ffffff;
-  --admin-text-secondary: rgba(255, 255, 255, 0.8);
-  --admin-text-muted: rgba(255, 255, 255, 0.6);
-
-  /* Cores de Estado */
-  --admin-success: #00d4aa;
-  --admin-warning: #ffa726;
-  --admin-danger: #ff6b6b;
-  --admin-info: #4fc3f7;
-
-  /* Bordas */
-  --border-radius-rounded: 50px;
-  --admin-border-light: rgba(255, 255, 255, 0.1);
-  --admin-border-medium: rgba(255, 255, 255, 0.2); 
-
-  /* Sombras */
-  --admin-shadow-light: rgba(0, 0, 0, 0.1);
-}
-
 .product-management {
-  background-color: var(--admin-bg-primary);
-  min-height: calc(100vh - 100px);
-  color: var(--admin-text-primary);
-  padding: 2rem;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #0f1419;
+  min-height: 100vh;
+  color: #e8eaed;
+  padding: 2rem 1rem;
+  max-width: 1280px;
+  margin: 0 auto;
+  font-family: 'Inter', sans-serif;
 }
 
 .text-primary-ggtech {
-  color: var(--admin-accent-primary) !important;
+  background: linear-gradient(90deg, #64b5f6 0%, #42a5f5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   font-weight: 700;
-  text-shadow: 0 0 10px rgba(0, 255, 225, 0.3);
-  font-size: 1.9rem;
-}
-
-.btn-main-action {
-  background: linear-gradient(135deg, var(--admin-accent-primary) 0%, var(--admin-accent-secondary) 100%);
-  color: #fff;
-  border: 1px solid rgba(0, 255, 225, 0.3);
-  font-size: 1.15rem;
-  border-radius: var(--border-radius-rounded);
-  box-shadow: 0 4px 16px rgba(0, 255, 225, 0.2);
-  transition: all 0.3s ease;
-  font-weight: 600;
-  padding: 0.6rem 1.8rem;
-}
-
-.btn-main-action:hover {
-  background: linear-gradient(135deg, var(--admin-accent-secondary) 0%, var(--admin-accent-primary) 100%);
-  color: #fff;
-  box-shadow: 0 8px 25px rgba(0, 255, 225, 0.3);
-  transform: translateY(-2px);
-  border-color: rgba(0, 255, 225, 0.5);
-}
-
-.search-bar {
-  max-width: 340px;
-  border-radius: var(--border-radius-rounded) !important;
-  overflow: hidden;
-  box-shadow: 0 2px 12px rgba(0, 255, 225, 0.16);
-  border: 2px solid var(--admin-border-light);
-  background: var(--admin-bg-secondary);
-  transition: box-shadow 0.2s, border-color 0.2s;
-}
-
-.search-bar:focus-within {
-  box-shadow: 0 4px 18px rgba(0, 255, 225, 0.22);
-  border-color: var(--admin-accent-primary);
-}
-
-.search-input {
-  background-color: var(--admin-bg-secondary);
-  border: none;
-  color: var(--admin-text-primary);
-  border-radius: var(--border-radius-rounded) 0 0 var(--border-radius-rounded) !important;
-  padding-left: 1.5rem;
-  font-size: 1.12rem;
-  font-weight: 600;
-  box-shadow: none;
+  font-size: 2.2rem;
   letter-spacing: 0.02em;
 }
 
-.search-input::placeholder {
-  color: var(--admin-text-muted);
-  opacity: 1;
-  font-weight: 500;
+.btn-main-action {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  color: white;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
 }
 
-.search-input:focus {
-  background: var(--admin-bg-tertiary);
-  box-shadow: none;
-  outline: none;
-  color: var(--admin-text-primary);
+.btn-main-action:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  color: white;
+}
+
+.btn-discount-action {
+  background: linear-gradient(90deg, #00ffe1 0%, #8f5fe8 100%);
+  color: #23233a;
+  font-weight: 700;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 1.08rem;
+  box-shadow: 0 2px 12px #00ffe130;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-discount-action:hover {
+  background: linear-gradient(90deg, #8f5fe8 0%, #00ffe1 100%);
+  color: #fff;
+  box-shadow: 0 4px 18px #00ffe160;
+}
+
+.form-select, .form-control {
+  background-color: #1a2332;
+  border: 1px solid #374151;
+  color: #e8eaed;
+  border-radius: 0.5rem;
+}
+
+.form-select:focus, .form-control:focus {
+  background-color: #1a2332;
+  border-color: #64b5f6;
+  color: #e8eaed;
+  box-shadow: 0 0 0 0.2rem rgba(100, 181, 246, 0.25);
+}
+
+.form-select option {
+  background-color: #1a2332;
+  color: #e8eaed;
+}
+
+.search-bar {
+  max-width: 300px;
+}
+
+.search-input {
+  border-right: none;
 }
 
 .search-icon {
-  background-color: var(--admin-bg-tertiary);
-  border: none;
-  color: var(--admin-accent-primary);
-  border-radius: 0 var(--border-radius-rounded) var(--border-radius-rounded) 0 !important;
-  padding-right: 1.5rem;
-  font-size: 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-}
-
-.pagination-controls {
-  margin-top: 2rem;
-  display: flex; 
-  align-items: center; 
+  background-color: #1a2332;
+  border: 1px solid #374151;
+  border-left: none;
+  color: #64b5f6;
 }
 
 .btn-pagination {
-  background: var(--admin-bg-tertiary);
-  color: var(--admin-accent-primary);
-  border: 1px solid var(--admin-border-medium);
-  border-radius: 8px;
-  padding: 0.6rem 1.2rem;
-  font-weight: 600;
+  background-color: #1a2332;
+  border: 1px solid #374151;
+  color: #64b5f6;
   transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
 }
 
 .btn-pagination:hover:not(:disabled) {
-  background: var(--admin-accent-primary);
-  color: var(--admin-bg-primary);
-  border-color: var(--admin-accent-primary);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 255, 225, 0.2);
+  background-color: #374151;
+  border-color: #4a5568;
+  color: #e8eaed;
 }
 
 .btn-pagination:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  background-color: #0f1419;
+  border-color: #1a2332;
+  color: #4a5568;
 }
 
-.page-info { 
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--admin-accent-primary);
+.pagination-info {
+  color: #b0b7c3;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+}
+
+label {
+  color: #a0aec0;
+  font-weight: 500;
 }
 
 /* Responsividade */
 @media (max-width: 768px) {
   .product-management {
-    padding: 1rem;
+    padding: 1rem 0.5rem;
   }
   
   .text-primary-ggtech {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
   }
   
   .search-bar {
     max-width: 100%;
-  }
-
-  .btn-main-action {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .pagination-controls {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .btn-pagination {
-    width: 100%;
-    justify-content: center;
+    margin-top: 1rem;
   }
 }
 </style>

@@ -33,10 +33,11 @@
         >Esgotado</span
       >
       <span
-        v-if="produto.desconto"
-        class="badge bg-danger position-absolute top-0 end-0 m-2"
-        >-{{ produto.desconto }}%</span
+        v-if="showDiscount && produto.discount && produto.discount.discount_percentage > 0"
+        class="badge badge-discount position-absolute top-0 end-0 m-2"
       >
+        -{{ produto.discount.discount_percentage }}%
+      </span>
     </div>
     <div class="card-body d-flex flex-column flex-grow-1"> 
       <!-- router-link só no título -->
@@ -57,15 +58,22 @@
         {{ produto.category?.name }}
       </p>
 
-      <div class="mb-2">
-        <span class="fw-bold text-primaty fs-5">R$ {{ precoFinal }}</span>
-        <span
-          v-if="produto.desconto"
-          class="text-muted text-decoration-line-through ms-2"
-        > 
-          R$ {{ Number(produto.price).toFixed(2) }}
-      </span>
-    </div>
+      <div class="mb-2 product-price-box">
+        <span v-if="showDiscount && produto.discount && produto.discount.discount_percentage > 0">
+          <span class="product-price-original">
+            <del>R$ {{ formatPrice(produto.price) }}</del>
+          </span>
+          <span class="product-price-discount ms-2">
+            R$ {{ formatPrice(discountedPrice(produto)) }}
+          </span>
+          <span class="badge badge-discount ms-2">
+            -{{ produto.discount.discount_percentage }}%
+          </span>
+        </span>
+        <span v-else>
+          R$ {{ formatPrice(produto.price) }}
+        </span>
+      </div>
 
     <div class="mb-3 text-warning">
       <i class="bi bi-star-fill me-1" v-for="i in produto.estrelas" :key="i"></i>
@@ -93,7 +101,11 @@ import { useWishlistStore } from '@/stores/wishlistStore';
 const BASE_URL = import.meta.env.VITE_API_URL;
 
 const props = defineProps({ 
-    produto: Object
+    produto: Object,
+    showDiscount: {
+      type: Boolean,
+      default: false
+    }
 })
 
 const imageUrl = computed(() => {
@@ -116,6 +128,17 @@ const precoFinal = computed(() => {
     }
     return Number(props.produto.price).toFixed(2)
 })
+
+const discountedPrice = (produto) => {
+  if (produto.discount && produto.discount.discount_percentage > 0) {
+    return (produto.price * (1 - produto.discount.discount_percentage / 100)).toFixed(2)
+  }
+  return produto.price
+}
+
+const formatPrice = (val) => {
+  return Number(val).toLocaleString('pt-BR', { style: 'decimal', minimumFractionDigits: 2 })
+}
 
 const adicionarAoCarrinho = () => { 
   const productId = props.produto.id
@@ -241,5 +264,34 @@ const adicionarAoCarrinho = () => {
 }
 .btn-fav .bi-heart {
   color: #fff;
+}
+
+.product-price-box {
+  font-size: 1.18rem;
+  font-weight: 700;
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.product-price-original {
+  color: #b0b7c3;
+  font-size: 1.05rem;
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+.product-price-discount {
+  color: #00ffe1;
+  font-size: 1.22rem;
+  font-weight: 800;
+}
+.badge-discount {
+  background: linear-gradient(90deg,#00ffe1 0%,#8f5fe8 100%);
+  color: #23233a;
+  font-weight: 700;
+  border-radius: 8px;
+  font-size: 0.98rem;
+  padding: 0.22em 0.7em;
+  box-shadow: 0 1px 6px #232e4720;
 }
 </style>

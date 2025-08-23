@@ -8,13 +8,9 @@
           <h2 class="section-title text-center mb-5 animate-fade-in">
             {{ tituloPagina }}
           </h2>
+          <!-- Barra de busca e filtros igual à Home -->
           <div class="search-filter-bar d-flex flex-wrap justify-content-center justify-content-md-between align-items-center gap-3 mb-5">
-            <div class="search-input-group flex-grow-1">
-              <span class="search-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="#00ffe1" class="bi bi-search" viewBox="0 0 16 16">
-                  <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-                </svg>
-              </span>
+            <div class="search-bar-box position-relative flex-grow-1">
               <input
                 v-model="termoBusca"
                 type="text"
@@ -23,14 +19,20 @@
                 aria-label="Buscar produtos"
                 @keyup.enter="buscarProdutos"
               />
-              <button class="search-button" type="button" aria-label="Pesquisar" @click="buscarProdutos">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#11111c" class="bi bi-arrow-right" viewBox="0 0 16 16">
-                  <path fill-rule="evenodd" d="M10.146 6.646a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L11 7.707V13.5a.5.5 0 0 1-1 0V7.707l-2.146 2.147a.5.5 0 0 1-.708-.708l3-3z"/>
-                </svg>
+              <span class="search-icon">
+                <i class="bi bi-search"></i>
+              </span>
+              <button
+                class="btn btn-search"
+                type="button"
+                @click="buscarProdutos"
+                aria-label="Buscar"
+              >
+                <i class="bi bi-arrow-right"></i>
               </button>
             </div>
-            <div class="d-flex align-items-center gap-3 filtro-ordenacao-box">
-              <label for="ordemSelect" class="form-label mb-0 d-none d-lg-block filtro-label">
+            <div class="dropdown filtro-ordenacao-box">
+              <label for="ordemSelect" class="form-label mb-0 ms-2 filtro-label">
                 <i class="bi bi-funnel"></i> Ordenar por:
               </label>
               <select
@@ -52,7 +54,11 @@
           </div>
           <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
             <div class="col d-flex" v-for="produto in produtosFiltrados" :key="produto.id">
-              <ProductCard :produto="produto" class="flex-fill" />
+              <ProductCard
+                :produto="produto"
+                class="flex-fill"
+                :show-discount="true"
+              />
             </div>
           </div>
         </div>
@@ -70,11 +76,12 @@ import Navbar from '@/components/home/NavBar.vue';
 import SideBar from '@/components/home/SideBar.vue';
 import ProductCard from '@/components/home/ProductCard.vue';
 import Footer from '@/components/home/Footer.vue';
-import { getAllProducts } from '@/services/apiService';
+import { getAllProducts, getAllDiscounts } from '@/services/apiService';
 import BrandsCarousel from '@/components/home/BrandsCarousel.vue';
 import { useAuthStore } from '@/stores/authStore';
 
 const produtos = ref([]);
+const descontos = ref([]);
 const categoriaSelecionada = ref('Todos os Produtos');
 const termoBusca = ref('');
 const ordemSelecionada = ref('');
@@ -82,7 +89,25 @@ const route = useRoute();
 const authStore = useAuthStore();
 
 onMounted(async () => {
-  produtos.value = await getAllProducts();
+  const produtosApi = await getAllProducts();
+  const descontosApi = await getAllDiscounts();
+  // Associa desconto ao produto
+  produtos.value = produtosApi.map(prod => {
+    const desconto = descontosApi.find(d => Number(d.product_id) === Number(prod.id));
+    return {
+      ...prod,
+      discount: desconto
+        ? {
+            discount_percentage: Number(desconto.discount_percentage),
+            description: desconto.description,
+            start_date: desconto.start_date,
+            end_date: desconto.end_date,
+            id: desconto.id
+          }
+        : null
+    }
+  });
+  descontos.value = descontosApi;
   if (route.query.categoria) {
     categoriaSelecionada.value = route.query.categoria;
   }
@@ -118,7 +143,7 @@ const tituloPagina = computed(() => {
 });
 
 const produtosFiltrados = computed(() => {
-  let listaFiltrada = produtos.value; // Mostra todos os produtos para todos os usuários
+  let listaFiltrada = produtos.value;
 
   // Filtro por categoria
   if (categoriaSelecionada.value !== 'Todos os Produtos') {
@@ -205,83 +230,93 @@ const produtosFiltrados = computed(() => {
 }
 .search-filter-bar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
   gap: 1.5rem;
   margin-bottom: 2rem;
-  flex-wrap: wrap;
-  justify-content: center;
 }
-.search-input-group {
+
+.search-bar-box {
   position: relative;
   display: flex;
-  flex-grow: 1;
-  max-width: 400px;
-  background: rgba(22,22,36,0.85);
-  border: 2px solid #00ffe1;
-  border-radius: 2rem;
-  box-shadow: 0 4px 15px #00ffe122;
-  padding: 5px 10px 5px 0;
   align-items: center;
-  transition: box-shadow 0.2s, border-color 0.2s;
+  max-width: 400px;
+  flex: 1 0 180px;
+  background: rgba(22,22,36,0.84);
+  border-radius: 1.1rem;
+  box-shadow: 0 8px 32px rgba(143, 95, 232, 0.10);
+  border: 1.5px solid #23233a;
 }
-.search-input-group:focus-within {
-  box-shadow: 0 0 0 4px #00ffe1a1;
-  border-color: #8f5fe8;
-}
+
 .search-bar {
-  background-color: transparent;
+  border-radius: 1.1rem;
   border: none;
+  background: transparent;
   color: #fff;
-  padding: 0.8rem 1rem 0.8rem 2.4rem;
+  padding: 0.7rem 1.2rem 0.7rem 2.7rem;
   font-size: 1.1rem;
   width: 100%;
   outline: none;
 }
-.search-bar:focus {
-  background: rgba(0,255,225,0.09);
-}
+
+/* Torna o placeholder mais visível */
 .search-bar::placeholder {
-  color: #999;
+  color: #00ffe1;
+  opacity: 1;
+  font-weight: 500;
+  letter-spacing: 0.5px;
 }
+
+.search-bar:focus {
+  border: none;
+  background: rgba(0,255,225,0.08);
+  box-shadow: 0 0 0 2px #00ffe1;
+}
+
 .search-icon {
   position: absolute;
-  left: 13px;
+  left: 16px;
   top: 50%;
   transform: translateY(-50%);
+  color: #00ffe1;
+  font-size: 1.32rem;
   pointer-events: none;
-  opacity: 0.95;
-  z-index: 2;
+  opacity: 0.85;
 }
-.search-button {
-  background: linear-gradient(90deg, #00ffe1, #8f5fe8);
+
+.btn-search {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: linear-gradient(90deg,#00ffe1 0%,#8f5fe8 100%);
   border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0, 255, 225, 0.3);
-  transition: transform 0.18s, box-shadow 0.18s;
-  margin-left: 7px;
+  color: #23233a;
+  border-radius: 22px;
+  font-weight: 700;
+  padding: 0.28rem 0.98rem;
+  font-size: 1.09rem;
+  box-shadow: 0 2px 8px #8f5fe866;
+  transition: background 0.22s, box-shadow 0.18s;
 }
-.search-button:hover,
-.search-button:focus {
-  transform: scale(1.11);
-  box-shadow: 0 8px 18px #00ffe1b7;
-  outline: none;
+.btn-search i {
+  transition: transform 0.2s;
 }
-.search-button svg {
-  color: #11111c;
-  width: 22px;
-  height: 22px;
+.btn-search:active i,
+.btn-search:hover i {
+  transform: translateX(2px) scale(1.18);
 }
+.btn-search:hover {
+  background: linear-gradient(90deg,#8f5fe8 0%,#00ffe1 100%);
+  box-shadow: 0 4px 14px #00ffe1cc;
+}
+
 .filtro-ordenacao-box {
-  min-width: 220px;
-  display: flex;
-  align-items: center;
+  min-width: 200px;
+  margin-left: 14px;
 }
+
 .filtro-label {
   color: #00ffe1;
   font-weight: 600;
@@ -291,11 +326,13 @@ const produtosFiltrados = computed(() => {
   align-items: center;
   gap: 7px;
 }
+
+/* Select de ordenação */
 .filtro-ordenacao {
   border: 2px solid #00ffe1;
   border-radius: 1rem;
   background-color: #18182a;
-  color: #fff;
+  color: #00ffe1;
   padding: 0.58rem 1.1rem;
   font-size: 1.07rem;
   font-weight: 500;
@@ -304,33 +341,77 @@ const produtosFiltrados = computed(() => {
   min-width: 180px;
   max-width: 220px;
   z-index: 10;
-  color-scheme: dark; /* Para browsers modernos */
 }
+
 .filtro-ordenacao option {
   background: #18182a;
-  color: #fff;
+  color: #00ffe1;
+  font-weight: 500;
 }
+
 .filtro-ordenacao:focus {
   outline: none;
   border-color: #8f5fe8;
-  background: rgba(143,95,232,0.09);
+  background: rgba(143,95,232,0.07);
 }
 
 /* Responsivo */
-@media (max-width: 576px) {
+@media (max-width: 992px) {
+  .content-wrapper {
+    flex-direction: column;
+    padding: 0 !important;
+  }
+  .products-container {
+    padding: 1.5rem 0.5rem 1.2rem 0.5rem;
+    border-radius: 1.2rem;
+    min-height: 350px;
+  }
+  .section-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.2rem !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .products-container {
+    padding: 1rem 0.2rem 1rem 0.2rem;
+    min-height: auto;
+    border-radius: 1rem;
+  }
+  .section-title {
+    font-size: 1.2rem;
+    margin-bottom: 1rem !important;
+  }
   .search-filter-bar {
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
+    margin-bottom: 1.2rem;
   }
-  .search-input-group {
+  .search-bar-box {
     max-width: 100%;
-    margin-bottom: 1rem;
+    margin-bottom: 0.7rem;
+    min-width: 0;
   }
   .filtro-ordenacao-box {
     margin-left: 0;
     min-width: 100%;
-    justify-content: flex-start;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .products-container {
+    padding: 0.7rem 0.1rem 0.7rem 0.1rem;
+    border-radius: 0.7rem;
+  }
+  .section-title {
+    font-size: 1rem;
+    margin-bottom: 0.7rem !important;
+  }
+  .row.g-4 {
+    --bs-gutter-x: 0.5rem;
+    --bs-gutter-y: 0.5rem;
   }
 }
 </style>

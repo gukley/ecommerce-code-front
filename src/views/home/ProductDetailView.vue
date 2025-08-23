@@ -46,6 +46,13 @@ function adicionarAoCarrinho() {
     alert('Produto adicionado ao carrinho!');
   }
 }
+
+function discountedPrice(produto) {
+  if (produto.discount && produto.discount.discount_percentage > 0) {
+    return (produto.price * (1 - produto.discount.discount_percentage / 100)).toFixed(2)
+  }
+  return Number(produto.price).toFixed(2)
+}
 </script>
 
 <template>
@@ -77,7 +84,22 @@ function adicionarAoCarrinho() {
         </div>
         <div class="col-md-6">
           <h2 class="fw-bold mb-3 product-title">{{ produto.name }}</h2>
-          <h4 class="product-price mb-3">R$ {{ Number(produto.price).toFixed(2) }}</h4>
+          <div class="product-price mb-3">
+            <span v-if="produto.discount && produto.discount.discount_percentage > 0">
+              <span class="product-price-original">
+                <del>R$ {{ Number(produto.price).toFixed(2) }}</del>
+              </span>
+              <span class="product-price-discount ms-2">
+                R$ {{ discountedPrice(produto) }}
+              </span>
+              <span class="badge badge-discount ms-2">
+                -{{ produto.discount.discount_percentage }}%
+              </span>
+            </span>
+            <span v-else>
+              R$ {{ Number(produto.price).toFixed(2) }}
+            </span>
+          </div>
           <p class="mb-4 product-desc" v-html="descricaoFormatada"></p>
 
           <div class="mb-3">
@@ -183,16 +205,18 @@ function adicionarAoCarrinho() {
   transform: scale(1.05) translateY(-4px);
 }
 
+/* Ajuste: fonte do nome do produto menos extravagante */
 .product-title {
   color: #a362ff;
-  font-size: 2.3rem;
-  font-family: 'Orbitron', Arial, sans-serif;
-  letter-spacing: 1px;
-  text-shadow: 0 2px 16px #a362ff99, 0 1px 7px #8f5fe8cc;
-  background: linear-gradient(90deg, #a362ff 30%, #8f5fe8 90%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-size: 2.1rem;
+  font-family: 'Rajdhani', Arial, sans-serif; /* Troca Orbitron por Rajdhani */
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 8px #a362ff33;
+  background: none;
+  -webkit-background-clip: initial;
+  -webkit-text-fill-color: initial;
+  background-clip: initial;
 }
 
 .product-price {
@@ -201,6 +225,27 @@ function adicionarAoCarrinho() {
   font-weight: 700;
   text-shadow: 0 1px 8px #8f5fe888;
   margin-bottom: 1rem;
+}
+
+.product-price-original {
+  color: #b0b7c3;
+  font-size: 1.05rem;
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+.product-price-discount {
+  color: #00ffe1;
+  font-size: 1.22rem;
+  font-weight: 800;
+}
+.badge-discount {
+  background: linear-gradient(90deg,#00ffe1 0%,#8f5fe8 100%);
+  color: #23233a;
+  font-weight: 700;
+  border-radius: 8px;
+  font-size: 0.98rem;
+  padding: 0.22em 0.7em;
+  box-shadow: 0 1px 6px #232e4720;
 }
 
 .product-desc {
@@ -362,7 +407,7 @@ function adicionarAoCarrinho() {
     border-radius: 1.5rem;
   }
   .product-title {
-    font-size: 1.4rem;
+    font-size: 1.2rem;
   }
   .product-price {
     font-size: 1rem;

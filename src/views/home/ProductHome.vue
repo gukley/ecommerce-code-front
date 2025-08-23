@@ -76,6 +76,7 @@
               <ProductCard
                 :produto="produto"
                 class="flex-fill product-link"
+                :show-discount="true"
                 @click.native="irParaDetalhes(produto.id)"
               />
             </div>
@@ -312,19 +313,62 @@ function buscarProdutos() {
 }
 
 /* Responsivo */
-@media (max-width: 576px) {
+@media (max-width: 992px) {
+  .content-wrapper {
+    flex-direction: column;
+    padding: 0 !important;
+  }
+  .products-container {
+    padding: 1.5rem 0.5rem 1.2rem 0.5rem;
+    border-radius: 1.2rem;
+    min-height: 350px;
+  }
+  .section-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.2rem !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .products-container {
+    padding: 1rem 0.2rem 1rem 0.2rem;
+    min-height: auto;
+    border-radius: 1rem;
+  }
+  .section-title {
+    font-size: 1.2rem;
+    margin-bottom: 1rem !important;
+  }
   .search-filter-bar {
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
+    margin-bottom: 1.2rem;
   }
   .search-bar-box {
     max-width: 100%;
-    margin-bottom: 1rem;
+    margin-bottom: 0.7rem;
+    min-width: 0;
   }
   .filtro-ordenacao-box {
     margin-left: 0;
     min-width: 100%;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .products-container {
+    padding: 0.7rem 0.1rem 0.7rem 0.1rem;
+    border-radius: 0.7rem;
+  }
+  .section-title {
+    font-size: 1rem;
+    margin-bottom: 0.7rem !important;
+  }
+  .row.g-4 {
+    --bs-gutter-x: 0.5rem;
+    --bs-gutter-y: 0.5rem;
   }
 }
 </style>
