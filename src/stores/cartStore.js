@@ -193,6 +193,14 @@ export const useCartStore = defineStore('cart', () => {
     }
   }
 
+  // Atualiza a quantidade do item (delta: +1 ou -1)
+  async function updateQuantity(productId, delta) {
+    const item = items.value.find(i => i.product_id === productId);
+    if (!item) return;
+    const newQuantity = item.quantity + delta;
+    await updateItemQuantity(productId, newQuantity);
+  }
+
   // Remove um item do carrinho
   async function removeItem(productId) {
     try {
@@ -253,6 +261,7 @@ export const useCartStore = defineStore('cart', () => {
     initCart,
     addItem,
     updateItemQuantity,
+    updateQuantity,
     removeItem,
     clearCart
   };

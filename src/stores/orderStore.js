@@ -21,26 +21,47 @@ export const useOrderStore = defineStore('order', () => {
 
     // Função auxiliar para processar um pedido e calcular o total
     const processOrderData = (order) => {
-        const groupedProducts = {};
         let total = 0;
-        if (order.products && Array.isArray(order.products)) {
-            order.products.forEach(product => {
-                const productPrice = Number(product.price)
-                if (isNaN(productPrice)) {
-                    console.error('Preço do produto inválido:', product.price, 'em:', product.name)
-                    return
-                }
-                if (!groupedProducts[product.id]) {
-                    groupedProducts[product.id] = { ...product, quantity: 0 }
-                }
-                groupedProducts[product.id].quantity++
-                total += productPrice
+        let products = [];
+
+        // Se vier um campo order_items (mais comum em APIs), use ele para montar os produtos
+        if (order.order_items && Array.isArray(order.order_items)) {
+            products = order.order_items.map(item => {
+                const product = item.product || {}; // pode ser que venha item.product ou item.product_id
+                const price = Number(item.unit_price || product.price || 0);
+                total += price * (item.quantity || 1);
+                return {
+                    id: product.id || item.product_id,
+                    name: product.name || 'Produto',
+                    image_url: product.image_url || product.image_path
+                        ? `${import.meta.env.VITE_API_URL || ''}${(product.image_path || '').startsWith('/') ? '' : '/'}${product.image_path || ''}`
+                        : '',
+                    quantity: item.quantity || 1,
+                    price: price
+                };
             });
         }
-     return {
+        // Caso não tenha order_items, mas tenha products (fallback antigo)
+        else if (order.products && Array.isArray(order.products)) {
+            products = order.products.map(product => {
+                const price = Number(product.price) || 0;
+                total += price * (product.quantity || 1);
+                return {
+                    id: product.id,
+                    name: product.name,
+                    image_url: product.image_url || product.image_path
+                        ? `${import.meta.env.VITE_API_URL || ''}${(product.image_path || '').startsWith('/') ? '' : '/'}${product.image_path || ''}`
+                        : '',
+                    quantity: product.quantity || 1,
+                    price: price
+                };
+            });
+        }
+
+        return {
             ...order,
-            total: Number(total).toFixed(2), 
-            products: Object.values(groupedProducts)
+            total: Number(total).toFixed(2),
+            products
         }
     }
 

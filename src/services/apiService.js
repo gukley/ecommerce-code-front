@@ -154,11 +154,173 @@ export const getUsersOrders = () =>
 export const getOrdersById = (orderId) =>
     api.get(`/orders/${orderId}`).then(res => res.data)
 
-export const createOrder = (orderData) =>
-    api.post('/orders/', orderData).then(res => res.data)
+export const createOrder = (orderData) => {
+    // Garante que coupon_id sempre existe (mesmo que null)
+    if (!('coupon_id' in orderData)) {
+        orderData.coupon_id = null;
+    }
+    // Garante que todos os unit_price são number (não string)
+    if (Array.isArray(orderData.items)) {
+        orderData.items = orderData.items.map(item => ({
+            ...item,
+            unit_price: Number(item.unit_price)
+        }));
+    }
+    return api.post('/orders/', orderData).then(res => res.data)
+}
 
 export const updateOrderStatus = (orderId, statusData) =>
     api.put(`/orders/${orderId}`, statusData).then(res => res.data)
 
 export const cancelOrder = (orderId) =>
     api.delete(`/orders/${orderId}`).then(res => res.data)
+
+// Coupons
+export const getAllCoupons = () =>
+    api.get('/coupons/').then(res => res.data)
+
+export const getCouponById = (couponId) =>
+    api.get(`/coupons/${couponId}`).then(res => res.data)
+
+export const createCoupon = (couponData) =>
+    api.post('/coupons/', couponData).then(res => res.data)
+
+export const updateCoupon = (couponId, couponData) =>
+    api.put(`/coupons/${couponId}`, couponData).then(res => res.data)
+
+export const deleteCoupon = (couponId) =>
+    api.delete(`/coupons/${couponId}`).then(res => res.data)
+
+// Discounts
+export const getAllDiscounts = () =>
+    api.get('/discounts/').then(res => res.data)
+
+export const createDiscount = (discountData) =>
+    api.post('/discounts/', {
+        description: discountData.description,
+        discount_percentage: discountData.discount_percentage,
+        start_date: discountData.start_date,
+        end_date: discountData.end_date,
+        product_id: discountData.product_id
+    }).then(res => res.data)
+
+export const getDiscountById = (discountId) =>
+    api.get(`/discounts/${discountId}`).then(res => res.data)
+
+export const updateDiscount = (discountId, discountData) =>
+    api.put(`/discounts/${discountId}`, {
+        description: discountData.description,
+        discount_percentage: discountData.discount_percentage,
+        start_date: discountData.start_date,
+        end_date: discountData.end_date,
+        product_id: discountData.product_id
+    }).then(res => res.data)
+
+export const deleteDiscount = (discountId) =>
+    api.delete(`/discounts/${discountId}`).then(res => res.data)
+
+export const changeUserPassword = (data) =>
+    api.post('/users/me/change-password', data).then(res => res.data) // alterar senha
+
+export const getUserSummary = () =>
+    api.get('/users/me/summary').then(res => res.data)
+
+// Favoritos 
+export const getFavorites = () => api.get('/favorites/').then(res => res.data)
+export const addFavorite = (productId) => api.post('/favorites/', { product_id: productId }).then(res => res.data)
+export const removeFavorite = (favoriteId) => api.delete(`/favorites/${favoriteId}`).then(res => res.data)
+
+// Reviews
+export const getReviews = () => api.get('/reviews/').then(res => res.data)
+export const addReview = (reviewData) => api.post('/reviews/', reviewData).then(res => res.data)
+export const updateReview = (reviewId, reviewData) => api.put(`/reviews/${reviewId}`, reviewData).then(res => res.data)
+export const deleteReview = (reviewId) => api.delete(`/reviews/${reviewId}`).then(res => res.data)
+
+/**
+ * Busca todos os clientes (admin)
+ */
+export const getAdminClients = () => {
+  return api.get('/admin/clients');
+}
+
+
+ // Busca pedidos de um cliente específico (admin)
+export const getOrdersByUserId = (userId) =>
+  api.get(`/orders/user/${userId}`).then(res => res.data);
+
+// Editar moderador
+export const updateModerator = (moderatorId, data) =>
+    api.put(`/users/moderators/${moderatorId}`, data).then(res => res.data)
+
+export const getModerators = () =>
+    api.get('/users/moderators').then(res => res.data)
+
+export default {
+  login,
+  register,
+  renewToken,
+  verifyToken,
+  getUserProfile,
+  updateUserProfile,
+  deleteUser,
+  createModerator,
+  updateModerator,
+  updateUserImage,
+  getAllProducts,
+  getProductById,
+  getProductsByUser,
+  getProductsByCategory,
+  createProduct,
+  updateProduct,
+  updateProductStock,
+  updateProductImage,
+  deleteProduct,
+  getCategories,
+  getCategoryById,
+  getCategoriesByUser,
+  createCategory,
+  updateCategory,
+  deleteCategory,
+  updateCategoryImage,
+  getCart,
+  createCart,
+  getCartItems,
+  addItemToCart,
+  updateCartItem,
+  removeCartItem,
+  clearCart,
+  getAllAddresses,
+  createAddress,
+  getAddressById,
+  updateAddress,
+  deleteAddress,
+  getAllOrders,
+  getOrderByAdmin,
+  getUsersOrders,
+  getOrdersById,
+  createOrder,
+  updateOrderStatus,
+  cancelOrder,
+  getAllCoupons,
+  getCouponById,
+  createCoupon,
+  updateCoupon,
+  deleteCoupon,
+  getAllDiscounts,
+  createDiscount,
+  getDiscountById,
+  updateDiscount,
+  deleteDiscount,
+  changeUserPassword,
+  getUserSummary,
+  getFavorites,
+  addFavorite,
+  removeFavorite,
+  getReviews,
+  addReview,
+  updateReview,
+  deleteReview,
+  getAdminClients,
+  getOrdersByUserId,
+  getModerators,
+};
