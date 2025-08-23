@@ -1,5 +1,5 @@
 <template>
-  <div class="checkout-form">
+  <div class="checkout-form glass-card">
     <!-- Indicador de etapas -->
     <div class="steps-indicator">
       <div :class="['step', etapa === 1 ? 'active' : '', etapa > 1 ? 'done' : '']">
@@ -94,10 +94,24 @@
       </form>
 
       <!-- Botão continuar quando endereço já existe -->
-      <button v-else class="btn-primary w-100" @click="avancarEtapaEndereco">
-        <i class="bi bi-check-circle"></i>
-        Continuar
-      </button>
+      <div
+        v-if="!modoNovoEndereco && enderecos.length > 0 && enderecoSelecionadoId && getSelectedAddressInfo()"
+        class="address-continue"
+      >
+        <div class="selected-address-info">
+          <h5>Endereço Selecionado:</h5>
+          <div class="selected-address">
+            <i class="bi bi-check-circle-fill"></i>
+            <div class="address-details">
+              <strong>{{ getSelectedAddressInfo() }}</strong>
+            </div>
+          </div>
+        </div>
+        <button class="btn-primary w-100" @click="avancarEtapaEndereco">
+          <i class="bi bi-check-circle"></i>
+          Continuar com este endereço
+        </button>
+      </div>
     </div>
 
     <!-- Etapa 2: Pagamento -->
@@ -175,7 +189,19 @@ async function avancarEtapaEndereco() {
         return;
       }
 
+      // Não tente buscar a lista novamente antes de avançar!
+      // Avance imediatamente para a próxima etapa com o novo endereço
+      enderecoSelecionadoId.value = enderecoFinal.id;
+      modoNovoEndereco.value = false;
+
       toast.success('Novo endereço cadastrado com sucesso!');
+
+      emit('dadosColetados', {
+        endereco: enderecoFinal,
+        metodoPagamento: metodoPagamento.value
+      });
+      emit('etapaChange', 2);
+      return;
     } else {
       enderecoFinal = enderecos.value.find(
         (end) => end.id === enderecoSelecionadoId.value
@@ -204,7 +230,24 @@ function handleEtapaChangeFromPayment(newEtapa) {
 }
 
 function handleDadosColetadosFromPayment(dados) {
-  emit('dadosColetados', dados);
+  // Sempre envie o endereço selecionado junto com o método de pagamento
+  const enderecoFinal = enderecos.value.find(
+    (end) => end.id === enderecoSelecionadoId.value
+  );
+  emit('dadosColetados', {
+    endereco: enderecoFinal,
+    metodoPagamento: dados.metodoPagamento || metodoPagamento.value
+  });
+}
+
+function getSelectedAddressInfo() {
+  const selectedAddress = enderecos.value.find(
+    (end) => end.id === enderecoSelecionadoId.value
+  );
+  if (selectedAddress) {
+    return `${selectedAddress.street}, ${selectedAddress.number} - ${selectedAddress.city}/${selectedAddress.state} - CEP: ${selectedAddress.zip}`;
+  }
+  return '';
 }
 </script>
 
@@ -214,6 +257,20 @@ function handleDadosColetadosFromPayment(dados) {
   margin: 0 auto;
   font-family: 'Inter', sans-serif;
   background: transparent;
+}
+.glass-card {
+  background: rgba(24, 30, 42, 0.92);
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 32px 0 #232e4780;
+  border: 1.5px solid #232e47;
+  backdrop-filter: blur(8px);
+  padding: 2.2rem 2rem 2rem 2rem;
+  margin-bottom: 2rem;
+  transition: box-shadow 0.2s;
+}
+.glass-card:focus-within, .glass-card:hover {
+  box-shadow: 0 12px 40px #399bff40;
+  border-color: #399bff;
 }
 .steps-indicator {
   display: flex;
@@ -256,113 +313,122 @@ function handleDadosColetadosFromPayment(dados) {
   border-radius: 2px;
 }
 .form-section {
-  background: #1e1e2d;
-  border-radius: 15px;
-  box-shadow: 0 12px 40px rgba(0,255,225,0.09);
-  padding: 2.5rem 2rem;
-  margin-bottom: 2rem;
-  border: 1px solid rgba(0,255,225,0.06);
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  padding: 0;
+  margin-bottom: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 1.5rem;
 }
+
 .section-header {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid rgba(0,255,225,0.08);
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #374151;
 }
+
 .section-header i {
-  font-size: 25px;
-  color: #00ffe1;
+  font-size: 1.5rem;
+  color: #64b5f6;
 }
+
 .section-header h4 {
   margin: 0;
-  color: #ffffff;
+  color: #f9fafb;
   font-weight: 700;
-  font-size: 21px;
+  font-size: 1.25rem;
   letter-spacing: 0.01em;
 }
+
 .address-selection {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 1.25rem;
 }
+
 .selection-header label {
   font-weight: 600;
-  font-size: 16px;
-  color: #b0b0b0;
-  margin-bottom: 8px;
+  font-size: 1rem;
+  color: #e8eaed;
+  margin-bottom: 0.5rem;
+  display: block;
 }
+
 .address-options {
   display: flex;
   flex-direction: column;
-  gap: 13px;
+  gap: 0.75rem;
 }
+
 .address-option {
   position: relative;
+  transition: all 0.3s ease;
 }
+
+.address-option:hover {
+  transform: translateX(5px);
+}
+
 .address-radio {
   position: absolute;
   opacity: 0;
-  width: 0;
-  height: 0;
+  cursor: pointer;
 }
+
 .address-label {
   display: flex;
-  flex-direction: column;
-  padding: 16px 20px;
-  background: rgba(0,255,225,0.03);
-  border: 1.5px solid rgba(0,255,225,0.08);
-  border-radius: 10px;
+  align-items: center;
+  padding: 1rem;
+  border: 2px solid #232e47;
+  background: rgba(36, 44, 60, 0.85);
+  transition: border 0.2s, background 0.2s;
+  border-radius: 0.75rem;
   cursor: pointer;
-  transition: all 0.2s ease;
-  position: relative;
+  transition: all 0.3s ease;
+  color: #e8eaed;
 }
+
 .address-radio:checked + .address-label {
-  border-color: #00ffe1;
-  background: rgba(0,255,225,0.09);
-  box-shadow: 0 4px 22px rgba(0,255,225,0.11);
+  border-color: #399bff;
+  background: linear-gradient(135deg, #232e47 0%, #399bff20 100%);
+  box-shadow: 0 4px 20px #399bff30;
 }
+
 .address-radio:checked + .address-label::before {
-  content: '';
-  position: absolute;
-  top: 12px;
-  right: 16px;
-  width: 19px;
-  height: 19px;
-  background: linear-gradient(135deg, #00ffe1 0%, #8f5fe8 100%);
-  border-radius: 50%;
-  transition: all 0.2s ease;
-  box-shadow: 0 0 10px #00ffe1;
-}
-.address-radio:checked + .address-label::after {
   content: '✓';
   position: absolute;
-  top: 10px;
-  right: 20px;
-  color: #fff;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64b5f6;
+  font-size: 1.25rem;
   font-weight: bold;
-  font-size: 14px;
-  text-shadow: 0 0 7px #00ffe1;
 }
+
 .address-info {
-  color: #ffffff;
+  flex: 1;
 }
+
 .address-street {
-  font-weight: 700;
-  font-size: 16px;
-  margin-bottom: 4px;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #f9fafb;
+  margin-bottom: 0.25rem;
 }
+
 .address-details {
-  color: rgba(255, 255, 255, 0.67);
-  font-size: 15px;
+  font-size: 0.875rem;
+  color: #b0b7c3;
 }
+
 .address-country {
-  color: rgba(255, 255, 255, 0.45);
-  font-size: 13px;
-  margin-top: 4px;
+  font-size: 0.875rem;
+  color: #9ca3af;
+  margin-top: 0.25rem;
 }
 .address-form {
   display: grid;
@@ -387,19 +453,20 @@ function handleDadosColetadosFromPayment(dados) {
 }
 .form-input {
   background: #23233a;
-  border: 1.5px solid rgba(0,255,225,0.09);
+  border: 1.5px solid #399bff40;
   border-radius: 8px;
   padding: 12px 16px;
   color: #fff;
   font-size: 16px;
   transition: all 0.2s ease;
   min-width: 0;
+  box-shadow: 0 2px 8px #399bff10;
 }
 .form-input:focus {
   outline: none;
-  border-color: #00ffe1;
+  border-color: #399bff;
   background: #23233a;
-  box-shadow: 0 0 0 2px rgba(0,255,225,0.18);
+  box-shadow: 0 0 0 2px #399bff30;
 }
 .form-input::placeholder {
   color: rgba(255, 255, 255, 0.4);
@@ -424,36 +491,93 @@ function handleDadosColetadosFromPayment(dados) {
   gap: 8px;
 }
 .btn-primary {
-  background: linear-gradient(145deg, #00ffe1 0%, #8f5fe8 100%);
-  color: #181828;
+  background: linear-gradient(135deg, #399bff 0%, #42a5f5 100%);
+  color: white;
   border: none;
-  padding: 14px 28px;
-  font-size: 17px;
-  box-shadow: 0 4px 15px rgba(0,255,225,0.14);
+  border-radius: 0.75rem;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 15px #399bff30;
 }
 .btn-primary:hover {
-  background: linear-gradient(145deg, #8f5fe8 0%, #00ffe1 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(0,255,225,0.22);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px #399bff40;
+  background: linear-gradient(135deg, #42a5f5 0%, #399bff 100%);
 }
 .btn-secondary {
   background: transparent;
-  color: #00ffe1;
-  border: 1.5px solid #00ffe1;
-  padding: 12px 24px;
-  font-size: 16px;
+  color: #399bff;
+  border: 2px solid #399bff;
+  border-radius: 0.75rem;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 .btn-secondary:hover {
-  background: rgba(0,255,225,0.09);
+  background: #399bff;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px #399bff30;
 }
+
 .w-100 {
   width: 100%;
 }
 
+.address-continue {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.selected-address-info h5 {
+  color: #399bff;
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.selected-address {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: rgba(57, 155, 255, 0.08);
+  border: 1.5px solid #399bff40;
+  border-radius: 10px;
+  color: #fff;
+  box-shadow: 0 2px 8px #399bff10;
+}
+
+.selected-address i {
+  font-size: 24px;
+  color: #399bff;
+}
+
+.address-details {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
 /* Responsividade */
 @media (max-width: 768px) {
+  .glass-card {
+    padding: 1.2rem 0.7rem;
+  }
   .form-section {
-    padding: 2rem 1.25rem;
+    padding: 0;
   }
   .address-form {
     grid-template-columns: 1fr;
@@ -469,37 +593,13 @@ function handleDadosColetadosFromPayment(dados) {
     justify-content: center;
     padding: 14px 24px;
   }
-  .section-header h4 {
-    font-size: 18px;
-  }
-  .steps-indicator {
-    gap: 1.2rem;
-    margin-bottom: 1.1rem;
-  }
-  .step i {
-    font-size: 1.4rem;
-  }
 }
 @media (max-width: 480px) {
   .checkout-form {
     padding: 0.5rem;
   }
-  .form-section {
-    padding: 1.2rem 0.5rem;
-  }
-  .steps-indicator {
-    gap: 0.7rem;
-  }
-  .step i {
-    font-size: 1.05rem;
-  }
-  .address-form {
-    gap: 8px;
-  }
-  .btn-primary,
-  .btn-secondary {
-    font-size: 15px;
-    padding: 12px 10px;
+  .glass-card {
+    padding: 0.7rem 0.2rem;
   }
 }
 </style>

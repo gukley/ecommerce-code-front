@@ -1,8 +1,25 @@
 <template>
-  <div class="order-review">
+  <div class="order-review glass-card">
     <div class="review-header">
       <i class="bi bi-clipboard-check"></i>
       <h4>Confira seu pedido</h4>
+    </div>
+
+    <!-- Resumo do endereço -->
+    <div v-if="endereco && endereco.id" class="order-address-summary">
+      <div class="address-title"><i class="bi bi-geo-alt"></i> Endereço de entrega:</div>
+      <div class="address-content">
+        {{ endereco.street }}, {{ endereco.number }} - {{ endereco.city }}/{{ endereco.state }} - CEP: {{ endereco.zip }}
+        <span v-if="endereco.country">({{ endereco.country }})</span>
+      </div>
+    </div>
+
+    <!-- Resumo do pagamento -->
+    <div v-if="metodoPagamento" class="order-payment-summary">
+      <div class="payment-title"><i class="bi bi-credit-card"></i> Pagamento:</div>
+      <div class="payment-content">
+        {{ metodoPagamentoLabel }}
+      </div>
     </div>
 
     <div class="products-list">
@@ -31,13 +48,24 @@
         <span>Frete:</span>
         <span>{{ formatPrice(frete) }}</span>
       </div>
+      <div v-if="appliedCoupon" class="d-flex justify-content-between align-items-center mb-2">
+        <span class="fw-bold text-success">
+          Cupom aplicado: {{ appliedCoupon.code }} ({{ appliedCoupon.discount_percentage }}%)
+        </span>
+        <span class="fw-bold text-success">-R$ {{ descontoCupom.toFixed(2) }}</span>
+      </div>
       <div class="total-line total-final">
         <span>Total:</span>
         <span>{{ formatPrice(total) }}</span>
       </div>
     </div>
 
-    <button class="btn-confirm" @click="$emit('confirmarPedido')">
+    <button
+      class="btn-confirm"
+      @click="$emit('confirmarPedido')"
+      :disabled="!endereco || !endereco.id"
+      :title="!endereco || !endereco.id ? 'Selecione um endereço antes de confirmar' : ''"
+    >
       <i class="bi bi-cart-check"></i>
       Confirmar Pedido
     </button>
@@ -59,6 +87,22 @@ const props = defineProps({
   total: {
     type: Number,
     default: 0
+  },
+  appliedCoupon: {
+    type: Object,
+    default: null
+  },
+  descontoCupom: {
+    type: Number,
+    default: 0
+  },
+  endereco: {
+    type: Object,
+    default: null
+  },
+  metodoPagamento: {
+    type: String,
+    default: ''
   }
 });
 
@@ -69,6 +113,15 @@ const subtotal = computed(() =>
 function formatPrice(value) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 }
+
+const metodoPagamentoLabel = computed(() => {
+  switch (props.metodoPagamento) {
+    case 'pix': return 'PIX';
+    case 'boleto': return 'Boleto Bancário';
+    case 'credito': return 'Cartão de Crédito';
+    default: return props.metodoPagamento || '-';
+  }
+});
 </script>
 
 <style scoped>
@@ -108,6 +161,50 @@ function formatPrice(value) {
   background-clip: text;
   text-fill-color: transparent;
   letter-spacing: 0.03em;
+}
+.order-address-summary {
+  background: rgba(0,255,225,0.06);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  color: #00ffe1;
+  font-size: 1rem;
+}
+.address-title {
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 2px;
+  color: #00ffe1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.address-content {
+  color: #fff;
+  font-size: 0.98rem;
+  margin-left: 2px;
+}
+.order-payment-summary {
+  background: rgba(143,95,232,0.08);
+  border-radius: 10px;
+  padding: 10px 16px;
+  margin-bottom: 12px;
+  color: #8f5fe8;
+  font-size: 1rem;
+}
+.payment-title {
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 2px;
+  color: #8f5fe8;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.payment-content {
+  color: #fff;
+  font-size: 0.98rem;
+  margin-left: 2px;
 }
 .products-list {
   margin-bottom: 22px;
@@ -216,6 +313,11 @@ function formatPrice(value) {
   justify-content: center;
   gap: 11px;
   transition: all 0.2s cubic-bezier(.4,.2,.2,1);
+}
+.btn-confirm[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  filter: grayscale(0.5);
 }
 .btn-confirm:hover {
   background: linear-gradient(145deg, #8f5fe8 0%, #00ffe1 100%);

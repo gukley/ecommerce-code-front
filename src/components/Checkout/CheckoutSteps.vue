@@ -1,161 +1,159 @@
 <template>
-    <div class="checkout-steps">
-      <div class="steps-container">
-        <div class="step" :class="{ active: etapa >= 1, completed: etapa > 1 }">
-          <div class="step-circle">
-            <i v-if="etapa > 1" class="bi bi-check"></i>
-            <span v-else>1</span>
-          </div>
-          <div class="step-label">Endereço</div>
+  <div class="checkout-steps">
+    <div class="steps-indicator">
+      <div class="step" :class="{ active: etapa >= 1, done: etapa > 1 }">
+        <div class="step-circle">
+          <i v-if="etapa > 1" class="bi bi-check"></i>
+          <span v-else>1</span>
         </div>
-        <div class="step-line" :class="{ active: etapa >= 2 }"></div>
-        <div class="step" :class="{ active: etapa >= 2, completed: etapa > 2 }">
-          <div class="step-circle">
-            <i v-if="etapa > 2" class="bi bi-check"></i>
-            <span v-else>2</span>
-          </div>
-          <div class="step-label">Pagamento</div>
+        <span class="step-label">Endereço</span>
+      </div>
+      <div class="step" :class="{ active: etapa >= 2, done: etapa > 2 }">
+        <div class="step-circle">
+          <i v-if="etapa > 2" class="bi bi-check"></i>
+          <span v-else>2</span>
         </div>
-        <div class="step-line" :class="{ active: etapa >= 3 }"></div>
-        <div class="step" :class="{ active: etapa >= 3, completed: etapa > 3 }">
-          <div class="step-circle">
-            <i v-if="etapa > 3" class="bi bi-check"></i>
-            <span v-else>3</span>
-          </div>
-          <div class="step-label">Confirmação</div>
+        <span class="step-label">Pagamento</span>
+      </div>
+      <div class="step" :class="{ active: etapa >= 3, done: etapa > 3 }">
+        <div class="step-circle">
+          <i v-if="etapa > 3" class="bi bi-check"></i>
+          <span v-else>3</span>
         </div>
+        <span class="step-label">Confirmação</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fg" :style="{ width: progressWidth }"></div>
       </div>
     </div>
-  </template>
-  
-  <script setup>
-  defineProps({ etapa: Number });
-  </script>
-  
-  <style scoped>
-  .checkout-steps {
-    margin-bottom: 3rem;
-    padding: 0 1rem;
-    user-select: none;
+  </div>
+</template>
+
+<script setup>
+import { computed } from 'vue';
+const props = defineProps({ etapa: Number });
+const progressWidth = computed(() => {
+  if (props.etapa === 1) return '0%';
+  if (props.etapa === 2) return '50%';
+  if (props.etapa >= 3) return '100%';
+  return '0%';
+});
+</script>
+
+<style scoped>
+.checkout-steps {
+  margin-bottom: 3rem;
+  padding: 0 1rem;
+  user-select: none;
+}
+.steps-indicator {
+  display: flex;
+  justify-content: center;
+  gap: 2.5rem;
+  margin-bottom: 2rem;
+  position: relative;
+  align-items: flex-end;
+}
+.progress-bar-bg {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 1.7rem;
+  height: 6px;
+  background: #232e47;
+  border-radius: 4px;
+  z-index: 0;
+  width: 100%;
+}
+.progress-bar-fg {
+  height: 100%;
+  background: linear-gradient(90deg, #399bff 0%, #42a5f5 100%);
+  border-radius: 4px;
+  transition: width 0.4s cubic-bezier(.4,2,.3,1);
+}
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  color: #9ca3af;
+  font-weight: 600;
+  opacity: 0.7;
+  position: relative;
+  z-index: 2;
+}
+.step.active, .step.done {
+  color: #399bff;
+  opacity: 1;
+}
+.step-label {
+  font-size: 0.93rem;
+  font-weight: 600;
+  text-align: center;
+  max-width: 100px;
+  line-height: 1.2;
+  color: inherit;
+  margin-top: 0.2rem;
+}
+.step-circle {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: #232e47;
+  border: 2.5px solid #232e47;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.1rem;
+  transition: border 0.3s, background 0.3s;
+  box-shadow: 0 2px 8px #399bff10;
+}
+.step.active .step-circle,
+.step.done .step-circle {
+  border-color: #399bff;
+  background: linear-gradient(135deg, #399bff 0%, #42a5f5 100%);
+  color: #fff;
+  box-shadow: 0 4px 16px #399bff30;
+}
+.step.done .step-circle {
+  background: linear-gradient(135deg, #42a5f5 0%, #399bff 100%);
+}
+.step-circle i {
+  font-size: 1.3rem;
+  color: #fff;
+}
+@media (max-width: 768px) {
+  .steps-indicator {
+    gap: 1.2rem;
+    margin-bottom: 1.1rem;
   }
-  
-  .steps-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 2.2rem;
-    position: relative;
-  }
-  
-  .step {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.66rem;
-    transition: all 0.3s cubic-bezier(.4,.2,.2,1);
-  }
-  
   .step-circle {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: linear-gradient(120deg, #23233a 60%, #2a2a3e 100%);
-    border: 2.5px solid rgba(0,255,225,0.10);
-    color: #a0a0a0;
-    font-size: 19px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.28s cubic-bezier(.4,.2,.2,1);
-    position: relative;
-    box-shadow: 0 3px 15px rgba(0,255,225,0.07);
-    z-index: 1;
+    width: 1.7rem;
+    height: 1.7rem;
+    font-size: 1rem;
   }
-  
-  .step-circle i {
-    font-size: 22px;
-    color: #fff;
-    font-weight: bold;
-    filter: drop-shadow(0 0 7px #00ffe1);
-    transition: color 0.3s;
-  }
-  
-  .step.active .step-circle {
-    background: linear-gradient(120deg, #00ffe1 0%, #8f5fe8 90%);
-    border-color: #8f5fe8;
-    color: #181828;
-    box-shadow: 0 4px 15px rgba(0,255,225,0.26);
-    transform: scale(1.13);
-  }
-  
-  .step.completed .step-circle {
-    background: linear-gradient(120deg, #15fbe3 0%, #8f5fe8 90%);
-    border-color: #00ffe1;
-    color: #181828;
-    box-shadow: 0 4px 12px rgba(0,255,225,0.16);
-    filter: brightness(1.08);
-  }
-  
   .step-label {
-    font-size: 15px;
-    font-weight: 500;
-    color: #a0a0a0;
-    text-align: center;
-    letter-spacing: 0.01em;
-    transition: color 0.3s cubic-bezier(.4,.2,.2,1);
+    font-size: 0.82rem;
   }
-  
-  .step.active .step-label,
-  .step.completed .step-label {
-    color: #00ffe1;
-    font-weight: 700;
-    text-shadow: 0 2px 8px rgba(0,255,225,0.08);
-  }
-  
-  .step-line {
-    width: 70px;
+  .progress-bar-bg {
+    top: 1.1rem;
     height: 4px;
-    background: linear-gradient(90deg, #34345e 0%, #23233a 100%);
-    border-radius: 2px;
-    transition: all 0.28s cubic-bezier(.4,.2,.2,1);
-    position: relative;
-    z-index: 0;
   }
-  .step-line.active {
-    background: linear-gradient(90deg, #00ffe1 0%, #8f5fe8 100%);
-    box-shadow: 0 2px 10px rgba(0,255,225,0.13);
+}
+@media (max-width: 480px) {
+  .checkout-steps {
+    margin-bottom: 1.2rem;
+    padding: 0 0.3rem;
   }
-  
-  @media (max-width: 768px) {
-    .steps-container {
-      gap: 1.2rem;
-    }
-    .step-circle {
-      width: 36px;
-      height: 36px;
-      font-size: 15px;
-    }
-    .step-label {
-      font-size: 12px;
-    }
-    .step-line {
-      width: 30px;
-      height: 3px;
-    }
+  .steps-indicator {
+    gap: 0.7rem;
   }
-  @media (max-width: 480px) {
-    .checkout-steps {
-      margin-bottom: 1.2rem;
-      padding: 0 0.3rem;
-    }
-    .step-line {
-      width: 15px;
-    }
-    .step-circle {
-      width: 28px;
-      height: 28px;
-      font-size: 12px;
-    }
+  .step-label {
+    font-size: 0.75rem;
   }
-  </style>
+}
+</style>
