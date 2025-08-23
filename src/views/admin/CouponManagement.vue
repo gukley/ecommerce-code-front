@@ -1,6 +1,6 @@
 <template>
-  <div class="p-4 dashboard-container">
-    <div v-if="isLoading" class="loading-overlay">
+  <div class="coupon-management">
+    <div v-if="couponStore.loading" class="loading-overlay">
       <div class="spinner-border text-primary" role="status">
         <span class="visually-hidden">Carregando...</span>
       </div>
@@ -8,28 +8,85 @@
     <div v-else>
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold text-primary-ggtech">Gestão de Cupons</h2>
-        <button class="btn btn-success-ggtech btn-gradient" @click="openCreateForm">
+        <button class="btn btn-gradient-add" @click="openCreateForm">
           <i class="bi bi-plus-lg me-2"></i> Adicionar Novo Cupom
         </button>
       </div>
       <p class="text-light-ggtech">Gerencie e visualize todos os cupons de desconto da sua loja.</p>
 
-      <!-- Mensagem de sucesso quando o token está presente -->
-      <div class="mb-4 d-flex align-items-center">
-        <div class="alert alert-success d-flex align-items-center me-3" role="alert">
-          <i class="bi bi-check-circle-fill me-2"></i>
-          Token de autenticação processado com sucesso.
+      <!-- Estatísticas dos cupons -->
+      <div class="row g-4 mb-4">
+        <div class="col-lg-3 col-md-6">
+          <div class="card p-3 shadow-sm h-100 metric-card">
+            <div class="card-body">
+              <div class="d-flex align-items-center">
+                <div class="icon-container total-icon">
+                  <i class="bi bi-ticket-perforated"></i>
+                </div>
+                <div>
+                  <h5 class="card-title">Total de Cupons</h5>
+                  <p class="card-text fs-4 fw-bold">{{ couponStore.totalCoupons }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <div class="card p-3 shadow-sm h-100 metric-card">
+            <div class="card-body">
+              <div class="d-flex align-items-center">
+                <div class="icon-container active-icon">
+                  <i class="bi bi-check-circle"></i>
+                </div>
+                <div>
+                  <h5 class="card-title">Cupons Ativos</h5>
+                  <p class="card-text fs-4 fw-bold">{{ couponStore.activeCoupons.length }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <div class="card p-3 shadow-sm h-100 metric-card">
+            <div class="card-body">
+              <div class="d-flex align-items-center">
+                <div class="icon-container valid-icon">
+                  <i class="bi bi-star"></i>
+                </div>
+                <div>
+                  <h5 class="card-title">Cupons Válidos</h5>
+                  <p class="card-text fs-4 fw-bold">{{ couponStore.validCoupons.length }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <div class="card p-3 shadow-sm h-100 metric-card">
+            <div class="card-body">
+              <div class="d-flex align-items-center">
+                <div class="icon-container expired-icon">
+                  <i class="bi bi-clock-history"></i>
+                </div>
+                <div>
+                  <h5 class="card-title">Cupons Expirados</h5>
+                  <p class="card-text fs-4 fw-bold">{{ couponStore.expiredCoupons.length }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       <!-- Exibe a mensagem de erro se existir -->
-      <div v-if="errorMessage" class="alert alert-danger" role="alert">
-        <strong>Erro:</strong> {{ errorMessage }}
+      <div v-if="couponStore.error" class="alert alert-danger mb-4" role="alert">
+        <strong>Erro:</strong> {{ couponStore.error }}
       </div>
 
       <!-- Componente da lista de cupons com botões de ação -->
       <CouponList 
-        :coupons="coupons"
+        :coupons="couponStore.coupons"
+        :loading="couponStore.loading"
         @edit-coupon="handleEditCoupon"
         @delete-coupon="handleDeleteCoupon"
       />
@@ -39,6 +96,7 @@
     <CouponForm 
       v-if="showCouponForm" 
       :coupon="couponToEdit"
+      :loading="couponStore.loading"
       @submit-coupon="handleFormSubmitted" 
       @cancel="closeForm" 
     />
@@ -47,91 +105,44 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useCouponStore } from '@/stores/couponStore';
 import CouponList from '@/components/Admin/CouponList.vue';
 import CouponForm from '@/components/Admin/CouponForm.vue';
-import { getCoupons, createCoupon, updateCoupon, deleteCoupon } from '@/services/apiService';
 
-// Estado da aplicação
-const coupons = ref([]);
-const isLoading = ref(true);
+// Store
+const couponStore = useCouponStore();
+
+// Estado local
 const showCouponForm = ref(false);
 const couponToEdit = ref(null);
-const errorMessage = ref('');
 
 // Ações do ciclo de vida
-onMounted(() => {
-  // Apenas chama a função de carregar cupons na inicialização
-  fetchCoupons();
+onMounted(async () => {
+  if (couponStore.shouldRefetch()) {
+    await couponStore.fetchAllCoupons();
+  }
 });
 
 // Funções para gerenciamento de dados
-const fetchCoupons = async () => {
-  isLoading.value = true;
-  try {
-    const data = await getCoupons();
-    coupons.value = data.map(item => ({
-        ...item,
-        is_percentage: item.discount_percentage > 0,
-        expiration_date: item.end_date,
-    }));
-  } catch (error) {
-    console.error("Erro ao carregar cupons:", error);
-    errorMessage.value = error.message;
-    coupons.value = [];
-  } finally {
-    isLoading.value = false;
-  }
-};
-
 const handleFormSubmitted = async (formData) => {
-  isLoading.value = true;
-  errorMessage.value = '';
   try {
-    let result;
-    const dataToSend = {
-      ...formData,
-      discount_percentage: Number(formData.value) || 0,
-    };
-    
-    if (dataToSend.id) {
-      result = await updateCoupon(dataToSend.id, dataToSend);
-      const index = coupons.value.findIndex(c => c.id === result.id);
-      if (index !== -1) {
-        coupons.value[index] = {
-            ...result,
-            is_percentage: result.discount_percentage > 0,
-            expiration_date: result.end_date,
-        };
-      }
+    if (formData.id) {
+      await couponStore.updateExistingCoupon(formData.id, formData);
     } else {
-      result = await createCoupon(dataToSend);
-      coupons.value.push({
-          ...result,
-          is_percentage: result.discount_percentage > 0,
-          expiration_date: result.end_date,
-      });
+      await couponStore.createNewCoupon(formData);
     }
     closeForm();
   } catch (error) {
     console.error("Falha ao salvar o cupom:", error);
-    errorMessage.value = error.message;
-  } finally {
-    isLoading.value = false;
   }
 };
 
 const handleDeleteCoupon = async (coupon) => {
   if (confirm(`Tem certeza que deseja excluir o cupom "${coupon.code}"?`)) {
     try {
-      isLoading.value = true;
-      errorMessage.value = '';
-      await deleteCoupon(coupon.id);
-      coupons.value = coupons.value.filter(c => c.id !== coupon.id);
+      await couponStore.deleteExistingCoupon(coupon.id);
     } catch (error) {
       console.error("Falha ao excluir o cupom:", error);
-      errorMessage.value = error.message;
-    } finally {
-      isLoading.value = false;
     }
   }
 };
@@ -139,93 +150,169 @@ const handleDeleteCoupon = async (coupon) => {
 const openCreateForm = () => {
   couponToEdit.value = null;
   showCouponForm.value = true;
-  errorMessage.value = '';
 };
 
 const handleEditCoupon = (coupon) => {
   couponToEdit.value = coupon;
   showCouponForm.value = true;
-  errorMessage.value = '';
 };
 
 const closeForm = () => {
   showCouponForm.value = false;
   couponToEdit.value = null;
-  errorMessage.value = '';
 };
 </script>
 
 <style scoped>
-/* Adicionando os estilos para o botão de gradiente */
-.btn-gradient {
-  background: linear-gradient(135deg, var(--admin-accent-primary) 0%, var(--admin-accent-secondary) 100%);
-  color: #fff !important;
+.coupon-management {
+  background-color: #0f1419;
+  min-height: 100vh;
+  color: #e8eaed;
+  padding: 2rem 1rem;
+  max-width: 1280px;
+  margin: 0 auto;
+  font-family: 'Inter', sans-serif;
+}
+
+.text-primary-ggtech {
+  background: linear-gradient(90deg, #64b5f6 0%, #42a5f5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+  font-size: 2.2rem;
+  letter-spacing: 0.02em;
+}
+
+.text-light-ggtech { 
+  color: #b0b7c3; 
+  font-weight: 400;
+}
+
+.btn-gradient-add {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border: none;
-  border-radius: 50px;
+  color: white;
   font-weight: 600;
   padding: 0.75rem 1.5rem;
-  box-shadow: 0 4px 16px rgba(0, 255, 225, 0.2);
+  border-radius: 0.5rem;
   transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.btn-gradient:hover {
-  background: linear-gradient(135deg, var(--admin-accent-secondary) 0%, var(--admin-accent-primary) 100%);
-  color: #fff !important;
-  box-shadow: 0 8px 25px rgba(0, 255, 225, 0.3);
+.btn-gradient-add:hover {
   transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  color: white;
 }
 
-.btn-gradient:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
+.metric-card {
+  background: linear-gradient(135deg, #1a2332 0%, #2d3748 100%);
+  border: 1px solid #374151;
+  border-radius: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  color: #e8eaed;
+  transition: all 0.3s ease;
+  cursor: default;
+  overflow: hidden;
 }
 
-/* Os outros estilos já existentes... */
-:root {
-  --admin-bg-primary: #0f0f23;
-  --admin-bg-secondary: #181828;
-  --admin-bg-tertiary: #202038;
-  --admin-accent-primary: #00ffe1;
-  --admin-accent-secondary: #8f5fe8;
-  --admin-text-primary: #ffffff;
-  --admin-text-secondary: rgba(255, 255, 255, 0.8);
-  --admin-text-muted: rgba(255, 255, 255, 0.6);
-  --admin-border-light: rgba(255, 255, 255, 0.1);
-  --admin-shadow-light: rgba(0, 0, 0, 0.4);
-  --admin-danger: #ff6b6b;
-  --admin-border-medium: rgba(255, 255, 255, 0.2);
+.metric-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+  border-color: #4a5568;
 }
-.dashboard-container {
-  background: var(--admin-bg-primary);
-  color: var(--admin-text-primary);
-  min-height: 100vh;
+
+.metric-card .card-title {
+  color: #a0aec0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
 }
-.text-primary-ggtech {
-  color: var(--admin-accent-primary) !important;
+
+.metric-card .card-text {
+  color: #f7fafc;
+  margin-bottom: 0;
 }
-.text-light-ggtech {
-  color: var(--admin-text-muted) !important;
+
+.icon-container {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1rem;
+  flex-shrink: 0;
+  font-size: 1.5rem;
+  color: white;
 }
+
+.total-icon {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.active-icon {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.valid-icon {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+}
+
+.expired-icon {
+  background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+}
+
 .loading-overlay {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  background-color: var(--admin-bg-primary);
+  min-height: 80vh;
 }
+
 .spinner-border {
-  color: var(--admin-accent-primary) !important;
+  color: #64b5f6;
 }
+
 .alert-danger {
-  background-color: var(--admin-danger);
-  color: var(--admin-text-primary);
-  border: 1px solid var(--admin-danger);
+  background-color: #1a202c;
+  color: #f56565;
+  border: 1px solid #f56565;
+  border-radius: 0.5rem;
 }
-.alert-success {
-    background-color: #28a745;
-    color: #fff;
-    border: 1px solid #28a745;
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .coupon-management {
+    padding: 1rem 0.5rem;
+  }
+  
+  .text-primary-ggtech {
+    font-size: 1.8rem;
+  }
+  
+  .btn-gradient-add {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .icon-container {
+    width: 50px;
+    height: 50px;
+    font-size: 1.2rem;
+  }
+  
+  .metric-card .card-title {
+    font-size: 0.8rem;
+  }
+  
+  .metric-card .card-text {
+    font-size: 1.2rem;
+  }
 }
 </style>

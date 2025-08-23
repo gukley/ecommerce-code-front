@@ -23,20 +23,17 @@
           <tbody>
             <!-- Itera sobre a lista de cupons recebida via props -->
             <tr v-for="coupon in coupons" :key="coupon.code">
-              <td class="fw-bold">{{ coupon.code }}</td>
+              <td class="fw-bold text-coupon-code">{{ coupon.code }}</td>
               <td>
-                <!-- Corrigido: Agora exibe a propriedade correta para o desconto percentual -->
-                <span v-if="coupon.is_percentage">
+                <span v-if="coupon.discount_percentage > 0" class="badge badge-discount">
                   {{ coupon.discount_percentage }}%
                 </span>
-                <span v-else>
-                  R$ {{ Number(coupon.value).toFixed(2) }}
-                </span>
+                <span v-else class="text-muted">N/A</span>
               </td>
-              <td>{{ formatDate(coupon.expiration_date) }}</td>
+              <td class="text-coupon-date">{{ formatDate(coupon.end_date) }}</td>
               <td>
-                <span :class="`badge rounded-pill bg-${getCouponStatusColor(coupon.status)}`">
-                  {{ formatStatus(coupon.status) }}
+                <span :class="`badge rounded-pill ${getCouponStatusClass(coupon)}`">
+                  {{ formatStatus(coupon) }}
                 </span>
               </td>
               <td>
@@ -94,13 +91,27 @@
     }
   };
   
-  const formatStatus = (status) => {
-    const statusMap = {
-      'active': 'Ativo',
-      'expired': 'Expirado',
-      'inactive': 'Inativo',
-    };
-    return statusMap[status?.toLowerCase()] || 'Desconhecido';
+  const formatStatus = (coupon) => {
+    // Considera expirado se passou da data de expiração
+    if (coupon.end_date) {
+      const expirationDate = new Date(coupon.end_date);
+      const now = new Date();
+      if (expirationDate < now) {
+        return 'Expirado';
+      }
+    }
+    return 'Ativo';
+  };
+
+  const getCouponStatusClass = (coupon) => {
+    if (coupon.end_date) {
+      const expirationDate = new Date(coupon.end_date);
+      const now = new Date();
+      if (expirationDate < now) {
+        return 'bg-danger text-white';
+      }
+    }
+    return 'bg-success text-white';
   };
   </script>
   
@@ -121,34 +132,71 @@
     --admin-border-medium: rgba(255, 255, 255, 0.2);
   }
   
+  /* Estilos adicionais para melhorar a aparência */
+  .text-muted {
+    color: #9ca3af !important;
+    font-style: italic;
+  }
+  
+  .fw-bold {
+    color: #f9fafb;
+    font-weight: 700;
+  }
+  
+  /* Animação para as linhas da tabela */
+  .table-custom tbody tr {
+    transition: all 0.3s ease;
+  }
+  
+  /* Estilo para o container principal */
   .coupon-list-container {
-    background-color: var(--admin-bg-secondary);
-    border: 1px solid var(--admin-border-light);
+    background: linear-gradient(135deg, #1a2332 0%, #2d3748 100%);
+    border: 1px solid #374151;
+    border-radius: 1rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+  }
+  
+  /* Estilo para o cabeçalho da tabela */
+  .table-custom thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
   }
   
   .text-primary-ggtech {
-    color: var(--admin-accent-primary);
+    background: linear-gradient(90deg, #64b5f6 0%, #42a5f5 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
   }
   
   /* Estilo para a tabela */
   .table-custom {
-    color: var(--admin-text-secondary);
+    color: #e8eaed;
     border-collapse: separate;
     border-spacing: 0;
+    background: transparent;
   }
   
   .table-custom th {
-    background-color: var(--admin-bg-tertiary);
-    color: var(--admin-text-primary);
+    background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+    color: #f9fafb;
     border: none;
     font-weight: 600;
     padding: 1rem;
+    text-transform: uppercase;
+    font-size: 0.875rem;
+    letter-spacing: 0.05em;
   }
   
   .table-custom td {
-    border-top: 1px solid var(--admin-border-light);
-    border-bottom: 1px solid var(--admin-border-light);
+    border-top: 1px solid #374151;
+    border-bottom: 1px solid #374151;
     padding: 1rem;
+    background: transparent;
+    transition: background-color 0.2s ease;
   }
   
   /* Estilos de borda arredondada para a tabela */
@@ -170,38 +218,115 @@
   
   /* Efeito hover nas linhas */
   .table-custom tbody tr:hover {
-    background-color: var(--admin-bg-tertiary);
+    background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+  
+  .table-custom tbody tr:hover td {
+    border-color: #64b5f6;
   }
   
   /* Estilo para os botões de ação */
   .btn-outline-info-ggtech {
-    color: var(--admin-accent-primary);
-    border-color: var(--admin-accent-primary);
-    transition: all 0.2s ease-in-out;
+    background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%);
+    border: 2px solid #64b5f6;
+    color: white;
+    transition: all 0.3s ease;
+    border-radius: 0.5rem;
+    font-weight: 600;
   }
   
   .btn-outline-info-ggtech:hover {
-    background-color: var(--admin-accent-primary);
-    color: var(--admin-bg-primary);
+    background: linear-gradient(135deg, #42a5f5 0%, #64b5f6 100%);
+    border-color: #42a5f5;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(100, 181, 246, 0.4);
   }
   
   .btn-outline-danger {
-    color: var(--admin-danger);
-    border-color: var(--admin-danger);
-    transition: all 0.2s ease-in-out;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    border: 2px solid #ef4444;
+    color: white;
+    transition: all 0.3s ease;
+    border-radius: 0.5rem;
+    font-weight: 600;
   }
   
   .btn-outline-danger:hover {
-    background-color: var(--admin-danger);
-    color: #fff;
+    background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+    border-color: #dc2626;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+  }
+  
+  /* Estilo para os badges */
+  .badge {
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  .bg-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  }
+  
+  .bg-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  }
+  
+  .bg-warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+  }
+  
+  .bg-secondary {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%) !important;
   }
   
   /* Estilo para o alerta de informação */
   .alert-info-ggtech {
-    background-color: var(--admin-bg-tertiary);
-    border-color: var(--admin-border-light);
-    color: var(--admin-text-secondary);
+    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+    border: 1px solid #60a5fa;
+    color: white;
+    border-radius: 0.75rem;
+    padding: 1rem 1.5rem;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
   }
-  
+
+  .text-coupon-code {
+    font-size: 1.1rem;
+    color: #fff !important;
+    letter-spacing: 1px;
+    font-weight: 700;
+    /* Removido o gradiente/text-fill para garantir contraste */
+    background: none !important;
+    -webkit-background-clip: unset !important;
+    -webkit-text-fill-color: unset !important;
+    background-clip: unset !important;
+  }
+
+  .badge-discount {
+    background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+    color: #181e2a !important;
+    font-weight: 700;
+    font-size: 1rem;
+    border-radius: 8px;
+    padding: 0.4em 1em;
+    margin: 0 0.2em;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px #43e97b40;
+  }
+
+  .text-coupon-date {
+    font-size: 1rem;
+    color: #b0b7c3;
+    font-weight: 500;
+  }
+
+  .table-custom th, .table-custom td {
+    font-size: 1rem;
+  }
   </style>
-  

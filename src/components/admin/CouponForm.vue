@@ -16,24 +16,11 @@
                 <label for="coupon-code" class="form-label">Código do Cupom</label>
                 <input type="text" class="form-control modern-input" id="coupon-code" v-model="form.code" required>
               </div>
-              
-              <!-- Tipo de Desconto -->
+
+              <!-- Valor do Desconto (%) -->
               <div class="mb-3">
-                <label class="form-label">Tipo de Desconto</label>
-                <div class="form-check">
-                  <input class="form-check-input" type="radio" id="percentage" value="percentage" v-model="discountType">
-                  <label class="form-check-label" for="percentage">Porcentagem (%)</label>
-                </div>
-                <div class="form-check">
-                  <input class="form-check-input" type="radio" id="fixed" value="fixed" v-model="discountType">
-                  <label class="form-check-label" for="fixed">Valor Fixo (R$)</label>
-                </div>
-              </div>
-  
-              <!-- Valor do Desconto -->
-              <div class="mb-3">
-                <label for="coupon-value" class="form-label">Valor do Desconto</label>
-                <input type="number" class="form-control modern-input" id="coupon-value" v-model.number="form.value" required min="0">
+                <label for="coupon-value" class="form-label">Desconto (%)</label>
+                <input type="number" class="form-control modern-input" id="coupon-value" v-model.number="form.value" required min="1" max="100">
               </div>
   
               <!-- Data de Início e Fim -->
@@ -47,7 +34,7 @@
                   <input type="date" class="form-control modern-input" id="end-date" v-model="form.end_date" required>
                 </div>
               </div>
-  
+
               <div class="d-flex justify-content-end gap-2 mt-4">
                 <button type="button" class="btn btn-outline-secondary custom-btn-cancel" @click="$emit('cancel')">Cancelar</button>
                 <button type="submit" class="btn btn-success custom-btn-save">{{ isEditing ? 'Salvar Alterações' : 'Salvar Cupom' }}</button>
@@ -60,8 +47,8 @@
   </template>
   
   <script setup>
-  import { reactive, ref, watch, onMounted } from 'vue';
-  
+  import { reactive, ref, onMounted } from 'vue';
+
   const props = defineProps({
     coupon: {
       type: Object,
@@ -72,12 +59,10 @@
   const emit = defineEmits(['submit-coupon', 'cancel']);
   
   const isEditing = ref(false);
-  const discountType = ref('percentage');
-  
+
   const form = reactive({
     code: '',
     value: null,
-    is_percentage: true,
     start_date: '',
     end_date: '',
   });
@@ -85,25 +70,42 @@
   onMounted(() => {
     if (props.coupon) {
       isEditing.value = true;
-      Object.assign(form, {
-        ...props.coupon,
-        start_date: props.coupon.start_date ? new Date(props.coupon.start_date).toISOString().split('T')[0] : '',
-        end_date: props.coupon.expiration_date ? new Date(props.coupon.expiration_date).toISOString().split('T')[0] : '',
-      });
-      discountType.value = form.is_percentage ? 'percentage' : 'fixed';
+      form.code = props.coupon.code || '';
+      form.value = props.coupon.discount_percentage || null;
+      form.start_date = props.coupon.start_date
+        ? new Date(props.coupon.start_date).toISOString().split('T')[0]
+        : '';
+      form.end_date = props.coupon.end_date
+        ? new Date(props.coupon.end_date).toISOString().split('T')[0]
+        : '';
     }
   });
-  
-  watch(discountType, (newType) => {
-    form.is_percentage = newType === 'percentage';
-  });
-  
+
   const submitForm = () => {
-    if (form.code && form.value !== null && form.start_date && form.end_date) {
-      emit('submit-coupon', { ...form, id: props.coupon?.id });
-    } else {
-      console.error("Por favor, preencha todos os campos do formulário.");
+    if (!form.code || form.value === null || !form.start_date || !form.end_date) {
+      console.error("Por favor, preencha todos os campos obrigatórios.");
+      return;
     }
+    if (form.value <= 0 || form.value > 100) {
+      console.error("O desconto percentual deve ser entre 1 e 100.");
+      return;
+    }
+    const startDate = new Date(form.start_date);
+    const endDate = new Date(form.end_date);
+    if (endDate <= startDate) {
+      console.error("A data de expiração deve ser posterior à data de início.");
+      return;
+    }
+    const formattedData = {
+      code: form.code.trim().toUpperCase(),
+      discount_percentage: form.value,
+      start_date: new Date(form.start_date + 'T00:00:00.000Z').toISOString(),
+      end_date: new Date(form.end_date + 'T23:59:59.999Z').toISOString()
+    };
+    if (props.coupon?.id) {
+      formattedData.id = props.coupon.id;
+    }
+    emit('submit-coupon', formattedData);
   };
   </script>
   
@@ -244,5 +246,28 @@
     transform: none;
     box-shadow: none;
   }
-  </style>
+  .form-check-input {
+    background-color: var(--admin-bg-primary);
+    border: 1px solid var(--admin-border-medium);
+    border-radius: 0.25rem;
+  }
   
+  .form-check-input:checked {
+    background-color: var(--admin-accent-primary);
+    border-color: var(--admin-accent-primary);
+  }
+  
+  .form-check-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(0, 255, 225, 0.25);
+  }
+  
+  .form-check-label {
+    color: var(--admin-text-secondary);
+    font-weight: 500;
+    cursor: pointer;
+  }
+  
+  .form-check {
+    margin-bottom: 0.5rem;
+  }
+  </style>
