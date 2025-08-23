@@ -47,24 +47,20 @@
   const authStore = useAuthStore();
   
   const carregarCategorias = async () => {
-  try {
-    const apiCategories = await getCategories();
+    try {
+      const apiCategories = await getCategories();
+      // Exibe todas as categorias para todos os usuários
+      categorias.value = [
+        { nome: 'Todos os Produtos', icone: 'bi bi-grid-fill' },
+        ...apiCategories.map(cat => ({ nome: cat.name }))
+      ];
+    } catch (err) {
+      categorias.value = [
+        { nome: 'Todos os Produtos', icone: 'bi bi-grid-fill' }
+      ];
+    }
+  };
 
-    const userId = authStore.user?.id;
-
-    categorias.value = [
-      { nome: 'Todos os Produtos', icone: 'bi bi-grid-fill' },
-      ...apiCategories
-        .filter(cat => !userId || cat.user_id === userId)
-        .map(cat => ({ nome: cat.name }))
-    ];
-  } catch (err) {
-    categorias.value = [
-      { nome: 'Todos os Produtos', icone: 'bi bi-grid-fill' }
-    ];
-  }
-};
-  
   onMounted(() => {
     carregarCategorias();
   });
@@ -72,9 +68,7 @@
   watch(
     () => authStore.user,
     (newUser) => {
-      if (newUser && newUser.id) {
-        carregarCategorias();
-      }
+      carregarCategorias();
     },
     { immediate: true }
   );
@@ -251,4 +245,3 @@
     }
   }
   </style>
-  

@@ -30,11 +30,21 @@
           <router-link :to="{ name: 'AdminOrders' }" class="nav-link-custom">
             <i class="bi bi-list-check me-2"></i> Pedidos
           </router-link>
+        </li>
         <li class="nav-item mb-2">
           <router-link :to="{ name: 'AdminCoupon' }" class="nav-link-custom">
           <i class="bi bi-ticket-perforated me-2"></i> Cupons
         </router-link>
         </li>
+        <li class="nav-item mb-2">
+          <router-link :to="{ name: 'CreateModerator' }" class="nav-link-custom">
+            <i class="bi bi-person-plus me-2"></i> Criar Moderador
+          </router-link>
+        </li>
+        <li class="nav-item mb-2">
+          <router-link to="/admin/clientes" class="nav-link-custom">
+            <i class="bi bi-people me-2"></i> Clientes
+          </router-link>
         </li>
        </ul>
   
@@ -75,93 +85,182 @@
     flex-direction: column;
     justify-content: space-between;
     padding-bottom: 1rem;
-    background: linear-gradient(180deg, #1a1a2e 0%, #24243a 100%);
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    background: linear-gradient(180deg, #0f1419 0%, #1a2332 100%);
+    border-right: 1px solid #374151;
     z-index: 10;
-    box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 4px 0 25px rgba(0, 0, 0, 0.3);
   }
 
   .sidebar-header {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid #374151;
     padding-bottom: 1.5rem;
     margin-bottom: 1.5rem;
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: 12px;
+    background: linear-gradient(135deg, #1a2332 0%, #2d3748 100%);
+    border-radius: 1rem;
     padding: 1.5rem 1rem;
     margin: 0 0.5rem 1.5rem 0.5rem;
+    border: 1px solid #374151;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   }
+  
   .text-primary-ggtech {
-    color: #00ffe1 !important;
+    background: linear-gradient(90deg, #64b5f6 0%, #42a5f5 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     font-family: 'Inter', sans-serif;
     font-weight: 700;
-    text-shadow: 0 0 10px rgba(0, 255, 225, 0.3);
+    font-size: 1.5rem;
+    letter-spacing: 0.02em;
   }
+  
   .text-light-50 {
-    color: rgba(255, 255, 255, 0.6);
+    color: #b0b7c3;
     font-size: 0.9rem;
+    font-weight: 400;
   }
   .nav-link-custom {
     display: flex;
     align-items: center;
     padding: 0.85rem 1.2rem;
-    color: rgba(255, 255, 255, 0.7);
+    color: #e8eaed;
     text-decoration: none;
-    border-radius: 12px;
+    border-radius: 0.75rem;
     transition: all 0.3s ease;
-    font-size: 1rem;
+    font-size: 0.95rem;
     margin: 0 0.5rem 0.3rem 0.5rem;
     border: 1px solid transparent;
+    font-weight: 500;
+    position: relative;
+    overflow: hidden;
   }
+  
   .nav-link-custom:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-    color: #00ffe1;
-    border-color: rgba(0, 255, 225, 0.2);
+    background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+    color: #64b5f6;
+    border-color: #64b5f6;
+    transform: translateX(5px);
+    box-shadow: 0 4px 15px rgba(100, 181, 246, 0.2);
+  }
+  
+  .nav-link-custom.router-link-active {
+    background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%);
+    color: white;
+    border-color: #64b5f6;
+    box-shadow: 0 4px 20px rgba(100, 181, 246, 0.3);
     transform: translateX(5px);
   }
-  .nav-link-custom.router-link-active {
-    background: linear-gradient(135deg, rgba(0, 255, 225, 0.1) 0%, rgba(0, 124, 240, 0.1) 100%);
-    color: #00ffe1;
-    border-color: rgba(0, 255, 225, 0.3);
-    box-shadow: 0 2px 15px rgba(0, 255, 225, 0.1);
-  }
+  
   .nav-link-custom i {
     font-size: 1.1rem;
     margin-right: 0.8rem;
     opacity: 0.8;
-    transition: opacity 0.3s ease;
+    transition: all 0.3s ease;
   }
+  
   .nav-link-custom:hover i {
     opacity: 1;
+    transform: scale(1.1);
+  }
+  
+  .nav-link-custom.router-link-active i {
+    opacity: 1;
+    color: white;
   }
   .btn-logout {
-    background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
     color: #fff;
-    border: 1px solid rgba(229, 62, 62, 0.3);
-    border-radius: 12px;
+    border: 2px solid #ef4444;
+    border-radius: 0.75rem;
     padding: 0.85rem 1.2rem;
-    font-size: 1rem;
+    font-size: 0.95rem;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
     transition: all 0.3s ease;
     margin: 0 0.5rem;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
   }
+  
   .btn-logout i {
     color: #fff !important;
     font-size: 1.1rem;
+    transition: transform 0.3s ease;
   }
+  
   .btn-logout:hover {
-    background: linear-gradient(135deg, #c53030 0%, #a32020 100%);
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
     color: #fff;
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(229, 62, 62, 0.2);
-    border-color: rgba(229, 62, 62, 0.5);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+    border-color: #dc2626;
+  }
+  
+  .btn-logout:hover i {
+    transform: translateX(2px);
   }
   
   .sidebar-footer {
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-top: 1px solid #374151;
     padding-top: 1rem;
     margin-top: 1rem;
+    background: linear-gradient(135deg, #1a2332 0%, #2d3748 100%);
+    border-radius: 0.75rem;
+    margin: 0 0.5rem;
+    padding: 1rem;
+    border: 1px solid #374151;
+  }
+
+  /* Efeitos visuais adicionais */
+  .admin-sidebar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, #64b5f6 50%, transparent 100%);
+    opacity: 0.5;
+  }
+  
+  /* Animação para os links */
+  .nav-link-custom {
+    position: relative;
+  }
+  
+  .nav-link-custom::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(100, 181, 246, 0.1), transparent);
+    transition: left 0.5s ease;
+  }
+  
+  .nav-link-custom:hover::before {
+    left: 100%;
+  }
+  
+  /* Estilo para o container da lista de navegação */
+  .nav.flex-column {
+    background: linear-gradient(135deg, #1a2332 0%, #2d3748 100%);
+    border-radius: 0.75rem;
+    margin: 0 0.5rem;
+    padding: 0.5rem;
+    border: 1px solid #374151;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Melhorar espaçamento dos itens */
+  .nav-item {
+    margin-bottom: 0.5rem;
+  }
+  
+  .nav-item:last-child {
+    margin-bottom: 0;
   }
   </style>

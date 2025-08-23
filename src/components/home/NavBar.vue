@@ -62,9 +62,18 @@ const handleSearch = (e) => {
   }
 };
 
+const theme = ref(localStorage.getItem('theme') || 'dark')
+
+function toggleTheme() {
+  theme.value = theme.value === 'dark' ? 'light' : 'dark'
+  document.documentElement.setAttribute('data-theme', theme.value)
+  localStorage.setItem('theme', theme.value)
+}
+
 onMounted(() => {
   document.addEventListener('mousedown', handleClickOutside);
   cart.initCart();
+  document.documentElement.setAttribute('data-theme', theme.value)
 
   if (authStore.token && (!authStore.user || !authStore.user.id)) {
     authStore.getUserProfile().catch(() => {
@@ -139,6 +148,19 @@ onBeforeUnmount(() => {
               </template>
             </div>
           </div>
+
+          <button class="btn-theme-toggle" @click="toggleTheme">
+            <i :class="theme === 'dark' ? 'bi bi-brightness-high' : 'bi bi-moon-stars'"></i>
+            {{ theme === 'dark' ? 'Light' : 'Dark' }}
+          </button>
+
+          <router-link
+            v-if="authStore.user && (authStore.user.role === 'ADMIN' || authStore.user.role === 'MODERATOR')"
+            to="/admin"
+            class="btn-admin-panel"
+          >
+            <i class="bi bi-speedometer2 me-1"></i> Painel Admin
+          </router-link>
         </div>
       </div>
     </div>
@@ -330,6 +352,45 @@ onBeforeUnmount(() => {
   color: #1a1a2e;
 }
 
+/* Botão de Alternância de Tema */
+.btn-theme-toggle {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 1.2rem;
+  margin-left: 1rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.btn-theme-toggle:hover {
+  color: #64b5f6;
+}
+
+/* Estilos do Botão Painel Admin */
+.btn-admin-panel {
+  background: linear-gradient(90deg, #64b5f6 0%, #42a5f5 100%);
+  color: #fff !important;
+  font-weight: 700;
+  border: none;
+  border-radius: 14px;
+  padding: 8px 22px;
+  font-size: 1.08rem;
+  box-shadow: 0 2px 12px #64b5f630;
+  text-decoration: none;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-admin-panel:hover {
+  background: linear-gradient(90deg, #42a5f5 0%, #64b5f6 100%);
+  color: #fff !important;
+  box-shadow: 0 4px 18px #64b5f660;
+  text-decoration: none;
+}
+
 /* Responsividade */
 @media (max-width: 991.98px) { 
   .custom-navbar {
@@ -374,5 +435,4 @@ onBeforeUnmount(() => {
     gap: 0.7rem !important;
   }
 }
-
 </style>
