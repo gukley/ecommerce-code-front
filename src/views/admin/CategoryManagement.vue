@@ -68,7 +68,7 @@ import {
 } from '@/services/apiService';
 import { useAuthStore } from '@/stores/authStore';
 import { useToast } from 'vue-toastification';
-import CategoryFormModal from '@/components/Admin/AdminCategoryFormModal.vue';
+import CategoryFormModal from '@/components/Admin/Category/AdminCategoryFormModal.vue';
 
 const auth = useAuthStore();
 const categories = ref([]);

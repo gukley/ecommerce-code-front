@@ -16,10 +16,11 @@
 import { useRoute } from 'vue-router';
 import { onMounted, ref, computed, watch } from 'vue';
 import { useAuthStore } from './stores/authStore';
-import ProductCard from './components/home/ProductCard.vue';
+import { useCartStore } from '@/stores/cartStore';
 
 const route = useRoute();
 const authStore = useAuthStore();
+const cartStore = useCartStore();
 const isLoading = ref(true);
 
 // Função para carregar dados iniciais
@@ -28,6 +29,7 @@ const initializeApp = async () => {
     if (authStore.token) {
       await authStore.getUserProfile();
     }
+    await cartStore.initCart();
   } catch (error) {
     console.error('Erro ao inicializar app:', error);
     // Se houver erro, limpa o token inválido

@@ -44,8 +44,9 @@ export const getAllProducts = () =>
 export const getProductById = (productId) =>
     api.get(`/products/${productId}`).then(res => res.data)
 
+// Corrija este endpoint para buscar produtos por usuário (admin_id)
 export const getProductsByUser = (userId) =>
-    api.get(`/products/category/${userId}`).then(res => res.data)
+    api.get(`/products/user/${userId}`).then(res => res.data)
 
 export const getProductsByCategory = (categoryId) =>
     api.get(`/products/category/${categoryId}`).then(res => res.data)
@@ -83,6 +84,7 @@ export const getCategories = () =>
 export const getCategoryById = (categoryId) =>
     api.get(`/categories/${categoryId}`).then(res => res.data);
 
+// Corrija este endpoint para buscar categorias por usuário (admin_id)
 export const getCategoriesByUser = (userId) =>
     api.get(`/categories/user/${userId}`).then(res => res.data);
 
@@ -145,6 +147,7 @@ export const deleteAddress = (addressId) => {
 export const getAllOrders = () =>
     api.get('/orders/all').then(res => res.data)
 
+// Corrija este endpoint para buscar pedidos por admin_id
 export const getOrderByAdmin = (adminId) =>
     api.get(`/orders/all/${adminId}`).then(res => res.data)
 
@@ -220,31 +223,30 @@ export const deleteDiscount = (discountId) =>
     api.delete(`/discounts/${discountId}`).then(res => res.data)
 
 export const changeUserPassword = (data) =>
-    api.post('/users/me/change-password', data).then(res => res.data) // alterar senha
+    api.post('/users/me/change-password', data).then(res => res.data) 
 
 export const getUserSummary = () =>
     api.get('/users/me/summary').then(res => res.data)
 
 // Favoritos 
-export const getFavorites = () => api.get('/favorites/').then(res => res.data)
+export async function getFavorites() {
+  try {
+    // const response = await axios.get('/favorites/')
+    // return response.data
+    return []
+  } catch (e) {
+    return []
+  }
+}
 export const addFavorite = (productId) => api.post('/favorites/', { product_id: productId }).then(res => res.data)
 export const removeFavorite = (favoriteId) => api.delete(`/favorites/${favoriteId}`).then(res => res.data)
 
-// Reviews
-export const getReviews = () => api.get('/reviews/').then(res => res.data)
-export const addReview = (reviewData) => api.post('/reviews/', reviewData).then(res => res.data)
-export const updateReview = (reviewId, reviewData) => api.put(`/reviews/${reviewId}`, reviewData).then(res => res.data)
-export const deleteReview = (reviewId) => api.delete(`/reviews/${reviewId}`).then(res => res.data)
-
-/**
- * Busca todos os clientes (admin)
- */
+// Buscar todos clientes(admin)
 export const getAdminClients = () => {
-  return api.get('/admin/clients');
+  return api.get('/admin/clients').then(res => res.data)
 }
 
-
- // Busca pedidos de um cliente específico (admin)
+// Busca pedidos de um cliente específico (admin)
 export const getOrdersByUserId = (userId) =>
   api.get(`/orders/user/${userId}`).then(res => res.data);
 
@@ -254,6 +256,16 @@ export const updateModerator = (moderatorId, data) =>
 
 export const getModerators = () =>
     api.get('/users/moderators').then(res => res.data)
+
+export async function getUserMe() {
+  // Exemplo usando axios, ajuste conforme sua API
+  try {
+    const response = await axios.get('/users/me')
+    return response.data
+  } catch (e) {
+    return null
+  }
+}
 
 export default {
   login,
@@ -316,11 +328,9 @@ export default {
   getFavorites,
   addFavorite,
   removeFavorite,
-  getReviews,
-  addReview,
-  updateReview,
-  deleteReview,
   getAdminClients,
   getOrdersByUserId,
   getModerators,
+  
 };
+

@@ -1,179 +1,50 @@
 <template>
-  <div class="profile-bg py-5">
-    <div class="container">
-      <!-- Botão de voltar para home -->
-      <div class="d-flex justify-content-start mb-4">
-        <router-link to="/" class="btn-back-home">
-          <i class="bi bi-arrow-left"></i> Voltar para Home
-        </router-link>
-      </div>
-      <div class="row g-4 justify-content-center">
-        <!-- Sidebar com avatar e dados -->
-        <div class="col-12 col-lg-4 d-flex flex-column align-items-center">
-          <aside class="profile-sidebar-glass modern-sidebar">
-            <div class="profile-avatar-box position-relative mb-3">
-              <img
-                :src="avatarUrl"
-                alt="Avatar"
-                class="profile-avatar-img"
-                @error="onAvatarError"
-                loading="lazy"
-                style="object-fit: cover; width: 100%; height: 100%; border-radius: 50%; background: #232e47;"
-              />
-              <button class="avatar-edit-btn" @click="showEditModal = true" title="Editar avatar">
-                <i class="bi bi-pencil"></i>
-              </button>
-            </div>
-            <h3 class="sidebar-name text-center mb-1">{{ user?.name || 'Usuário' }}</h3>
-            <p class="sidebar-email text-center mb-3">{{ user?.email || 'Sem email' }}</p>
-            <div class="sidebar-badges mb-3 d-flex flex-column align-items-center gap-2">
-              <span class="badge modern-badge bg-purple">
-                <i class="bi bi-person-badge"></i> <strong>ID:</strong> {{ user?.id || '-' }}
-              </span>
-              <span class="badge modern-badge bg-green">
-                <i class="bi bi-shield-lock"></i> <strong>Papel:</strong> {{ user?.role || '-' }}
-              </span>
-            </div>
-            <button class="sidebar-btn w-100" @click="showEditModal = true">
-              <i class="bi bi-pencil"></i> Editar Perfil
-            </button>
-          </aside>
-        </div>
-        <!-- Conteúdo principal -->
-        <div class="col-12 col-lg-8">
-          <section class="profile-main-section d-grid gap-4">
-            <div class="profile-header-card mb-2">
-              <h2 class="profile-username mb-1">
-                <i class="bi bi-person-circle me-2"></i>{{ user?.name || 'Usuário' }}
-              </h2>
-              <div class="profile-user-email">{{ user?.email }}</div>
-            </div>
-            <ProfileAddresses
-              :addresses="addresses"
-              @refresh="fetchAddresses"
-              @add="showAddressModal = true"
-              @edit="editAddress"
-              @delete="deleteAddress"
-            />
-            <ProfileOrders :orders="orders" @cancel="cancelOrder" />
-            <ProfileFavorites :favorites="favorites" />
-            <ProfileReviews :reviews="reviews" />
-          </section>
-        </div>
-      </div>
-    </div>
-    <!-- Modais -->
-    <ProfileEditModal
-      v-if="showEditModal"
-      :user="user"
-      @close="showEditModal = false"
-      @updated="fetchProfileAndAvatar"
-    />
-    <AddressModal
-      v-if="showAddressModal"
-      mode="add"
-      @close="showAddressModal = false"
-      @saved="refreshAddresses"
-    />
-    <AddressModal
-      v-if="editAddressData"
-      mode="edit"
-      :address="editAddressData"
-      @close="editAddressData = null"
-      @saved="refreshAddresses"
-    />
-  </div>
+  <Profile
+    :user="user"
+    :orders="orders"
+    :favorites="favorites"
+    :addresses="addresses"
+  />
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
-import { getUserProfile, getAllAddresses, getUsersOrders, getFavorites, getReviews, cancelOrder as apiCancelOrder, deleteAddress as apiDeleteAddress } from '@/services/apiService.js'
-import ProfileAddresses from '@/components/Profile/ProfileAddresses.vue'
-import ProfileOrders from '@/components/Profile/ProfileOrders.vue'
-import ProfileFavorites from '@/components/Profile/ProfileFavorites.vue'
-import ProfileReviews from '@/components/Profile/ProfileReviews.vue'
-import ProfileEditModal from '@/components/Profile/ProfileEditModal.vue'
-import AddressModal from '@/components/Profile/AddressModal.vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+import Profile from '@/components/Profile/Profile.vue'
+import {
+  getUserProfile,
+  getUsersOrders,
+  getAllAddresses,
+  getFavorites
+} from '@/services/apiService.js'
 
 const user = ref(null)
-const addresses = ref([])
 const orders = ref([])
 const favorites = ref([])
-const reviews = ref([])
+const addresses = ref([])
 
-const showEditModal = ref(false)
-const showAddressModal = ref(false)
-const editAddressData = ref(null)
-
-const avatarUrl = ref('/default-avatar.png')
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
-
-function resolveAvatar(user) {
-  if (user?.image_path) {
-    if (user.image_path.startsWith('/')) {
-      return API_BASE_URL.replace(/\/$/, '') + user.image_path
-    }
-    return user.image_path
-  }
-  return '/default-avatar.png'
-}
-function onAvatarError(e) {
-  e.target.src = '/default-avatar.png'
-  e.target.style.objectFit = 'cover'
-  e.target.style.background = '#232e47'
-}
-
-const fetchProfile = async () => {
-  user.value = await getUserProfile()
-}
-const fetchProfileAndAvatar = async () => {
-  await fetchProfile()
-  avatarUrl.value = resolveAvatar(user.value)
-}
-const fetchAddresses = async () => {
-  addresses.value = await getAllAddresses()
-}
-const fetchOrders = async () => {
+async function fetchUserOrders() {
   orders.value = await getUsersOrders()
-}
-const fetchFavorites = async () => {
-  favorites.value = await getFavorites()
-}
-const fetchReviews = async () => {
-  reviews.value = await getReviews()
-}
-
-function refreshAddresses() {
-  showAddressModal.value = false
-  editAddressData.value = null
-  fetchAddresses()
-}
-function editAddress(addr) {
-  editAddressData.value = addr
-}
-function deleteAddress(addr) {
-  if (confirm('Tem certeza que deseja excluir este endereço?')) {
-    apiDeleteAddress(addr.id).then(fetchAddresses)
-  }
-}
-
-async function cancelOrder(orderId) {
-  if (confirm('Tem certeza que deseja cancelar este pedido?')) {
-    await apiCancelOrder(orderId)
-    await fetchOrders()
-  }
 }
 
 onMounted(async () => {
-  await fetchProfileAndAvatar()
-  await fetchAddresses()
-  await fetchOrders()
-  await fetchFavorites()
-  await fetchReviews()
+  try {
+    user.value = await getUserProfile()
+    await fetchUserOrders()
+    addresses.value = await getAllAddresses()
+    favorites.value = await getFavorites()
+  } catch (e) {
+    user.value = { name: 'Usuário', email: '', id: '-', role: '-' }
+    orders.value = []
+    addresses.value = []
+    favorites.value = []
+  }
+
+  // Escuta evento global para atualização de pedidos
+  window.addEventListener('orders-updated', fetchUserOrders)
 })
 
-watch(user, (val) => {
-  avatarUrl.value = resolveAvatar(val)
+onBeforeUnmount(() => {
+  window.removeEventListener('orders-updated', fetchUserOrders)
 })
 </script>
 
@@ -181,6 +52,7 @@ watch(user, (val) => {
 .profile-bg {
   background: linear-gradient(120deg, #10141a 0%, #181e2a 80%, #232e47 100%);
   min-height: 100vh;
+  font-family: 'Inter', 'Rajdhani', Arial, sans-serif;
 }
 .btn-back-home {
   display: inline-flex;
@@ -205,8 +77,8 @@ watch(user, (val) => {
 .profile-main-section {
   gap: 2.2rem !important;
 }
-.profile-header-card {
-  background: rgba(24,30,42,0.92);
+.profile-header-card.profile-header-custom {
+  background: linear-gradient(90deg, #232e47 60%, #399bff 100%);
   border-radius: 18px;
   box-shadow: 0 2px 12px #232e4720;
   padding: 24px 32px 18px 32px;
@@ -231,10 +103,8 @@ watch(user, (val) => {
   text-align: left;
   opacity: 0.88;
 }
-
-/* Sidebar Glass */
-.profile-sidebar-glass.modern-sidebar {
-  background: linear-gradient(120deg, #181e2a 60%, #232e47 100%);
+.profile-sidebar-custom {
+  background: linear-gradient(120deg, #232e47 60%, #399bff 100%);
   border-radius: 26px;
   box-shadow: 0 8px 32px 0 #232e4780, 0 1.5px 0 #50b8fe;
   border: 1.5px solid #232e47;
@@ -259,14 +129,14 @@ watch(user, (val) => {
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 2px 16px #399bff40;
+  border: 3px solid #50b8fe;
 }
 .profile-avatar-img {
   width: 120px;
   height: 120px;
   object-fit: cover;
   border-radius: 50%;
-  border: 3px solid #50b8fe;
-  box-shadow: 0 2px 16px #399bff40;
   background: #232e47;
   display: block;
 }
@@ -329,6 +199,13 @@ watch(user, (val) => {
 }
 .bg-purple { background: #a470ff !important; color: #fff !important; }
 .bg-green { background: #4be3b0 !important; color: #181e2a !important; }
+.sidebar-actions {
+  margin-top: 1.2rem;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
 .sidebar-btn {
   background: linear-gradient(90deg,#50b8fe 60%, #399bff 100%);
   color: #181e2a;
@@ -340,24 +217,60 @@ watch(user, (val) => {
   transition: background 0.18s, box-shadow 0.18s, color 0.18s;
   padding: 10px 32px;
   font-size: 1.08rem;
-  margin-top: 10px;
+  margin-top: 0;
   cursor: pointer;
   outline: none;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 .sidebar-btn:hover {
   background: linear-gradient(90deg,#399bff 60%, #50b8fe 100%);
   color: #fff;
   box-shadow: 0 4px 18px #399bff60;
 }
-
+.btn-orders {
+  background: linear-gradient(90deg,#43e97b 60%, #38f9d7 100%);
+  color: #181e2a;
+}
+.btn-orders:hover {
+  background: linear-gradient(90deg,#38f9d7 60%, #43e97b 100%);
+  color: #fff;
+}
+.btn-favorites {
+  background: linear-gradient(90deg,#ff6a6a 60%, #ffb36a 100%);
+  color: #181e2a;
+}
+.btn-favorites:hover {
+  background: linear-gradient(90deg,#ffb36a 60%, #ff6a6a 100%);
+  color: #fff;
+}
+.btn-reviews {
+  background: linear-gradient(90deg,#a470ff 60%, #ff6ad5 100%);
+  color: #181e2a;
+}
+.btn-reviews:hover {
+  background: linear-gradient(90deg,#ff6ad5 60%, #a470ff 100%);
+  color: #fff;
+}
+.profile-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
 @media (max-width: 991px) {
   .profile-header-card {
     padding: 18px 14px 12px 14px;
   }
-  .profile-sidebar-glass {
+  .profile-sidebar-custom {
     max-width: 100vw;
     min-width: 0;
     padding: 24px 10px 18px 10px;
+  }
+  .profile-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
   }
 }
 @media (max-width: 600px) {

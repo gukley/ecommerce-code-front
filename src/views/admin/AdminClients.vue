@@ -119,7 +119,6 @@ const router = useRouter()
 
 onMounted(async () => {
   if (!authStore.isAuthenticated || authStore.user?.role !== 'ADMIN') {
-    router.replace({ name: 'login' })
     return
   }
   await fetchClients()
@@ -130,7 +129,18 @@ async function fetchClients() {
   error.value = ''
   try {
     const response = await apiService.getAdminClients()
-    clients.value = response.data
+    console.log('Resposta getAdminClients:', response)
+    // Ajuste para diferentes formatos de resposta
+    if (Array.isArray(response.data)) {
+      clients.value = response.data
+    } else if (Array.isArray(response.data?.data)) {
+      clients.value = response.data.data
+    } else if (Array.isArray(response)) {
+      clients.value = response
+    } else {
+      clients.value = []
+      error.value = 'Formato inesperado de resposta da API.'
+    }
   } catch (err) {
     error.value = 'Erro ao carregar clientes.'
   } finally {
@@ -278,3 +288,59 @@ function formatDate(dateStr) {
   }
 }
 </style>
+
+<!-- Nenhum ajuste de frontend é suficiente se o backend não retorna os dados corretos.
+Para funcionar, o backend precisa fornecer:
+
+1. Endpoint GET /admin/clients
+   - Deve retornar um array de clientes, cada um com:
+     - id, name, email
+     - addresses: array [{ id, street, number, neighborhood, city, state, cep }]
+     - (opcional) outros campos
+
+2. Endpoint GET /orders/user/:userId
+   - Deve retornar um array de pedidos do cliente, cada um com:
+     - id, status, order_date, total ou total_amount
+     - products: array [{ id, name, quantity, price, unit_price }]
+
+Se o backend não retorna esses dados, a tela ficará vazia.
+Verifique se o backend implementa e popula corretamente esses endpoints.
+No frontend, apenas chame apiService.getAdminClients() e apiService.getOrdersByUserId(clientId).
+
+Exemplo de resposta esperada do backend para GET /admin/clients:
+[
+  {
+    "id": 1,
+    "name": "João",
+    "email": "joao@email.com",
+    "addresses": [
+      {
+        "id": 10,
+        "street": "Rua Bahia",
+        "number": "989",
+        "neighborhood": "Centro",
+        "city": "Guarapuava",
+        "state": "PR",
+        "cep": "85010-000"
+      }
+    ]
+  },
+  ...
+]
+
+Exemplo de resposta esperada do backend para GET /orders/user/:userId:
+[
+  {
+    "id": 101,
+    "status": "PENDING",
+    "order_date": "2024-06-01T12:00:00Z",
+    "total": 199.90,
+    "products": [
+      { "id": 1, "name": "Mouse Gamer", "quantity": 2, "price": 99.95 }
+    ]
+  },
+  ...
+]
+
+Se o backend retornar assim, a tela exibirá corretamente.
+-->

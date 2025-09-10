@@ -98,17 +98,18 @@ export const useCartStore = defineStore('cart', () => {
   }
 
   // Sincroniza o carrinho do convidado com o localStorage
-  function syncGuestCart() {
+  async function syncGuestCart() {
     const localCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
+    console.log('Carrinho restaurado do localStorage:', localCart); // debug
     items.value = localCart;
-    loadDetailedItems(items.value);
+    await loadDetailedItems(items.value); // Aguarde o carregamento dos detalhes
   }
 
   // Inicializa o carrinho. Este é o ponto de entrada principal.
   async function initCart() {
     loading.value = true;
     if (isGuest.value) {
-      syncGuestCart();
+      await syncGuestCart(); // Aguarde o carregamento dos itens
     } else {
       await syncAuthenticatedCart();
     }
@@ -118,6 +119,7 @@ export const useCartStore = defineStore('cart', () => {
   // Função para salvar o carrinho do convidado
   function saveGuestCart() {
     localStorage.setItem('guestCart', JSON.stringify(items.value));
+    console.log('Carrinho salvo no localStorage:', items.value); // debug
   }
 
   // Adiciona um item ao carrinho
@@ -149,6 +151,7 @@ export const useCartStore = defineStore('cart', () => {
         } else {
           items.value.push({ product_id: productId, quantity: newQuantity, unit_price: unitPrice });
         }
+        items.value = [...items.value]; // <-- força reatividade
         saveGuestCart();
         await loadDetailedItems(items.value);
         toast.success('Item adicionado ao carrinho!');
@@ -179,9 +182,10 @@ export const useCartStore = defineStore('cart', () => {
         toast.info(`Quantidade de item atualizada para ${newQuantity}.`);
         await syncAuthenticatedCart();
       } else {
-        const item = items.value.find(i => i.product_id === productId);
-        if (item) {
-          item.quantity = newQuantity;
+        const idx = items.value.findIndex(i => i.product_id === productId);
+        if (idx !== -1) {
+          items.value[idx] = { ...items.value[idx], quantity: newQuantity };
+          items.value = [...items.value]; // <-- força reatividade
           saveGuestCart();
           await loadDetailedItems(items.value);
           toast.info(`Quantidade de item atualizada para ${newQuantity}.`);
@@ -212,6 +216,7 @@ export const useCartStore = defineStore('cart', () => {
         const itemIndex = items.value.findIndex(item => item.product_id === productId);
         if (itemIndex > -1) {
           items.value.splice(itemIndex, 1);
+          items.value = [...items.value]; // <-- força reatividade
           saveGuestCart();
           await loadDetailedItems(items.value);
           toast.success('Item removido do carrinho.');

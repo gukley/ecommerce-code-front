@@ -9,206 +9,47 @@
         <div class="admin-subtitle">Gerencie, filtre e visualize todos os pedidos do sistema</div>
       </div>
     </div>
-    
+
     <!-- Filtros -->
-    <div class="filters-section card-filters mb-4">
-      <div class="row g-3">
-        <div class="col-md-3">
-          <label class="form-label">Status:</label>
-          <select v-model="selectedStatus" class="form-select filter-select">
-            <option value="">Todos os Status</option>
-            <option value="PENDING">Pendente</option>
-            <option value="PROCESSING">Processando</option>
-            <option value="SHIPPED">Enviado</option>
-            <option value="DELIVERED">Entregue</option>
-            <option value="CANCELED">Cancelado</option>
-          </select>
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">Período:</label>
-          <select v-model="selectedPeriod" class="form-select filter-select">
-            <option value="">Todos os Períodos</option>
-            <option value="today">Hoje</option>
-            <option value="week">Última Semana</option>
-            <option value="month">Último Mês</option>
-            <option value="custom">Período Personalizado</option>
-          </select>
-        </div>
-        <div class="col-md-3" v-if="selectedPeriod === 'custom'">
-          <label class="form-label">Data Inicial:</label>
-          <input type="date" v-model="startDate" class="form-control filter-input">
-        </div>
-        <div class="col-md-3" v-if="selectedPeriod === 'custom'">
-          <label class="form-label">Data Final:</label>
-          <input type="date" v-model="endDate" class="form-control filter-input">
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">Buscar por ID:</label>
-          <input 
-            type="text" 
-            v-model="searchId" 
-            placeholder="Digite o ID do pedido"
-            class="form-control filter-input"
-          >
-        </div>
-        <div class="col-md-12">
-          <button @click="clearFilters" class="btn btn-outline-secondary btn-sm me-2">
-            <i class="bi bi-x-circle me-1"></i>Limpar Filtros
-          </button>
-          <span class="text-muted">
-            <i class="bi bi-info-circle me-1"></i>
-            {{ overallFilteredOrders.length }} de {{ orders.length }} pedidos |
-            <strong class="text-success">Total: R$ {{ totalPedidosFiltrados }}</strong>
-          </span>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Tabela de pedidos melhorada -->
-    <div class="table-responsive order-table-container card-table">
-      <table class="table table-dark table-hover align-middle order-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Produtos</th>
-            <th>Cliente</th>
-            <th>Status</th>
-            <th>Data</th>
-            <th>Total</th>
-            <th>Endereço</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="order in paginatedOrders" :key="order.id">
-            <td class="fw-bold text-info">#{{ order.id }}</td>
-            <td>
-              <div class="order-products-list">
-                <div
-                  v-for="product in order.products"
-                  :key="product.id"
-                  class="order-product-item"
-                >
-                  <img
-                    :src="product.image_url || fallbackImage"
-                    alt="Imagem do produto"
-                    class="order-product-img"
-                    @error="onImgError"
-                  />
-                  <div class="order-product-info">
-                    <div class="order-product-name">{{ product.name }}</div>
-                    <div class="order-product-qty-price">
-                      <span class="badge bg-secondary me-2">Qtd: {{ product.quantity }}</span>
-                      <span class="text-light">R$ {{ Number(product.price).toFixed(2) }}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </td>
-            <td>
-              <span v-if="order.user && order.user.name">{{ order.user.name }}</span>
-              <span v-else class="text-muted">-</span>
-            </td>
-            <td>
-              <span :class="['badge', getStatusClass(order.status)]">{{ getStatusLabel(order.status) }}</span>
-            </td>
-            <td>
-              <span>{{ formatDate(order.order_date) }}</span>
-            </td>
-            <td>
-              <span class="fw-bold text-success">R$ {{ order.total }}</span>
-            </td>
-            <td>
-              <span v-if="addresses[order.address_id]">
-                {{ formatAddress(addresses[order.address_id]) }}
-              </span>
-              <span v-else class="text-muted">-</span>
-            </td>
-            <td>
-              <div class="d-flex justify-content-center align-items-center gap-2">
-                <button class="btn btn-sm btn-outline-info" @click="showOrderDetail(order)">
-                  <i class="bi bi-eye"></i> Ver detalhes
-                </button>
-                <button class="btn btn-sm btn-outline-primary" @click="downloadOrderPDF(order)">
-                  <i class="bi bi-download"></i> Baixar PDF
-                </button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <!-- Paginação -->
-      <div class="d-flex justify-content-center my-3 pagination-controls" v-if="totalPages > 1">
-        <button class="btn btn-pagination me-2" :disabled="currentPage === 1" @click="goToPage(currentPage - 1)">
-          <i class="bi bi-chevron-left"></i> Anterior
-        </button>
-        <span class="pagination-info page-info">Página {{ currentPage }} de {{ totalPages }}</span>
-        <button class="btn btn-pagination ms-2" :disabled="currentPage === totalPages" @click="goToPage(currentPage + 1)">
-          Próxima <i class="bi bi-chevron-right"></i>
-        </button>
-      </div>
+    <OrderFilters
+      :selected-status="selectedStatus"
+      :selected-period="selectedPeriod"
+      :start-date="startDate"
+      :end-date="endDate"
+      :search-id="searchId"
+      :orders="orders"
+      :filtered-orders="overallFilteredOrders"
+      :total-pedidos="totalPedidosFiltrados"
+      @update:filters="updateFilters"
+      @clear-filters="clearFilters"
+    />
+
+    <!-- Tabela de pedidos -->
+    <div class="table-responsive order-table-container card-table glass-table">
+      <OrderTable
+        :orders="paginatedOrders"
+        :addresses="addresses"
+        @show-detail="showOrderDetail"
+        @download-pdf="downloadOrderPDF"
+        @change-status="changeOrderStatus"
+      />
+      <PaginationControls
+        :current-page="currentPage"
+        :total-pages="totalPages"
+        @go-to-page="goToPage"
+        class="my-3"
+        v-if="totalPages > 1"
+      />
     </div>
 
-    <!-- Modal de detalhes do pedido -->
-    <div v-if="selectedOrder" class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,0.5);">
-      <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content order-detail-modal">
-          <div class="modal-header">
-            <h5 class="modal-title">Detalhes do Pedido #{{ selectedOrder.id }}</h5>
-            <button type="button" class="btn-close" @click="selectedOrder = null"></button>
-          </div>
-          <div class="modal-body">
-            <div class="mb-3">
-              <strong>Status:</strong>
-              <span :class="['badge', getStatusClass(selectedOrder.status)]">{{ getStatusLabel(selectedOrder.status) }}</span>
-            </div>
-            <div class="mb-3">
-              <strong>Cliente:</strong>
-              <span>{{ selectedOrder.user?.name || '-' }}</span>
-            </div>
-            <div class="mb-3">
-              <strong>Data do Pedido:</strong>
-              <span>{{ formatDate(selectedOrder.order_date) }}</span>
-            </div>
-            <div class="mb-3">
-              <strong>Endereço:</strong>
-              <span>{{ addresses[selectedOrder.address_id] ? formatAddress(addresses[selectedOrder.address_id]) : '-' }}</span>
-            </div>
-            <div class="mb-3">
-              <strong>Produtos:</strong>
-              <div class="order-products-list">
-                <div
-                  v-for="product in selectedOrder.products"
-                  :key="product.id"
-                  class="order-product-item"
-                >
-                  <img
-                    :src="product.image_url || fallbackImage"
-                    alt="Imagem do produto"
-                    class="order-product-img"
-                    @error="onImgError"
-                  />
-                  <div class="order-product-info">
-                    <div class="order-product-name">{{ product.name }}</div>
-                    <div class="order-product-qty-price">
-                      <span class="badge bg-secondary me-2">Qtd: {{ product.quantity }}</span>
-                      <span class="text-light">R$ {{ Number(product.price).toFixed(2) }}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="mb-3">
-              <strong>Total:</strong>
-              <span class="fw-bold text-success">R$ {{ selectedOrder.total }}</span>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button class="btn btn-secondary" @click="selectedOrder = null">Fechar</button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- Modal de detalhes -->
+    <OrderDetailModal
+      v-if="selectedOrder"
+      :order="selectedOrder"
+      :addresses="addresses"
+      @close="selectedOrder = null"
+      @change-status="changeOrderStatus"
+    />
   </div>
 </template>
 
@@ -221,9 +62,13 @@ import { storeToRefs } from 'pinia';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
+import OrderFilters from '@/components/Admin/Orders/OrderFilters.vue';
+import OrderTable from '@/components/Admin/Orders/OrderTable.vue';
+import OrderDetailModal from '@/components/Admin/Orders/OrderDetailModal.vue';
+import PaginationControls from '@/components/Common/PaginationControls.vue';
+
 const addresses = ref({});
 const authStore = useAuthStore();
-const baseUrl = import.meta.env.VITE_API_URL || 'http://35.196.79.227:8000';
 const orderStore = useOrderStore();
 const { orders } = storeToRefs(orderStore);
 
@@ -232,34 +77,22 @@ const selectedPeriod = ref('');
 const startDate = ref('');
 const endDate = ref('');
 const searchId = ref('');
-const fallbackImage = 'https://placehold.co/60x60?text=Produto';
 const selectedOrder = ref(null);
 
-// --- Variáveis de Paginação ---
 const currentPage = ref(1);
-const itemsPerPage = 10; 
+const itemsPerPage = 10;
 
-// --- Computed para filtrar todos os pedidos (antes da paginação) ---
 const overallFilteredOrders = computed(() => {
   let filtered = orders.value;
-
-  // Filtro por status
   if (selectedStatus.value) {
     filtered = filtered.filter(order => order.status === selectedStatus.value);
   }
-
-  // Filtro por ID
   if (searchId.value) {
-    filtered = filtered.filter(order => 
-      order.id.toString().includes(searchId.value)
-    );
+    filtered = filtered.filter(order => order.id.toString().includes(searchId.value));
   }
-
-  // Filtro por período
   if (selectedPeriod.value) {
     const now = new Date();
     const orderDate = new Date();
-    
     switch (selectedPeriod.value) {
       case 'today':
         filtered = filtered.filter(order => {
@@ -285,8 +118,7 @@ const overallFilteredOrders = computed(() => {
         if (startDate.value && endDate.value) {
           const start = new Date(startDate.value);
           const end = new Date(endDate.value);
-          end.setHours(23, 59, 59); 
-          
+          end.setHours(23, 59, 59);
           filtered = filtered.filter(order => {
             orderDate.setTime(new Date(order.order_date).getTime());
             return orderDate >= start && orderDate <= end;
@@ -298,191 +130,113 @@ const overallFilteredOrders = computed(() => {
   return filtered;
 });
 
-// --- Computed para os pedidos paginados ---
 const paginatedOrders = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage;
   const end = start + itemsPerPage;
   return overallFilteredOrders.value.slice(start, end);
 });
 
-// --- Computed para o total de páginas ---
 const totalPages = computed(() => {
   return Math.ceil(overallFilteredOrders.value.length / itemsPerPage);
 });
 
-// --- Função para mudar de página ---
+const totalPedidosFiltrados = computed(() => {
+  return overallFilteredOrders.value.reduce((acc, order) => {
+    return acc + (Number(order.total) || 0);
+  }, 0).toFixed(2);
+});
+
 const goToPage = (page) => {
   if (page >= 1 && page <= totalPages.value) {
     currentPage.value = page;
   }
 };
 
-// --- Função para buscar endereço por ID ---
 const getAddressData = async (addressId) => {
   if (!addressId) return null;
   if (addresses.value[addressId]) return addresses.value[addressId];
-  
   try {
     const address = await getAddressById(addressId);
     addresses.value[addressId] = address;
     return address;
   } catch (error) {
-    console.error('Erro ao buscar endereço:', error);
     return null;
   }
 };
 
-// Função para limpar filtros
 const clearFilters = () => {
   selectedStatus.value = '';
   selectedPeriod.value = '';
   startDate.value = '';
   endDate.value = '';
   searchId.value = '';
-  currentPage.value = 1; 
+  currentPage.value = 1;
 };
 
-onMounted(async () => { 
-  while (!authStore.user || !authStore.user.id) { 
+function updateFilters({ status, period, start, end, id }) {
+  selectedStatus.value = status;
+  selectedPeriod.value = period;
+  startDate.value = start;
+  endDate.value = end;
+  searchId.value = id;
+}
+
+onMounted(async () => {
+  while (!authStore.user || !authStore.user.id) {
     await new Promise(resolve => setTimeout(resolve, 50));
   }
   await orderStore.fetchOrdersByAdmin(authStore.user.id);
-  for (const order of orders.value) { 
+  for (const order of orders.value) {
     if (order.address_id) {
       await getAddressData(order.address_id);
     }
   }
 });
 
-// Monitora mudanças nos filtros para resetar a página para 1
 watch([selectedStatus, selectedPeriod, startDate, endDate, searchId], () => {
   currentPage.value = 1;
 });
 
-const totalPedidosFiltrados = computed(() => { 
-  return overallFilteredOrders.value.reduce((acc, order) => { 
-    return acc + (Number(order.total) || 0);
-  }, 0).toFixed(2);
-});
-
-// Função para pegar a imagem do produto
-function getProductImage(product) {
-  if (product.image_url) {
-    return product.image_url;
-  }
-  return fallbackImage;
-}
-
-// Função para exibir detalhes do pedido em um modal
 function showOrderDetail(order) {
   selectedOrder.value = order;
 }
 
-// Função para baixar o PDF do pedido
 function downloadOrderPDF(order) {
   const doc = new jsPDF();
   doc.setFontSize(12);
   doc.text(`Pedido #${order.id}`, 14, 22);
   doc.setFontSize(10);
-  doc.text(`Status: ${getStatusLabel(order.status)}`, 14, 32);
+  doc.text(`Status: ${order.status}`, 14, 32);
   doc.text(`Cliente: ${order.user?.name || '-'}`, 14, 42);
-  doc.text(`Data do Pedido: ${formatDate(order.order_date)}`, 14, 52);
+  doc.text(`Data do Pedido: ${order.order_date}`, 14, 52);
   doc.text(`Total: R$ ${order.total}`, 14, 62);
-
-  // Adiciona tabela de produtos
-  const tableData = order.products.map(product => {
-    return [
-      product.name,
-      product.quantity,
-      `R$ ${Number(product.price).toFixed(2)}`,
-      `R$ ${(product.quantity * product.price).toFixed(2)}`
-    ];
-  });
-
+  const tableData = order.products.map(product => [
+    product.name,
+    product.quantity,
+    `R$ ${Number(product.price).toFixed(2)}`,
+    `R$ ${(product.quantity * product.price).toFixed(2)}`
+  ]);
   autoTable(doc, {
     startY: 70,
     head: [['Produto', 'Quantidade', 'Preço Unitário', 'Preço Total']],
     body: tableData,
     theme: 'grid',
-    styles: {
-      cellPadding: 2,
-      fontSize: 10,
-      halign: 'center',
-      valign: 'middle'
-    },
-    headStyles: {
-      fillColor: [100, 181, 246],
-      textColor: [0, 0, 0],
-      fontStyle: 'bold'
-    },
-    alternateRowStyles: {
-      fillColor: [240, 240, 240]
-    }
+    styles: { cellPadding: 2, fontSize: 10, halign: 'center', valign: 'middle' },
+    headStyles: { fillColor: [100, 181, 246], textColor: [0, 0, 0], fontStyle: 'bold' },
+    alternateRowStyles: { fillColor: [240, 240, 240] }
   });
-
   doc.save(`pedido_${order.id}.pdf`);
 }
 
-// Função para formatar a data
-function formatDate(dateString) {
-  if (!dateString) return '-';
-  const options = {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false
-  };
-  const date = new Date(dateString);
-  return date.toLocaleString('pt-BR', options);
-}
-
-// Função para obter a classe de status
-function getStatusClass(status) {
-  switch (status) {
-    case 'PENDING':
-      return 'bg-warning text-dark';
-    case 'PROCESSING':
-      return 'bg-info';
-    case 'SHIPPED':
-      return 'bg-primary';
-    case 'DELIVERED':
-      return 'bg-success';
-    case 'CANCELED':
-      return 'bg-danger';
-    default:
-      return '';
+async function changeOrderStatus(orderId, statusData) {
+  await orderStore.changeOrderStatus(orderId, statusData, authStore.user.id)
+  await orderStore.fetchOrdersByAdmin(authStore.user.id)
+  window.dispatchEvent(new Event('orders-updated'))
+  // Atualiza o modal para refletir o novo status
+  if (selectedOrder.value && selectedOrder.value.id === orderId) {
+    const updated = orders.value.find(o => o.id === orderId)
+    if (updated) selectedOrder.value = updated
   }
-}
-
-// Função para obter o rótulo de status
-function getStatusLabel(status) {
-  switch (status) {
-    case 'PENDING':
-      return 'Pendente';
-    case 'PROCESSING':
-      return 'Processando';
-    case 'SHIPPED':
-      return 'Enviado';
-    case 'DELIVERED':
-      return 'Entregue';
-    case 'CANCELED':
-      return 'Cancelado';
-    default:
-      return 'Desconhecido';
-  }
-}
-
-// Função para formatar o endereço
-function formatAddress(address) {
-  if (!address) return '-';
-  return `${address.street}, ${address.number} - ${address.neighborhood}, ${address.city} - ${address.state}, ${address.zip_code}`;
-}
-
-// Função chamada ao erro na imagem do produto
-function onImgError(event) {
-  event.target.src = fallbackImage;
 }
 </script>
 
@@ -503,13 +257,13 @@ function onImgError(event) {
 }
 
 .order-management {
-  background-color: var(--admin-bg-primary);
+  background: linear-gradient(120deg, #10141a 0%, #181e2a 80%, #232e47 100%);
   min-height: 100vh;
   color: var(--admin-text-primary);
   padding: 2rem 1rem;
   max-width: 1280px;
   margin: 0 auto;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', 'Rajdhani', Arial, sans-serif;
 }
 
 .text-primary-ggtech {
@@ -544,84 +298,81 @@ function onImgError(event) {
   font-weight: 500;
 }
 
+/* Filtros */
 .filters-section {
-  background: var(--admin-bg-secondary);
+  background: rgba(24,30,42,0.92);
   padding: 1.5rem;
-  border-radius: 0.5rem;
+  border-radius: 0.7rem;
   margin-bottom: 2rem;
+  box-shadow: 0 2px 12px #232e4720;
+  border: 1.5px solid #232e47;
 }
-
 .card-filters {
   box-shadow: 0 2px 12px #00000022;
   border: 1px solid #374151;
 }
-
 .filter-select, .filter-input {
-  background: var(--admin-bg-tertiary);
-  color: var(--admin-text-primary);
+  background: #181e2a;
+  color: #e8eaed;
   border: 1px solid #374151;
   border-radius: 0.5rem;
 }
-
 .filter-select:focus, .filter-input:focus {
-  background: var(--admin-bg-tertiary);
+  background: #181e2a;
   border-color: #64b5f6;
-  color: var(--admin-text-primary);
+  color: #e8eaed;
   box-shadow: 0 0 0 0.2rem rgba(100, 181, 246, 0.25);
 }
-
 .btn-outline-secondary {
-  color: var(--admin-text-primary);
+  color: #e8eaed;
   border-color: #374151;
 }
-
 .btn-outline-secondary:hover {
   background: #23233a;
 }
 
-.table-responsive {
-  background: var(--admin-bg-secondary);
-  border-radius: 1rem;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+/* Tabela de pedidos */
+.table-responsive.order-table-container {
+  background: none;
+  border-radius: 1.2rem;
+  overflow: visible;
+  box-shadow: none;
+  border: none;
+  margin-bottom: 2rem;
 }
-
-.table {
-  margin-bottom: 0;
-  color: var(--admin-text-primary);
+.glass-table {
+  background: rgba(24,30,42,0.97);
+  border-radius: 1.2rem;
+  box-shadow: 0 8px 32px 0 #232e4780;
+  border: 1.5px solid #232e47;
+  backdrop-filter: blur(8px);
+  padding: 0.5rem 0.5rem 0.5rem 0.5rem;
+  margin-bottom: 2rem;
+  transition: box-shadow 0.2s;
 }
-
-.card-table {
-  box-shadow: 0 4px 24px #00000033;
-  border: 1px solid #374151;
-}
-
 .order-table th, .order-table td {
   border: none;
 }
-
 .order-table th {
   background: linear-gradient(90deg, #374151 0%, #64b5f6 100%);
   color: #fff;
   font-size: 1rem;
   font-weight: 700;
   letter-spacing: 0.04em;
+  border-top: none;
 }
-
 .order-table td {
   background: transparent;
   color: #e8eaed;
   font-size: 0.97rem;
+  border-bottom: 1px solid #232e47;
 }
-
 .order-table tbody tr {
   transition: background 0.2s;
 }
-
 .order-table tbody tr:hover {
   background: linear-gradient(90deg, #23233a 0%, #374151 100%);
 }
-
 .badge {
   font-size: 0.92rem;
   font-weight: 600;
@@ -630,38 +381,31 @@ function onImgError(event) {
   letter-spacing: 0.04em;
   box-shadow: 0 1px 4px #00000018;
 }
-
 .bg-success {
   background: linear-gradient(90deg,#43e97b 0%,#38f9d7 100%) !important;
   color: #fff !important;
 }
-
 .bg-danger {
   background: linear-gradient(90deg,#ff6b6b 0%,#f44336 100%) !important;
   color: #fff !important;
 }
-
 .bg-warning {
   background: linear-gradient(90deg,#f9d423 0%,#ff4e50 100%) !important;
   color: #222 !important;
 }
-
 .bg-info {
   background: linear-gradient(90deg,#64b5f6 0%,#42a5f5 100%) !important;
   color: #fff !important;
 }
-
 .bg-primary {
   background: linear-gradient(90deg,#667eea 0%,#764ba2 100%) !important;
   color: #fff !important;
 }
-
 .order-products-list {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
-
 .order-product-item {
   background: #23233a;
   border-radius: 0.5rem;
@@ -672,7 +416,6 @@ function onImgError(event) {
   box-shadow: 0 2px 8px #00000010;
   min-width: 160px;
 }
-
 .order-product-img {
   width: 48px;
   height: 48px;
@@ -681,17 +424,14 @@ function onImgError(event) {
   border: 1.5px solid #374151;
   background: #181828;
 }
-
 .order-product-info {
   flex: 1;
 }
-
 .order-product-name {
   font-weight: 600;
   color: #8fd6fb;
   font-size: 0.98rem;
 }
-
 .order-product-qty-price {
   display: flex;
   gap: 0.5rem;
@@ -700,6 +440,7 @@ function onImgError(event) {
   font-size: 0.93rem;
 }
 
+/* Modal de detalhes */
 .order-detail-modal {
   background: #23233a;
   color: #e8eaed;
@@ -707,27 +448,22 @@ function onImgError(event) {
   box-shadow: 0 8px 32px #00000040;
   border: 1px solid #374151;
 }
-
 .modal-header {
   border-bottom: 1px solid #374151;
   background: linear-gradient(90deg, #374151 0%, #64b5f6 100%);
 }
-
 .modal-title {
   font-size: 1.25rem;
   color: #64b5f6;
   font-weight: 700;
 }
-
 .modal-body {
   padding: 1.5rem;
 }
-
 .modal-footer {
   border-top: 1px solid #374151;
   padding: 1rem;
 }
-
 .btn-close {
   background: transparent;
   border: none;
@@ -735,15 +471,14 @@ function onImgError(event) {
   font-size: 1.5rem;
   filter: invert(1);
 }
-
 .btn-close:hover {
   color: #64b5f6;
 }
 
+/* Paginação */
 .pagination-controls {
   margin-top: 1.5rem;
 }
-
 .btn-pagination {
   background: linear-gradient(90deg,#64b5f6 0%,#42a5f5 100%);
   color: #fff;
@@ -754,12 +489,10 @@ function onImgError(event) {
   margin: 0 0.2rem;
   transition: background 0.2s;
 }
-
 .btn-pagination:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
-
 .page-info {
   color: #90caf9;
   font-weight: 600;
@@ -767,6 +500,7 @@ function onImgError(event) {
   margin: 0 0.7rem;
 }
 
+/* Responsivo */
 @media (max-width: 900px) {
   .order-management {
     padding: 1.2rem 0.5rem;
@@ -785,6 +519,16 @@ function onImgError(event) {
   .order-product-item {
     min-width: 120px;
     padding: 0.3rem 0.5rem;
+  }
+  .glass-table {
+    padding: 0.2rem 0.2rem 0.2rem 0.2rem;
+    border-radius: 0.7rem;
+  }
+}
+@media (max-width: 600px) {
+  .glass-table {
+    padding: 0.1rem 0.1rem 0.1rem 0.1rem;
+    border-radius: 0.4rem;
   }
 }
 </style>

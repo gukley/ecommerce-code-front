@@ -1,177 +1,180 @@
 <template>
-  <div class="address-modal-overlay">
-    <div class="address-modal-card">
-      <div class="address-modal-header">
+  <div class="address-modal-backdrop">
+    <div class="address-modal-card clean">
+      <div class="address-modal-header d-flex justify-content-between align-items-center mb-3">
         <h5 class="modal-title">
-          {{ mode === 'edit' ? 'Editar Endereço' : 'Novo Endereço' }}
+          <i class="bi bi-geo-alt text-tech me-2"></i>
+          {{ address?.id ? 'Editar Endereço' : 'Novo Endereço' }}
         </h5>
-        <button type="button" class="close-btn" @click="$emit('close')">
-          <i class="bi bi-x-lg"></i>
-        </button>
+        <button type="button" class="btn-close" @click="$emit('close')"></button>
       </div>
-      <div class="address-modal-body">
-        <form @submit.prevent="handleSubmit" class="d-flex flex-column gap-3">
-          <div class="row g-2">
-            <div class="col-12 col-md-8">
-              <input v-model="form.street" class="address-input" placeholder="Rua" required />
-            </div>
-            <div class="col-12 col-md-4">
-              <input v-model="form.number" class="address-input" placeholder="Número" required />
-            </div>
-            <div class="col-12 col-md-6">
-              <input v-model="form.city" class="address-input" placeholder="Cidade" required />
-            </div>
-            <div class="col-12 col-md-3">
-              <input v-model="form.state" class="address-input" placeholder="Estado" required />
-            </div>
-            <div class="col-12 col-md-3">
-              <input v-model="form.zip" class="address-input" placeholder="CEP" required />
-            </div>
+      <form @submit.prevent="handleSubmit">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label" for="addressStreet">Rua</label>
+            <input v-model="form.street" id="addressStreet" type="text" class="form-control clean-input" required />
           </div>
-          <div class="d-flex gap-2 justify-content-end mt-2">
-            <button type="submit" class="address-btn primary">
-              {{ mode === 'edit' ? 'Salvar' : 'Adicionar' }}
-            </button>
-            <button type="button" class="address-btn" @click="$emit('close')">Cancelar</button>
+          <div class="col-md-3">
+            <label class="form-label" for="addressNumber">Número</label>
+            <input v-model="form.number" id="addressNumber" type="text" class="form-control clean-input" required />
           </div>
-        </form>
-      </div>
+          <div class="col-md-3">
+            <label class="form-label" for="addressZip">CEP</label>
+            <input v-model="form.zip" id="addressZip" type="text" class="form-control clean-input" required maxlength="9" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="addressCity">Cidade</label>
+            <input v-model="form.city" id="addressCity" type="text" class="form-control clean-input" required />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="addressState">Estado</label>
+            <input v-model="form.state" id="addressState" type="text" class="form-control clean-input" required maxlength="2" />
+          </div>
+          <div class="col-12">
+            <label class="form-label" for="addressComplement">Complemento</label>
+            <input v-model="form.complement" id="addressComplement" type="text" class="form-control clean-input" />
+          </div>
+        </div>
+        <div class="d-flex justify-content-end gap-2 mt-4">
+          <button type="submit" class="btn btn-tech px-4">
+            <i :class="form.id ? 'bi bi-save' : 'bi bi-plus-circle'"></i>
+            {{ form.id ? 'Salvar' : 'Adicionar' }}
+          </button>
+          <button type="button" class="btn btn-outline-secondary px-4" @click="$emit('close')">
+            <i class="bi bi-x-circle"></i> Cancelar
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, watch } from 'vue'
-import { createAddress, updateAddress } from '@/services/apiService.js'
+
 const props = defineProps({
-  mode: { type: String, default: 'add' },
-  address: { type: Object, default: null }
+  address: Object
 })
+
 const emit = defineEmits(['close', 'saved'])
 
 const form = ref({
+  id: null,
   street: '',
   number: '',
+  zip: '',
   city: '',
   state: '',
-  zip: ''
+  complement: ''
 })
 
-watch(
-  () => props.address,
-  (val) => {
-    if (props.mode === 'edit' && val) {
-      form.value = { ...val }
-    } else {
-      form.value = { street: '', number: '', city: '', state: '', zip: '' }
+watch(() => props.address, (addr) => {
+  if (addr) {
+    form.value = { ...addr }
+  } else {
+    form.value = {
+      id: null,
+      street: '',
+      number: '',
+      zip: '',
+      city: '',
+      state: '',
+      complement: ''
     }
-  },
-  { immediate: true }
-)
+  }
+}, { immediate: true })
 
-async function handleSubmit() {
-  if (props.mode === 'add') await createAddress(form.value)
-  else await updateAddress(props.address.id, form.value)
+function handleSubmit() {
   emit('saved', { ...form.value })
   emit('close')
 }
 </script>
 
 <style scoped>
-.address-modal-overlay {
+.address-modal-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 1200;
-  background: rgba(16,22,34,0.75);
+  background: rgba(24,30,42,0.18);
+  z-index: 9999;
   display: flex;
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(2px);
 }
-.address-modal-card {
-  background: rgba(24,30,42,0.97);
-  border-radius: 20px;
-  box-shadow: 0 8px 40px 0 #232e47cc, 0 1.5px 0 #50b8fe;
+.address-modal-card.clean {
+  background: #fff;
+  border-radius: 1.2rem;
+  box-shadow: 0 8px 32px #232e4720;
+  border: none;
+  padding: 2.2rem 2rem 2rem 2rem;
   min-width: 350px;
-  max-width: 95vw;
-  width: 420px;
+  max-width: 480px;
+  width: 100%;
+  color: #232e47;
   animation: modalIn 0.18s;
-  overflow: hidden;
 }
 @keyframes modalIn {
   from { opacity: 0; transform: translateY(30px);}
   to { opacity: 1; transform: translateY(0);}
 }
 .address-modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: linear-gradient(90deg,#232e47 60%, #399bff 100%);
-  padding: 18px 24px 14px 24px;
-  border-bottom: 1.5px solid #232e47;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 1rem;
+  margin-bottom: 1.2rem;
 }
-.address-modal-header .modal-title {
-  color: #fff;
-  font-weight: 700;
-  font-size: 1.18rem;
-  letter-spacing: 0.5px;
-  margin: 0;
+.text-tech {
+  color: #50b8fe;
 }
-.close-btn {
-  background: none;
-  border: none;
-  color: #fff;
-  font-size: 1.2rem;
-  opacity: 0.7;
-  transition: opacity 0.15s;
-  cursor: pointer;
-}
-.close-btn:hover { opacity: 1; }
-.address-modal-body {
-  padding: 28px 28px 22px 28px;
-  background: transparent;
-}
-.address-input {
-  width: 100%;
-  border-radius: 12px;
-  background: rgba(40,48,62,0.92);
-  color: #eaf6ff;
-  border: 1.5px solid #399bff;
-  font-size: 1.08rem;
-  padding: 12px 16px;
-  margin-bottom: 0;
+.clean-input {
+  background: #f8f9fa;
+  color: #232e47;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0.7rem 1rem;
+  font-size: 1.05rem;
+  box-shadow: 0 2px 8px #232e4710;
   transition: border 0.2s, background 0.2s;
-  box-shadow: 0 2px 8px #232e4720;
 }
-.address-input:focus {
+.clean-input:focus {
   border-color: #50b8fe;
-  background: rgba(40,48,62,1);
-  color: #fff;
+  background: #fff;
+  color: #232e47;
   outline: none;
 }
-.address-btn {
-  border-radius: 14px;
-  font-weight: 600;
-  font-size: 1rem;
-  padding: 8px 22px;
-  border: none;
-  background: #232e47;
-  color: #b8d8ff;
-  transition: background 0.18s, color 0.18s;
-  box-shadow: 0 2px 8px #232e4720;
-  cursor: pointer;
-}
-.address-btn.primary {
+.btn-tech {
   background: linear-gradient(90deg,#50b8fe 60%, #399bff 100%);
-  color: #181e2a;
-  font-weight: 700;
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px #50b8fe20;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
 }
-.address-btn.primary:hover {
+.btn-tech:hover {
   background: linear-gradient(90deg,#399bff 60%, #50b8fe 100%);
   color: #fff;
+  box-shadow: 0 4px 18px #50b8fe40;
 }
-.address-btn:hover:not(.primary) {
-  background: #399bff;
-  color: #fff;
+.btn-outline-secondary {
+  background: transparent;
+  color: #232e47;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  font-weight: 500;
+  transition: background 0.18s, color 0.18s;
+}
+.btn-outline-secondary:hover {
+  background: #e5e7eb;
+  color: #232e47;
+}
+@media (max-width: 600px) {
+  .address-modal-card.clean {
+    padding: 1.2rem 0.4rem 1rem 0.4rem;
+    min-width: 0;
+    max-width: 99vw;
+  }
+  .address-modal-header {
+    padding-bottom: 0.7rem;
+  }
 }
 </style>

@@ -1,11 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { authGuard } from '@/router/guard.js'
+import CartView from '@/views/cart/CartView.vue'
+import Home from '@/views/home/HomePage.vue' // ajuste conforme o nome/caminho real do seu arquivo Home
 
 const routes = [
   {
     path: '/',
     name: 'Home',
-    component: () => import('@/views/home/HomePage.vue')
+    component: Home
   },
   {
     path: '/login',
@@ -104,6 +106,17 @@ const routes = [
     name: 'Unauthorized',
     component: () => import('@/views/errors/UnauthorizedView.vue'),
     meta: { requiresAuth: false }
+  },
+  {
+    path: '/monte-seu-pc',
+    name: 'PcBuilder',
+    component: () => import('@/views/pcbuilder/PcBuilderView.vue'),
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/cart',
+    name: 'Cart',
+    component: CartView
   }
 ]
 

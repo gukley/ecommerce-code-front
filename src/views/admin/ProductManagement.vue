@@ -84,8 +84,8 @@ import { ref, onMounted, computed, watch } from 'vue';
 import { useToast } from 'vue-toastification';
 import { useAuthStore } from '@/stores/authStore';
 
-import ProductTable from '@/components/Admin/AdminProductTable.vue';
-import ProductFormModal from '@/components/Admin/AdminProductFormModal.vue';
+import ProductTable from '@/components/Admin/Product/AdminProductTable.vue';
+import ProductFormModal from '@/components/Admin/Product/AdminProductFormModal.vue';
 import DiscountModal from '@/components/Admin/AdminDiscountModal.vue';
 import {
   getAllProducts,

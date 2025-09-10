@@ -172,6 +172,7 @@ import { useProductStore } from '@/stores/productStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useCouponStore } from '@/stores/couponStore';
 import { storeToRefs } from 'pinia';
+import { useRouter } from 'vue-router';
 
 // Stores
 const orderStore = useOrderStore();
@@ -187,6 +188,7 @@ const { coupons, loading: loadingCupons } = storeToRefs(couponStore);
 // Estado local
 const totalClientes = ref(0);
 const dashboardInitialized = ref(false);
+const router = useRouter();
 
 // Carrega os dados de pedidos, produtos e cupons ao montar o componente
 onMounted(async () => {
@@ -275,6 +277,28 @@ const formatStatus = (status) => {
   };
   return statusMap[status?.toLowerCase()] || 'Desconhecido';
 };
+
+// Adicione um watch para a rota e para o usuário logado
+watch(
+  () => authStore.user,
+  async (newUser, oldUser) => {
+    if (newUser && newUser.id) {
+      await fetchDashboardData();
+      dashboardInitialized.value = true;
+    }
+  },
+  { immediate: true }
+);
+
+watch(
+  () => router.currentRoute.value.name,
+  async (routeName) => {
+    if (routeName === 'AdminDashboard' && authStore.user && authStore.user.id) {
+      await fetchDashboardData();
+      dashboardInitialized.value = true;
+    }
+  }
+);
 
 // Observa o estado do usuário para carregar os dados
 watch(() => authStore.user, async (newUser, oldUser) => {

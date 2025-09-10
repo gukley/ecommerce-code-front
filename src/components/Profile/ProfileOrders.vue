@@ -8,7 +8,9 @@
           <div class="d-flex flex-wrap justify-content-between align-items-center mb-2 gap-2">
             <span class="text-light">
               <strong>Pedido #{{ order.id }}</strong>
-              <span class="badge bg-blue modern-badge ms-2">{{ order.status ?? 'Indefinido' }}</span>
+              <span :class="['badge', 'modern-badge', getStatusClass(order.status), 'ms-2']">
+                {{ translateStatus(order.status) }}
+              </span>
             </span>
             <span class="text-light small">
               {{ new Date(order.order_date).toLocaleDateString('pt-BR') }}
@@ -21,7 +23,6 @@
               class="order-product-item d-flex align-items-center gap-3 mb-2"
             >
               <img
-                v-if="getProductImage(product)"
                 :src="getProductImage(product)"
                 alt="Imagem produto"
                 class="order-product-img"
@@ -41,13 +42,22 @@
             <span class="fw-bold text-blue fs-5">
               Total: {{ formatPrice(order.total_amount ?? order.total ?? getOrderTotal(order)) }}
             </span>
-            <button
-              v-if="canCancel(order.status)"
-              class="btn btn-outline-danger btn-cancel-order"
-              @click="$emit('cancel', order.id)"
-            >
-              <i class="bi bi-x-circle"></i> Cancelar Pedido
-            </button>
+            <div class="d-flex gap-2">
+              <button
+                class="btn btn-outline-info btn-download-pdf"
+                @click="downloadOrderPDF(order)"
+                title="Baixar Nota Fiscal (PDF)"
+              >
+                <i class="bi bi-file-earmark-pdf"></i> Nota Fiscal
+              </button>
+              <button
+                v-if="canCancel(order.status)"
+                class="btn btn-outline-danger btn-cancel-order"
+                @click="$emit('cancel', order.id)"
+              >
+                <i class="bi bi-x-circle"></i> Cancelar Pedido
+              </button>
+            </div>
           </div>
         </li>
       </ul>
@@ -56,25 +66,23 @@
 </template>
 
 <script setup>
+import jsPDF from 'jspdf'
 const props = defineProps({ orders: Array })
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
 function getProductImage(product) {
-  // Aceita tanto image_url quanto image_path
-  if (product.image_url) return product.image_url
+  if (product.image_url) return product.image_url;
   if (product.image_path) {
-    // Garante que não haja barra dupla e que a base esteja correta
-    let base = API_BASE_URL.replace(/\/$/, '')
-    let path = product.image_path.startsWith('/') ? product.image_path : '/' + product.image_path
-    return base + path
+    let base = API_BASE_URL.replace(/\/$/, '');
+    let path = product.image_path.startsWith('/') ? product.image_path : '/' + product.image_path;
+    return base + path;
   }
-  return '/default-product.png'
+  return '/default-product.png';
 }
 
 function formatPrice(value) {
-  if (value == null) return '-'
-  return Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+  if (value == null) return '-';
+  return Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
 // Calcula o total do pedido caso não venha do backend
@@ -87,9 +95,59 @@ function getOrderTotal(order) {
   }, 0);
 }
 
+// Só permite cancelar se status for PENDING (Pendente)
 function canCancel(status) {
-  // Só permite cancelar se status for PENDING ou PROCESSING
-  return ['PENDING', 'PROCESSING'].includes((status || '').toUpperCase());
+  return (status || '').toUpperCase() === 'PENDING';
+}
+
+// Traduz status para PT-BR
+function translateStatus(status) {
+  switch ((status || '').toUpperCase()) {
+    case 'PENDING': return 'Pendente';
+    case 'PROCESSING': return 'Processando';
+    case 'CANCELED': return 'Cancelado';
+    case 'SHIPPED': return 'Enviado';
+    case 'DELIVERED': return 'Entregue';
+    default: return status;
+  }
+}
+
+// Badge de status com cor tech
+function getStatusClass(status) {
+  switch ((status || '').toUpperCase()) {
+    case 'PENDING': return 'bg-status-pending';
+    case 'PROCESSING': return 'bg-status-processing';
+    case 'CANCELED': return 'bg-status-canceled';
+    case 'SHIPPED': return 'bg-status-shipped';
+    case 'DELIVERED': return 'bg-status-delivered';
+    default: return 'bg-secondary';
+  }
+}
+
+function downloadOrderPDF(order) {
+  const doc = new jsPDF()
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(18)
+  doc.text('Nota Fiscal - Pedido #' + order.id, 15, 20)
+  doc.setFontSize(12)
+  doc.text('Data: ' + new Date(order.order_date).toLocaleDateString('pt-BR'), 15, 30)
+  doc.text('Status: ' + translateStatus(order.status), 15, 38)
+  doc.text('Total: ' + formatPrice(order.total_amount ?? order.total ?? getOrderTotal(order)), 15, 46)
+  doc.text('Produtos:', 15, 56)
+  let y = 64
+  order.products?.forEach((p, idx) => {
+    doc.text(
+      `${idx + 1}. ${p.name} | Qtd: ${p.quantity ?? 1} | Unitário: ${formatPrice(p.unit_price ?? p.price)} | Subtotal: ${formatPrice((p.unit_price ?? p.price) * (p.quantity ?? 1))}`,
+      15,
+      y
+    )
+    y += 8
+    if (y > 270) {
+      doc.addPage()
+      y = 20
+    }
+  })
+  doc.save(`nota-fiscal-pedido-${order.id}.pdf`)
 }
 </script>
 
@@ -102,7 +160,6 @@ function canCancel(status) {
   border: 1.5px solid #232e47;
 }
 .bg-dark { background: #181e2a !important; }
-.bg-blue { background: #399bff !important; color:#fff !important; }
 .text-blue { color: #50b8fe;}
 .modern-badge {
   font-size: 0.92rem;
@@ -111,6 +168,26 @@ function canCancel(status) {
   box-shadow: 0 1px 6px #232e4720;
   border: 1.5px solid #232e47;
   background: rgba(80,184,254,0.08);
+}
+.bg-status-pending {
+  background: linear-gradient(90deg, #fbbf24 0%, #f59e0b 100%) !important;
+  color: #232e47 !important;
+}
+.bg-status-processing {
+  background: linear-gradient(90deg, #64b5f6 0%, #42a5f5 100%) !important;
+  color: #fff !important;
+}
+.bg-status-canceled {
+  background: linear-gradient(90deg, #ff6a6a 0%, #f44336 100%) !important;
+  color: #fff !important;
+}
+.bg-status-shipped {
+  background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%) !important;
+  color: #232e47 !important;
+}
+.bg-status-delivered {
+  background: linear-gradient(90deg, #50b8fe 0%, #399bff 100%) !important;
+  color: #fff !important;
 }
 .modern-list-item {
   transition: box-shadow 0.2s, background 0.2s;
@@ -149,6 +226,22 @@ function canCancel(status) {
   background: #ff6a6a;
   color: #fff;
   border-color: #ff6a6a;
+}
+.btn-download-pdf {
+  font-size: 0.98rem;
+  border-radius: 10px;
+  padding: 7px 18px;
+  font-weight: 600;
+  border-width: 2px;
+  border-color: #50b8fe;
+  color: #50b8fe;
+  background: transparent;
+  transition: background 0.18s, color 0.18s, border 0.18s;
+}
+.btn-download-pdf:hover {
+  background: #50b8fe;
+  color: #fff;
+  border-color: #50b8fe;
 }
 @keyframes fadein {
   from { opacity: 0; transform: translateY(12px);}

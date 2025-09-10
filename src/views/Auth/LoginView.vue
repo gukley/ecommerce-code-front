@@ -38,11 +38,14 @@
             </span>
             <input
               v-model="password"
-              type="password"
+              :type="showPassword ? 'text' : 'password'"
               class="form-control input-custom"
               placeholder="Senha"
               required
             />
+            <span class="input-group-text-modern input-password-toggle" @click="togglePassword" style="cursor:pointer;">
+              <i :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+            </span>
           </div>
           <button type="submit" class="btn btn-main-action w-100 rounded-pill">
             Entrar
@@ -70,7 +73,10 @@ import { useToast } from 'vue-toastification'
 const router = useRouter()
 const email = ref('')
 const password = ref('')
+const showPassword = ref(false)
 const toast = useToast()
+
+const togglePassword = () => { showPassword.value = !showPassword.value }
 
 const handleLogin = async () => {
   try {
@@ -183,6 +189,7 @@ const handleLogin = async () => {
 .input-group-modern {
   display: flex;
   margin-bottom: 1.2rem;
+  align-items: center;
 }
 .input-group-text-modern {
   background-color: #2c2c42;
@@ -194,6 +201,20 @@ const handleLogin = async () => {
   border-top-left-radius: 50px;
   border-bottom-left-radius: 50px;
   font-size: 1.1rem;
+}
+.input-password-toggle {
+  border-top-right-radius: 50px;
+  border-bottom-right-radius: 50px;
+  border-left: none;
+  background: #2c2c42;
+  color: #8f5fe8;
+  font-size: 1.15rem;
+  padding-left: 0.7rem;
+  padding-right: 0.7rem;
+  transition: color 0.18s;
+}
+.input-password-toggle:hover {
+  color: #00ffe1;
 }
 .glass-card {
   background: rgba(255,255,255,0.08);

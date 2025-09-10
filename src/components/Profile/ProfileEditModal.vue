@@ -2,7 +2,10 @@
   <div class="profile-modal-overlay">
     <div class="profile-modal-card">
       <div class="profile-modal-header">
-        <h5 class="modal-title">Editar Perfil</h5>
+        <span class="user-data-icon">
+          <i class="bi bi-person-badge-fill"></i>
+        </span>
+        <h5 class="modal-title">Meus dados</h5>
         <button type="button" class="close-btn" @click="$emit('close')">
           <i class="bi bi-x-lg"></i>
         </button>
@@ -109,10 +112,18 @@ async function handleSubmit() {
   from { opacity: 0; transform: translateY(30px);}
   to { opacity: 1; transform: translateY(0);}
 }
+.user-data-icon {
+  font-size: 2.1rem;
+  color: #d32f2f;
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+}
 .profile-modal-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 10px;
   background: linear-gradient(90deg,#232e47 60%, #399bff 100%);
   padding: 18px 24px 14px 24px;
   border-bottom: 1.5px solid #232e47;

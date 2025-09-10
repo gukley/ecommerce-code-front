@@ -169,19 +169,24 @@ onMounted(async () => {
 });
 
 watch(() => props.etapa, (newVal) => {
-  // Use para animações de etapa se quiser
 });
 
 async function avancarEtapaEndereco() {
   let enderecoFinal = null;
   try {
     if (modoNovoEndereco.value) {
-      if (!form.street || !form.number || !form.city || !form.state || !form.country || !form.zip) {
+      const addressPayload = {
+        street: form.street,
+        number: form.number,
+        city: form.city,
+        state: form.state,
+        zip: form.zip
+      };
+      if (!addressPayload.street || !addressPayload.number || !addressPayload.city || !addressPayload.state || !addressPayload.zip) {
         toast.error('Por favor, preencha todos os campos do endereço.');
         return;
       }
 
-      const addressPayload = { ...form };
       enderecoFinal = await createAddress(addressPayload);
 
       if (!enderecoFinal?.id) {
@@ -189,8 +194,6 @@ async function avancarEtapaEndereco() {
         return;
       }
 
-      // Não tente buscar a lista novamente antes de avançar!
-      // Avance imediatamente para a próxima etapa com o novo endereço
       enderecoSelecionadoId.value = enderecoFinal.id;
       modoNovoEndereco.value = false;
 
@@ -230,7 +233,7 @@ function handleEtapaChangeFromPayment(newEtapa) {
 }
 
 function handleDadosColetadosFromPayment(dados) {
-  // Sempre envie o endereço selecionado junto com o método de pagamento
+  // Sempre enviar o endereço selecionado junto com o método de pagamento
   const enderecoFinal = enderecos.value.find(
     (end) => end.id === enderecoSelecionadoId.value
   );

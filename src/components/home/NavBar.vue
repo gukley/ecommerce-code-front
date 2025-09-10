@@ -3,7 +3,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore';
 import { useCartStore } from '@/stores/cartStore';
-import CartDrawer from '@/components/Cart/CartDrawer.vue';
+// import CartDrawer from '@/components/Cart/CartDrawer.vue';
 import WishlistDrawer from '@/components/Cart/WishlistDrawer.vue';
 import { useWishlistStore } from '@/stores/wishlistStore';
 
@@ -11,16 +11,10 @@ const showMenu = ref(false);
 const authStore = useAuthStore();
 const router = useRouter();
 const cart = useCartStore();
-const showCartDrawer = ref(false);
 const searchTerm = ref("");
 const showWishlistDrawer = ref(false);
 const wishlist = useWishlistStore();
 
-
-const openCartDrawer = () => { 
-  showCartDrawer.value = true; 
-};
-const closeCartDrawer = () => { showCartDrawer.value = false; };
 
 const handleUserClick = () => {
   showMenu.value = !showMenu.value;
@@ -72,7 +66,7 @@ function toggleTheme() {
 
 onMounted(() => {
   document.addEventListener('mousedown', handleClickOutside);
-  cart.initCart();
+  // cart.initCart();
   document.documentElement.setAttribute('data-theme', theme.value)
 
   if (authStore.token && (!authStore.user || !authStore.user.id)) {
@@ -103,24 +97,14 @@ onBeforeUnmount(() => {
           <router-link class="nav-link custom-nav-link" :to="{ name: 'Home' }" active-class="active">Home</router-link>
           <router-link class="nav-link custom-nav-link" :to="'/produtos'" active-class="active">Produtos</router-link>
           <router-link class="nav-link custom-nav-link" :to="'/categorias'" active-class="active">Categorias</router-link>
+          <router-link to="/monte-seu-pc" class="nav-link nav-pcbuilder-link">
+            <i class="bi bi-cpu me-1"></i> Monte seu PC
+          </router-link>
         </div>
 
-        <form class="d-flex custom-search-bar ms-lg-auto me-lg-4 mt-2 mt-lg-0" @submit.prevent="handleSearch">
-          <input
-            class="form-control custom-search-input"
-            type="search"
-            placeholder="🔍 Buscar produtos..."
-            aria-label="Search"
-            v-model="searchTerm"
-          />
-          <button class="btn btn-main-action ms-2 rounded-pill px-4" type="submit">
-            <i class="bi bi-search"></i>
-          </button>
-        </form>
-        
-    
         <div class="d-flex align-items-center gap-4 ms-lg-3 mt-2 mt-lg-0">
-          <div class="position-relative nav-icon-wrapper" @click="openCartDrawer">
+          <!-- Carrinho: agora redireciona para /cart -->
+          <div class="position-relative nav-icon-wrapper" @click="router.push('/cart')">
             <i class="bi bi-cart3 fs-3 nav-icon"></i>
             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-gradient-purple cart-badge">
               {{ cart.totalItems }}
@@ -164,7 +148,7 @@ onBeforeUnmount(() => {
         </div>
       </div>
     </div>
-    <CartDrawer :open="showCartDrawer" @close="closeCartDrawer" />
+    <!-- Remova: <CartDrawer :open="showCartDrawer" @close="closeCartDrawer" /> -->
     <WishlistDrawer :open="showWishlistDrawer" @close="() => showWishlistDrawer = false" />
   </nav>
 </template>
@@ -244,37 +228,6 @@ onBeforeUnmount(() => {
 .custom-nav-link.active {
   color: #00ffe1 !important;
   font-weight: 600;
-}
-
-/* Barra de Busca */
-.custom-search-bar {
-  flex-grow: 0.7; 
-  max-width: 330px;
-}
-
-.custom-search-input {
-  background-color: #2b2b3d; 
-  border: 1px solid #4a4a6e; 
-  color: #e0e0e0; 
-  padding: 0.5rem 1rem;
-  border-radius: 50px; 
-  transition: all 0.3s ease;
-  font-size: 0.98rem;
-}
-
-.custom-search-input::placeholder {
-  color: #999999; 
-}
-
-.custom-search-input:focus {
-  background-color: #35354d; 
-  border-color: #a362ff; 
-  box-shadow: 0 0 0 0.18rem rgba(163, 98, 255, 0.18); 
-}
-
-.btn-main-action {
-  padding: 0.45rem 1.2rem !important;
-  font-size: 1rem !important;
 }
 
 /* Ícones */
@@ -418,21 +371,20 @@ onBeforeUnmount(() => {
     left: 0;
     transform: translateX(0);
   }
-  
-  .custom-search-bar {
-    width: 100%;
-    max-width: none;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    margin-top: 1.2rem !important;
-  }
-  
-  .d-flex.align-items-center.gap-4.ms-lg-3 { 
-    width: 100%;
-    justify-content: flex-start;
-    margin-top: 1.2rem !important;
-    margin-left: 0 !important;
-    gap: 0.7rem !important;
-  }
+}
+
+.nav-pcbuilder-link {
+  font-weight: 700;
+  color: #00ffe1 !important;
+  background: linear-gradient(90deg, #00ffe1 0%, #8f5fe8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: color 0.18s;
+}
+.nav-pcbuilder-link:hover {
+  color: #8f5fe8 !important;
+  -webkit-text-fill-color: #8f5fe8;
+  text-shadow: 0 0 12px #00ffe1cc;
 }
 </style>
