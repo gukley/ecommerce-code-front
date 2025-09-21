@@ -62,9 +62,9 @@ import { storeToRefs } from 'pinia';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-import OrderFilters from '@/components/Admin/Orders/OrderFilters.vue';
-import OrderTable from '@/components/Admin/Orders/OrderTable.vue';
-import OrderDetailModal from '@/components/Admin/Orders/OrderDetailModal.vue';
+import OrderFilters from '@/components/admin/Orders/OrderFilters.vue';
+import OrderTable from '@/components/admin/Orders/OrderTable.vue';
+import OrderDetailModal from '@/components/admin/Orders/OrderDetailModal.vue';
 import PaginationControls from '@/components/Common/PaginationControls.vue';
 
 const addresses = ref({});

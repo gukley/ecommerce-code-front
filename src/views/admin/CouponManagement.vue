@@ -106,8 +106,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useCouponStore } from '@/stores/couponStore';
-import CouponList from '@/components/Admin/Coupon/CouponList.vue';
-import CouponForm from '@/components/Admin/Coupon/CouponForm.vue';
+import CouponList from '@/components/admin/Coupon/CouponList.vue';
+import CouponForm from '@/components/admin/Coupon/CouponForm.vue';
 
 // Store
 const couponStore = useCouponStore();

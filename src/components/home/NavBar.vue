@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore';
 import { useCartStore } from '@/stores/cartStore';
 // import CartDrawer from '@/components/Cart/CartDrawer.vue';
-import WishlistDrawer from '@/components/Cart/WishlistDrawer.vue';
+import WishlistDrawer from '@/components/cart/WishlistDrawer.vue';
 import { useWishlistStore } from '@/stores/wishlistStore';
 
 const showMenu = ref(false);
