@@ -17,7 +17,7 @@
             <button @click="$emit('edit', addr)" class="btn btn-purple btn-sm px-3 modern-btn" title="Editar">
               <i class="bi bi-pencil"></i>
             </button>
-            <button @click="$emit('delete', addr.id)" class="btn btn-danger btn-sm px-3 modern-btn" title="Excluir">
+            <button @click="() => deleteAddressHandler(addr.id)" class="btn btn-danger btn-sm px-3 modern-btn" title="Excluir">
               <i class="bi bi-trash"></i>
             </button>
           </div>
@@ -27,7 +27,29 @@
   </section>
 </template>
 <script setup>
+import { ref, onMounted } from 'vue'
+import { deleteAddress, getAllAddresses } from '@/services/apiService'
+
 const props = defineProps({ addresses: Array })
+const emit = defineEmits(['add', 'edit', 'delete'])
+
+const addresses = ref([])
+
+async function fetchAddresses() {
+  addresses.value = await getAllAddresses()
+}
+
+async function deleteAddressHandler(id) {
+  try {
+    await deleteAddress(id)
+    await fetchAddresses() // Atualiza a lista após excluir
+  } catch (error) {
+    // Trate o erro, ex: toast.error('Erro ao excluir endereço')
+    console.error('Erro ao excluir endereço:', error)
+  }
+}
+
+onMounted(fetchAddresses)
 </script>
 <style scoped>
 .addresses-card.modern-addresses-card {

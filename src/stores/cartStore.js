@@ -1,8 +1,4 @@
-// =========================================================
-// cartStore.js - Store do Pinia (Versão Corrigida e Reativa)
-// =========================================================
-
-import { defineStore, storeToRefs } from 'pinia';
+import { defineStore } from 'pinia';
 import { ref, computed, watch } from 'vue';
 import { 
   getCart,
@@ -23,8 +19,8 @@ export const useCartStore = defineStore('cart', () => {
 
   // Estado reativo
   const cartId = ref(null);
-  const items = ref([]); // Guarda os IDs e quantidades (dados brutos)
-  const detailedItems = ref([]); // Guarda os objetos completos dos produtos
+  const items = ref([]); // IDs e quantidades (dados brutos)
+  const detailedItems = ref([]); // Objetos completos dos produtos
   const loading = ref(false);
 
   const isGuest = computed(() => !authStore.isAuthenticated);
@@ -42,7 +38,7 @@ export const useCartStore = defineStore('cart', () => {
     }, 0)
   );
 
-  // Função para carregar os detalhes dos produtos
+  // Carrega detalhes dos produtos
   async function loadDetailedItems(rawItems) {
     if (!rawItems || rawItems.length === 0) {
       detailedItems.value = [];
@@ -56,7 +52,7 @@ export const useCartStore = defineStore('cart', () => {
           const product = await getProductById(item.product_id);
           return { ...item, product };
         } catch (err) {
-          console.error(`Erro ao buscar detalhes do produto ${item.product_id}:`, err);
+          console.error(`Erro ao buscar produto ${item.product_id}:`, err);
           return { ...item, product: null };
         }
       });
@@ -66,13 +62,15 @@ export const useCartStore = defineStore('cart', () => {
     }
   }
 
-  // Sincroniza o carrinho do utilizador autenticado com a API
+  // 🔹 Carrinho autenticado sempre vem da API
   async function syncAuthenticatedCart() {
     try {
       const res = await getCart();
       cartId.value = res.id;
+
       const apiItems = await getCartItems();
-      items.value = apiItems;
+      items.value = apiItems && apiItems.length > 0 ? apiItems : [];
+
       await loadDetailedItems(items.value);
     } catch (err) {
       if (err.message && err.message.includes('not found')) {
@@ -84,7 +82,7 @@ export const useCartStore = defineStore('cart', () => {
     }
   }
 
-  // Cria um novo carrinho na API
+  // Cria carrinho vazio na API
   async function createNewCart() {
     try {
       const createRes = await createCart();
@@ -92,77 +90,90 @@ export const useCartStore = defineStore('cart', () => {
       items.value = [];
       detailedItems.value = [];
     } catch (createErr) {
-      console.error('Falha ao criar o carrinho:', createErr);
-      toast.error('Não foi possível carregar ou criar seu carrinho.');
+      console.error('Falha ao criar carrinho:', createErr);
+      toast.error('Não foi possível criar o carrinho.');
     }
   }
 
-  // Sincroniza o carrinho do convidado com o localStorage
+  // Carrinho do convidado (localStorage)
   async function syncGuestCart() {
     const localCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
-    console.log('Carrinho restaurado do localStorage:', localCart); // debug
     items.value = localCart;
-    await loadDetailedItems(items.value); // Aguarde o carregamento dos detalhes
+    await loadDetailedItems(items.value);
   }
 
-  // Inicializa o carrinho. Este é o ponto de entrada principal.
-  async function initCart() {
-    loading.value = true;
-    if (isGuest.value) {
-      await syncGuestCart(); // Aguarde o carregamento dos itens
-    } else {
-      await syncAuthenticatedCart();
-    }
-    loading.value = false;
-  }
-  
-  // Função para salvar o carrinho do convidado
   function saveGuestCart() {
     localStorage.setItem('guestCart', JSON.stringify(items.value));
-    console.log('Carrinho salvo no localStorage:', items.value); // debug
   }
 
-  // Adiciona um item ao carrinho
+  // 🔹 Merge do guestCart para o backend no login
+  async function mergeGuestCartOnLogin() {
+    if (!isGuest.value && localStorage.getItem('guestCart')) {
+      const guestItems = JSON.parse(localStorage.getItem('guestCart') || '[]');
+
+      for (const item of guestItems) {
+        try {
+          await addItemToCart(item.product_id, item.quantity, item.unit_price);
+        } catch (err) {
+          console.error(`Erro ao enviar item ${item.product_id}:`, err);
+        }
+      }
+
+      localStorage.removeItem('guestCart');
+      await syncAuthenticatedCart();
+    }
+  }
+
+  // 🔹 Inicializa o carrinho
+  async function initCart() {
+    loading.value = true;
+
+    if (isGuest.value) {
+      await syncGuestCart();
+    } else {
+      await mergeGuestCartOnLogin();
+      await syncAuthenticatedCart();
+    }
+
+    loading.value = false;
+  }
+
+  // Adiciona item
   async function addItem(productId, quantity = 1, unitPrice) {
     try {
-      // 1. Obter o stock atual do produto
       const product = await getProductById(productId);
       const stock = product.stock;
 
-      // 2. Encontrar o item existente para verificar o total
       const existingItem = items.value.find(item => item.product_id === productId);
       const currentQuantity = existingItem ? existingItem.quantity : 0;
       const newQuantity = currentQuantity + quantity;
 
-      // 3. Verificar stock
       if (newQuantity > stock) {
         toast.error(`Apenas ${stock} itens em stock. Não é possível adicionar mais.`);
         return;
       }
 
-      // 4. Lógica para utilizadores autenticados ou convidados
       if (!isGuest.value) {
         await addItemToCart(productId, quantity, unitPrice);
-        toast.success('Item adicionado ao carrinho!');
-        await syncAuthenticatedCart(); // Força a sincronização após a ação
+        await syncAuthenticatedCart();
       } else {
         if (existingItem) {
           existingItem.quantity = newQuantity;
         } else {
           items.value.push({ product_id: productId, quantity: newQuantity, unit_price: unitPrice });
         }
-        items.value = [...items.value]; // <-- força reatividade
+        items.value = [...items.value];
         saveGuestCart();
         await loadDetailedItems(items.value);
-        toast.success('Item adicionado ao carrinho!');
       }
+      toast.success('Item adicionado ao carrinho!');
     } catch (err) {
       console.error('Erro ao adicionar item:', err);
       toast.error('Erro ao adicionar item: ' + (err.message || 'Verifique a conexão.'));
     }
   }
 
-  // Atualiza a quantidade do item
+  // Atualiza quantidade
   async function updateItemQuantity(productId, newQuantity) {
     try {
       const product = await getProductById(productId);
@@ -179,25 +190,23 @@ export const useCartStore = defineStore('cart', () => {
 
       if (!isGuest.value) {
         await updateCartItem(productId, newQuantity);
-        toast.info(`Quantidade de item atualizada para ${newQuantity}.`);
         await syncAuthenticatedCart();
       } else {
         const idx = items.value.findIndex(i => i.product_id === productId);
         if (idx !== -1) {
           items.value[idx] = { ...items.value[idx], quantity: newQuantity };
-          items.value = [...items.value]; // <-- força reatividade
+          items.value = [...items.value];
           saveGuestCart();
           await loadDetailedItems(items.value);
-          toast.info(`Quantidade de item atualizada para ${newQuantity}.`);
         }
       }
+      toast.info(`Quantidade atualizada para ${newQuantity}.`);
     } catch (err) {
       console.error('Erro ao atualizar item:', err);
       toast.error('Erro ao atualizar item: ' + err.message);
     }
   }
 
-  // Atualiza a quantidade do item (delta: +1 ou -1)
   async function updateQuantity(productId, delta) {
     const item = items.value.find(i => i.product_id === productId);
     if (!item) return;
@@ -205,56 +214,56 @@ export const useCartStore = defineStore('cart', () => {
     await updateItemQuantity(productId, newQuantity);
   }
 
-  // Remove um item do carrinho
+  // Remove item
   async function removeItem(productId) {
     try {
       if (!isGuest.value) {
         await removeCartItem(productId);
-        toast.success('Item removido do carrinho.');
         await syncAuthenticatedCart();
       } else {
         const itemIndex = items.value.findIndex(item => item.product_id === productId);
         if (itemIndex > -1) {
           items.value.splice(itemIndex, 1);
-          items.value = [...items.value]; // <-- força reatividade
+          items.value = [...items.value];
           saveGuestCart();
           await loadDetailedItems(items.value);
-          toast.success('Item removido do carrinho.');
         }
       }
+      toast.success('Item removido do carrinho.');
     } catch (err) {
       console.error('Erro ao remover item:', err);
       toast.error('Erro ao remover item: ' + err.message);
     }
   }
 
-  // Limpa o carrinho
+  // Limpa carrinho
   async function clearCart() {
     try {
       if (!isGuest.value) {
         await clearCartAPI();
-        toast.success('Carrinho limpo.');
         await syncAuthenticatedCart();
       } else {
         items.value = [];
         detailedItems.value = [];
         saveGuestCart();
-        toast.success('Carrinho limpo.');
       }
+      toast.success('Carrinho limpo.');
     } catch (err) {
-      console.error('Erro ao limpar o carrinho:', err);
-      toast.error('Erro ao limpar o carrinho: ' + err.message);
+      console.error('Erro ao limpar carrinho:', err);
+      toast.error('Erro ao limpar carrinho: ' + err.message);
     }
   }
 
-  // Observa o estado de autenticação e inicializa o carrinho
-  watch(isGuest, (newValue, oldValue) => {
-    if (newValue !== oldValue) {
-      initCart();
+  // 🔹 Observa login/logout
+  watch(isGuest, async (newValue, oldValue) => {
+    if (oldValue && !newValue) {
+      await mergeGuestCartOnLogin();
     }
+    await initCart();
   });
 
-  // Expor propriedades e funções REATIVAS!
+  
+  // Expor propriedades e funções
   return {
     cartId,
     items,
@@ -270,4 +279,13 @@ export const useCartStore = defineStore('cart', () => {
     removeItem,
     clearCart
   };
-});
+},
+{
+    persist: {
+      key: 'cart',
+      storage: localStorage,
+      paths: ['items', 'cartId'] // só persiste o necessário
+    }
+  }
+
+)

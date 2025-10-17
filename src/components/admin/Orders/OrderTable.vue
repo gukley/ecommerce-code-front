@@ -54,11 +54,12 @@
             <select
               v-model="order.status"
               class="form-select form-select-sm mt-2"
-              @change="onStatusChange(order)"
+              @change="emitStatusChange(order)"
               style="min-width:120px; background:#181e2a; color:#fff; border:1px solid #374151;"
             >
               <option value="PENDING">Pendente</option>
               <option value="PROCESSING">Processando</option>
+              <option value="CONFIRMED">Confirmado</option>
               <option value="SHIPPED">Enviado</option>
               <option value="DELIVERED">Entregue</option>
               <option value="CANCELED">Cancelado</option>
@@ -95,11 +96,11 @@
 </template>
 <script setup>
 import { ref } from 'vue'
-import { updateOrderStatus } from '@/services/apiService'
 const props = defineProps({
   orders: Array,
   addresses: Object
 })
+const emit = defineEmits(['change-status', 'show-detail', 'download-pdf'])
 
 // Função para buscar desconto do produto (se existir)
 function getDiscount(product) {
@@ -142,24 +143,34 @@ function formatDate(dateString) {
   });
 }
 
+function emitStatusChange(order) {
+  // Só envia status permitido
+  const allowed = ['PENDING', 'PROCESSING', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELED'];
+  let status = String(order.status).toUpperCase().trim();
+  if (!allowed.includes(status)) status = 'PENDING';
+  emit('change-status', order.id, { status });
+}
+
 function getStatusClass(status) {
-  switch (status) {
+  switch (String(status).toUpperCase()) {
     case 'PENDING': return 'bg-warning text-dark';
     case 'PROCESSING': return 'bg-info';
+    case 'CONFIRMED': return 'bg-info';
     case 'SHIPPED': return 'bg-primary';
     case 'DELIVERED': return 'bg-success';
     case 'CANCELED': return 'bg-danger';
-    default: return '';
+    default: return 'bg-warning text-dark';
   }
 }
 function getStatusLabel(status) {
-  switch (status) {
+  switch (String(status).toUpperCase()) {
     case 'PENDING': return 'Pendente';
     case 'PROCESSING': return 'Processando';
+    case 'CONFIRMED': return 'Confirmado';
     case 'SHIPPED': return 'Enviado';
     case 'DELIVERED': return 'Entregue';
     case 'CANCELED': return 'Cancelado';
-    default: return 'Desconhecido';
+    default: return 'Pendente';
   }
 }
 
@@ -195,17 +206,6 @@ function getProductImage(product) {
   }
   return '/placeholder-product.png'
 }
-
-function onStatusChange(order) {
-  // Salva alteração no backend
-  updateOrderStatus(order.id, { status: order.status })
-    .then(() => {
-      // Optionally show a toast or reload orders
-    })
-    .catch(() => {
-      // Optionally show error and revert status
-    })
-}
 </script>
 <style scoped>
 /* ...copie os estilos da tabela da view OrderManagement.vue... */
@@ -213,7 +213,8 @@ function onStatusChange(order) {
   background: var(--admin-bg-secondary);
   border-radius: 1rem;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+  margin-bottom: 1.5rem;
 }
 .order-table th, .order-table td {
   border: none;
@@ -224,22 +225,31 @@ function onStatusChange(order) {
   font-size: 1rem;
   font-weight: 700;
   letter-spacing: 0.04em;
+  border-top: none;
+  padding: 1rem 0.7rem;
 }
 .order-table td {
   background: transparent;
   color: #e8eaed;
   font-size: 0.97rem;
+  padding: 1rem 0.7rem;
+  border-bottom: 1px solid #232e47;
+}
+.order-table tbody tr {
+  transition: background 0.18s;
 }
 .order-table tbody tr:hover {
   background: linear-gradient(90deg, #23233a 0%, #374151 100%);
+  box-shadow: 0 2px 12px #00ffe122;
 }
 .badge {
   font-size: 0.92rem;
   font-weight: 600;
   padding: 0.35rem 1rem;
-  border-radius: 8px;
+  border-radius: 12px;
   letter-spacing: 0.04em;
   box-shadow: 0 1px 4px #00000018;
+  border: none;
 }
 .bg-success { background: linear-gradient(90deg,#43e97b 0%,#38f9d7 100%) !important; color: #fff !important; }
 .bg-danger { background: linear-gradient(90deg,#ff6b6b 0%,#f44336 100%) !important; color: #fff !important; }
@@ -289,5 +299,24 @@ function onStatusChange(order) {
   padding: 0.25rem 0.7rem;
   border-radius: 8px;
   margin-top: 4px;
+  background: #181e2a;
+  color: #fff;
+  border: 1px solid #374151;
+}
+.btn-outline-info, .btn-outline-primary {
+  border-radius: 8px;
+  font-weight: 600;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.97rem;
+  transition: background 0.18s, color 0.18s;
+}
+.btn-outline-info:hover {
+  background: #64b5f6;
+  color: #fff;
+}
+.btn-outline-primary:hover {
+  background: #8f5fe8;
+  color: #fff;
 }
 </style>
+

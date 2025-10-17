@@ -1,89 +1,91 @@
 <template>
-  <div class="d-flex min-vh-100 register-container">
-    <div class="col-md-6 bg-left d-none d-md-flex flex-column justify-content-center align-items-center p-5 text-white position-relative">
-      <div class="bg-left-image"></div>
-      <div class="bg-left-overlay"></div>
-      <div class="z-index-1 w-100 d-flex flex-column justify-content-center align-items-center">
-        <h1 class="display-1 fw-bold logo-text">GG<span class="text-primary-brand">TECH</span></h1>
-        <p class="fs-5 mt-4 slogan-text text-center">
+  <div class="login-root d-flex min-vh-100">
+    <div class="login-left d-none d-md-flex flex-column justify-content-center align-items-center p-5">
+      <div class="login-left-bg"></div>
+      <div class="login-left-content z-index-1 w-100 d-flex flex-column justify-content-center align-items-center">
+        <h1 class="login-logo">GGTECH</h1>
+        <p class="login-slogan">
           Conectamos você à performance.<br />
           Equipamos seu setup.<br />
           Potencializamos seu jogo!
         </p>
       </div>
     </div>
-
-    <div class="col-md-6 d-flex justify-content-center align-items-center bg-right">
-      <div class="form-card rounded-4 shadow p-5 glass-card position-relative">
-        <div class="login-avatar mx-auto mb-3">
-          <i class="bi bi-person-circle"></i>
+    <div class="login-right d-flex justify-content-center align-items-center">
+      <div class="login-card">
+        <div class="login-avatar">
+          <svg width="64" height="64" viewBox="0 0 64 64">
+            <defs>
+              <radialGradient id="avatarGradient" cx="50%" cy="50%" r="80%">
+                <stop offset="0%" stop-color="#a362ff"/>
+                <stop offset="100%" stop-color="#00ffe1"/>
+              </radialGradient>
+            </defs>
+            <circle cx="32" cy="32" r="32" fill="url(#avatarGradient)" />
+            <circle cx="32" cy="26" r="10" fill="#fff" opacity="0.9"/>
+            <ellipse cx="32" cy="44" rx="14" ry="8" fill="#fff" opacity="0.7"/>
+          </svg>
         </div>
         <div class="text-center mb-4">
-          <h2 class="fw-bold register-heading">Crie sua Conta</h2>
-          <small class="register-subheading">Junte-se à comunidade GGTECH</small>
+          <h2 class="login-title">Crie sua Conta</h2>
+          <small class="login-subtitle">Junte-se à comunidade <span class="login-logo-small">GGTECH</span></small>
         </div>
-
         <form @submit.prevent="handleRegister">
-          <div class="mb-3 input-group-modern">
-            <span class="input-group-text-modern"> 
+          <div class="login-input-group">
+            <span class="login-input-icon">
               <i class="bi bi-person-fill"></i>
             </span>
             <input
               v-model="name"
               type="text"
-              class="form-control input-custom"
+              class="login-input"
               placeholder="Nome completo"
               required
             />
           </div>
-
-          <div class="mb-3 input-group-modern">
-            <span class="input-group-text-modern"> 
+          <div class="login-input-group">
+            <span class="login-input-icon">
               <i class="bi bi-envelope-fill"></i>
             </span>
             <input
               v-model="email"
               type="email"
-              class="form-control input-custom"
+              class="login-input"
               placeholder="Email"
               required
             />
           </div>
-
-          <div class="mb-3 input-group-modern">
-            <span class="input-group-text-modern"> 
+          <div class="login-input-group">
+            <span class="login-input-icon">
               <i class="bi bi-lock-fill"></i>
             </span>
             <input
               v-model="password"
               type="password"
-              class="form-control input-custom"
+              class="login-input"
               placeholder="Senha"
               required
             />
           </div>
-
-          <div class="mb-4 input-group-modern"> <span class="input-group-text-modern"> 
+          <div class="login-input-group">
+            <span class="login-input-icon">
               <i class="bi bi-lock-fill"></i>
             </span>
             <input
               v-model="confirmPassword"
               type="password"
-              class="form-control input-custom"
+              class="login-input"
               placeholder="Confirme a senha"
               required
             />
           </div>
-
-          <button type="submit" class="btn btn-main-action w-100 rounded-pill">
+          <button type="submit" class="login-btn">
             Cadastrar
           </button>
         </form>
-
-        <p class="text-center mt-4 mb-0 signup-text-bottom">
-          Já tem uma conta?
-          <router-link to="/login" class="login-link">Entrar</router-link>
-        </p>
+        <div class="login-links justify-content-center mt-3 mb-2">
+          <router-link to="/login" class="login-link text-center">Já tem uma conta? Entrar</router-link>
+        </div>
       </div>
     </div>
   </div>
@@ -108,14 +110,12 @@ const handleRegister = async () => {
     toast.error('As senhas não coincidem!')
     return
   }
-
   try {
     await register({
       name: name.value,
       email: email.value,
       password: password.value,
     })
-
     toast.success('Conta criada com sucesso!')
     router.push('/login')
   } catch (error) {
@@ -125,226 +125,195 @@ const handleRegister = async () => {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
-* {
+.login-root {
+  background: linear-gradient(120deg, #0a0a1a 60%, #1a1a2e 100%);
+  min-height: 100vh;
   font-family: 'Inter', sans-serif;
-  box-sizing: border-box; 
 }
-
-.register-container {
-  overflow: hidden;
-  
-}
-
-/* Lado Esquerdo */
-.bg-left {
-  background-color: #1a1a2e;
-  animation: fadeInUp 1s ease forwards;
-  color: #e0e0e0;
+.login-left {
+  flex: 1 1 0;
   position: relative;
+  background: transparent;
   overflow: hidden;
+  min-width: 0;
+  justify-content: center;
+  align-items: center;
 }
-.bg-left-image {
+.login-left-bg {
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: url('@/assets/gabinete gamerBranco.jpg') center center/cover no-repeat;
+  inset: 0;
+  background: radial-gradient(circle at 60% 40%, #a362ff33 0%, #00ffe133 60%, transparent 100%);
   z-index: 0;
-  opacity: 0.45;
+  opacity: 1;
 }
-.bg-left-overlay {
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(120deg, #1a1a2e 60%, #8f5fe8 100%);
-  opacity: 0.75;
+.login-left-content {
+  position: relative;
   z-index: 1;
+  text-align: center;
 }
-.z-index-1 {
-  z-index: 2;
+.login-logo {
+  font-size: 3.5rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg, #399bff 0%, #a362ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 1.2rem;
 }
-.glass-card {
-  background: rgba(255,255,255,0.13);
-  backdrop-filter: blur(14px);
-  border: 2px solid transparent;
-  border-radius: 1.5rem;
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
-  border-image: linear-gradient(120deg, #a362ff 0%, #00ffe1 100%) 1;
+.login-slogan {
+  color: #e0e0e0;
+  font-size: 1.25rem;
+  font-weight: 400;
+  margin-top: 1.5rem;
+  line-height: 1.6;
+  text-shadow: 0 0 18px #a362ff33;
+}
+.login-right {
+  flex: 1 1 0;
+  background: linear-gradient(120deg, #18182c 60%, #1a1a2e 100%);
+  min-width: 0;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+}
+.login-card {
+  background: rgba(31, 31, 51, 0.92);
+  border-radius: 2rem;
+  box-shadow: 0 8px 32px 0 rgba(163, 98, 255, 0.18);
+  padding: 2.8rem 2.2rem 2.2rem 2.2rem;
+  max-width: 400px;
+  width: 100%;
+  border: 1.5px solid rgba(255,255,255,0.07);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   position: relative;
 }
 .login-avatar {
-  width: 70px;
-  height: 70px;
-  background: linear-gradient(135deg, #a362ff 60%, #00ffe1 100%);
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
+  margin: 0 auto 1.2rem auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 12px rgba(163,98,255,0.18);
-  font-size: 2.7rem;
+  background: none;
+  box-shadow: 0 2px 18px #a362ff33;
+}
+.login-title {
   color: #fff;
-  margin-bottom: 1.2rem;
-  border: 3px solid #fff;
-  position: relative;
-  z-index: 2;
-}
-.logo-text {
-  font-size: 4.5rem; 
-  letter-spacing: 2px;
-  color: #ffffff; /* Branco puro */
-  text-shadow: 0 0 20px rgba(123, 79, 224, 0.7); 
-  margin-bottom: 0; 
-}
-
-.text-primary-brand { 
-  color: #8f5fe8 !important; 
-  text-shadow: 0 0 10px rgba(143, 95, 232, 0.5);
-}
-
-.slogan-text {
-  max-width: 380px; 
-  font-size: 1.2rem; 
-  color: #b0b0b0; 
-  line-height: 1.6; 
-  margin-top: 1.5rem; 
-}
-
-/* Lado Direito - Formulário */
-.bg-right {
-  background-color: #24243a; 
-  position: relative;
-  overflow: hidden;
-}
-
-.form-card {
-  background-color: #1f1f33; 
-  color: white;
-  width: 90%;
-  max-width: 455px; 
-  padding: 3.5rem; 
-  border-radius: 15px; 
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4); 
-  animation: fadeInUp 1s ease forwards;
-  animation-delay: 0.3s;
-  opacity: 0;
-  border: 1px solid rgba(255, 255, 255, 0.08); 
-}
-
-.register-heading {
-  color: #ffffff; 
-  font-size: 2.5rem; 
+  font-size: 2.2rem;
   font-weight: 700;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.3rem;
+  letter-spacing: 0.5px;
 }
-
-.register-subheading {
-  color: #a0a0a0; 
-  font-size: 0.95rem;
+.login-subtitle {
+  color: #b0b0b0;
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0.2px;
 }
-
-/* Estilos para os Input Groups (Ícone + Campo) */
-.input-group-modern {
-  display: flex;
-  margin-bottom: 1.2rem; 
+.login-logo-small {
+  background: linear-gradient(90deg, #399bff 0%, #a362ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
 }
-
-.input-group-text-modern {
-  background-color: #2c2c42; 
-  border: 1px solid #3d3d5a; 
-  color: #c0c0c0; 
-  padding: 0.8rem 1.2rem; 
+.login-input-group {
   display: flex;
   align-items: center;
-  border-top-left-radius: 50px; 
-  border-bottom-left-radius: 50px;
-  font-size: 1.1rem; 
-}
-
-.input-custom {
-  background-color: rgba(44,44,66,0.85);
+  background: rgba(44,44,66,0.85);
+  border-radius: 2.2rem;
+  margin-bottom: 1.3rem;
   border: 1.5px solid #3d3d5a;
-  border-left: none;
-  color: white;
-  padding: 0.8rem 1.2rem;
-  flex-grow: 1;
-  border-top-right-radius: 50px;
-  border-bottom-right-radius: 50px;
-  font-size: 1rem;
-  transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
+  padding: 0 0.2rem;
+  position: relative;
 }
-.input-custom:focus {
-  background-color: #35354d;
-  border-color: #a362ff;
-  box-shadow: 0 0 0 0.18rem rgba(163, 98, 255, 0.18);
-  outline: none;
+.login-input-icon {
+  color: #b0b0b0;
+  font-size: 1.25rem;
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: color 0.18s;
 }
-.input-custom::placeholder {
-  color: #808080; 
-}
-
-/* Botão Principal de Ação */
-.btn-main-action {
-  background: linear-gradient(90deg, #a362ff, #8f5fe8);
+.login-input {
+  background: transparent;
+  border: none;
   color: #fff;
-  border: 2px solid #cbb6ff;
-  font-weight: 600;
-  padding: 0.8rem 0;
-  font-size: 1.1rem;
-  transition: background 0.3s, box-shadow 0.3s, transform 0.2s;
-  margin-top: 1.5rem;
-  box-shadow: 0 4px 16px rgba(163,98,255,0.18);
+  font-size: 1.08rem;
+  font-weight: 500;
+  padding: 0.95rem 1rem 0.95rem 0.2rem;
+  flex: 1 1 0;
+  border-radius: 2.2rem;
+  outline: none;
+  box-shadow: none;
+  transition: background 0.18s, color 0.18s;
+}
+.login-input:focus {
+  background: rgba(44,44,66,0.98);
+  color: #fff;
+}
+.login-input::placeholder {
+  color: #b0b0b0;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  opacity: 1;
+}
+.login-btn {
+  width: 100%;
+  border: none;
+  border-radius: 2rem;
+  background: linear-gradient(90deg, #a362ff 0%, #00ffe1 100%);
+  color: #fff;
+  font-size: 1.18rem;
+  font-weight: 700;
+  padding: 0.95rem 0;
+  margin-top: 1.2rem;
+  box-shadow: 0 4px 18px #a362ff33;
+  transition: background 0.22s, box-shadow 0.18s, transform 0.18s;
   position: relative;
   overflow: hidden;
 }
-.btn-main-action::after {
-  content: '';
-  position: absolute;
-  left: -75%;
-  top: 0;
-  width: 50%;
-  height: 100%;
-  background: linear-gradient(120deg, rgba(255,255,255,0.18) 0%, rgba(163,98,255,0.12) 100%);
-  transform: skewX(-20deg);
-  transition: left 0.4s cubic-bezier(.4,2,.3,1);
-  z-index: 1;
-}
-.btn-main-action:hover::after {
-  left: 120%;
-}
-.btn-main-action:hover {
-  background: linear-gradient(90deg, #8f5fe8, #a362ff);
-  color: #fff;
+.login-btn:hover {
+  background: linear-gradient(90deg, #00ffe1 0%, #a362ff 100%);
+  box-shadow: 0 8px 28px #00ffe144;
   transform: translateY(-2px) scale(1.03);
-  box-shadow: 0 8px 25px rgba(163,98,255,0.28);
 }
-
-/* Links de Login */
-.signup-text-bottom {
-  color: #b0b0b0; 
-  font-size: 0.9rem;
-  margin-top: 2rem !important; 
+.login-links {
+  width: 100%;
+  margin-top: 1.2rem;
+  font-size: 1.02rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
-
 .login-link {
-  color: #8f5fe8; 
+  color: #8f5fe8;
   text-decoration: none;
-  font-weight: 600;
-  transition: color 0.3s ease;
+  font-weight: 500;
+  transition: color 0.2s;
+  text-align: center;
+  width: 100%;
+  display: block;
 }
-
 .login-link:hover {
-  color: #7b4fe0;
+  color: #00ffe1;
   text-decoration: underline;
 }
-
-/* Animação */
-@keyframes fadeInUp { 
-  0% { 
-    opacity: 0;
-    transform: translateY(30px);
+.login-link-right {
+  margin-left: auto;
+}
+@media (max-width: 991.98px) {
+  .login-left {
+    display: none !important;
   }
-  100% { 
-    opacity: 1;
-    transform: translateY(0);
+  .login-right {
+    flex: 1 1 100%;
+    min-width: 0;
   }
 }
 </style>

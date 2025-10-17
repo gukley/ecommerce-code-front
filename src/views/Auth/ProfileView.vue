@@ -1,20 +1,42 @@
 <template>
-  <Profile
-    :user="user"
-    :orders="orders"
-    :favorites="favorites"
-    :addresses="addresses"
-  />
+  <div class="profile-page theme-page">
+    <Navbar />
+    <div class="profile-header">
+      <div class="container">
+        <div class="d-flex justify-content-center align-items-center">
+          <h1 class="profile-title theme-text-primary">
+            <i class="bi bi-person-circle me-2"></i>
+            Meu Perfil
+          </h1>
+        </div>
+      </div>
+    </div>
+    <Profile
+      :user="user"
+      :orders="orders"
+      :favorites="favorites"
+      :addresses="addresses"
+      @add-address="handleAddAddress"
+      @edit-address="handleEditAddress"
+      @delete-address="handleDeleteAddress"
+      @cancel-order="handleCancelOrder"
+    />
+  </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import Profile from '@/components/Profile/Profile.vue'
+import Navbar from '@/components/home/NavBar.vue'
 import {
   getUserProfile,
   getUsersOrders,
   getAllAddresses,
-  getFavorites
+  getFavorites,
+  createAddress,
+  updateAddress,
+  deleteAddress,
+  cancelOrder
 } from '@/services/apiService.js'
 
 const user = ref(null)
@@ -22,15 +44,66 @@ const orders = ref([])
 const favorites = ref([])
 const addresses = ref([])
 
+async function fetchAddresses() {
+  addresses.value = await getAllAddresses()
+}
+
 async function fetchUserOrders() {
   orders.value = await getUsersOrders()
+}
+
+async function handleAddAddress(addressData) {
+  try {
+    await createAddress(addressData)
+    await fetchAddresses()
+  } catch (e) {
+    // Trate o erro, ex: toast.error('Erro ao adicionar endereço')
+    console.error('Erro ao adicionar endereço:', e)
+  }
+}
+
+async function handleEditAddress(addressData) {
+  try {
+    await updateAddress(addressData.id, addressData)
+    await fetchAddresses()
+  } catch (e) {
+    // Trate o erro, ex: toast.error('Erro ao editar endereço')
+    console.error('Erro ao editar endereço:', e)
+  }
+}
+
+async function handleDeleteAddress(id) {
+  try {
+    if (confirm('Tem certeza que deseja excluir este endereço?')) {
+      await deleteAddress(id)
+      await fetchAddresses()
+      // Mostrar mensagem de sucesso
+      console.log('Endereço excluído com sucesso!')
+    }
+  } catch (e) {
+    console.error('Erro ao excluir endereço:', e)
+    alert('Erro ao excluir endereço. Tente novamente.')
+  }
+}
+
+async function handleCancelOrder(orderId) {
+  try {
+    if (confirm('Tem certeza que deseja cancelar este pedido?')) {
+      await cancelOrder(orderId)
+      await fetchUserOrders()
+      console.log('Pedido cancelado com sucesso!')
+    }
+  } catch (e) {
+    console.error('Erro ao cancelar pedido:', e)
+    alert('Erro ao cancelar pedido. Tente novamente.')
+  }
 }
 
 onMounted(async () => {
   try {
     user.value = await getUserProfile()
     await fetchUserOrders()
-    addresses.value = await getAllAddresses()
+    await fetchAddresses()
     favorites.value = await getFavorites()
   } catch (e) {
     user.value = { name: 'Usuário', email: '', id: '-', role: '-' }
@@ -38,8 +111,6 @@ onMounted(async () => {
     addresses.value = []
     favorites.value = []
   }
-
-  // Escuta evento global para atualização de pedidos
   window.addEventListener('orders-updated', fetchUserOrders)
 })
 
@@ -286,6 +357,53 @@ onBeforeUnmount(() => {
     border-radius: 50%;
     object-fit: cover;
     background: #232e47;
+  }
+}
+
+/* ===== THEME STYLES ===== */
+.profile-page {
+  min-height: 100vh;
+  background: var(--bg-main);
+  transition: background-color var(--transition-normal);
+}
+
+.profile-header {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-color);
+  padding: 2rem 0;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.profile-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.profile-title i {
+  color: var(--accent-primary);
+  -webkit-text-fill-color: var(--accent-primary);
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .profile-header {
+    padding: 1.5rem 0;
+  }
+  
+  .profile-title {
+    font-size: 2rem;
+  }
+  
+  .d-flex {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
   }
 }
 </style>

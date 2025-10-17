@@ -6,6 +6,7 @@ import { useCartStore } from '@/stores/cartStore';
 // import CartDrawer from '@/components/Cart/CartDrawer.vue';
 import WishlistDrawer from '@/components/Cart/WishlistDrawer.vue';
 import { useWishlistStore } from '@/stores/wishlistStore';
+import ThemeToggle from '@/components/Common/ThemeToggle.vue';
 
 const showMenu = ref(false);
 const authStore = useAuthStore();
@@ -103,6 +104,9 @@ onBeforeUnmount(() => {
         </div>
 
         <div class="d-flex align-items-center gap-4 ms-lg-3 mt-2 mt-lg-0">
+          <!-- Theme Toggle -->
+          <ThemeToggle />
+          
           <!-- Carrinho: agora redireciona para /cart -->
           <div class="position-relative nav-icon-wrapper" @click="router.push('/cart')">
             <i class="bi bi-cart3 fs-3 nav-icon"></i>

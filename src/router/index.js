@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { authGuard } from '@/router/guard.js'
 import CartView from '@/views/cart/CartView.vue'
 import Home from '@/views/home/HomePage.vue' // ajuste conforme o nome/caminho real do seu arquivo Home
+import FinanceDashboard from '@/views/FinanceDashboard.vue'
 
 const routes = [
   {
@@ -92,6 +93,12 @@ const routes = [
         name: 'admin-clients',
         component: () => import('@/views/admin/AdminClients.vue'),
         meta: { requiresAuth: true, requiresAdmin: true }
+      },
+      {
+        path: '/admin/financeiro',
+        name: 'FinanceDashboard',
+        component: FinanceDashboard,
+        meta: { requiresAuth: true }
       }
   ],
   },
@@ -108,15 +115,19 @@ const routes = [
     meta: { requiresAuth: false }
   },
   {
-    path: '/monte-seu-pc',
-    name: 'PcBuilder',
-    component: () => import('@/views/pcbuilder/PcBuilderView.vue'),
-    meta: { requiresAuth: false }
-  },
-  {
     path: '/cart',
     name: 'Cart',
     component: CartView
+  },
+  {
+    path: '/forgot-password',
+    name: 'ForgotPassword',
+    component: () => import('@/views/Auth/ForgotPasswordView.vue')
+  },
+  {
+    path: '/reset-password',
+    name: 'ResetPassword',
+    component: () => import('@/views/Auth/ResetPassword.vue')
   }
 ]
 

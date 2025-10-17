@@ -119,14 +119,14 @@ const banners = [
 }
 
 .hero-section { 
-  background: linear-gradient(145deg, #1a1a2e, #0f1423),repeat;
+  background: linear-gradient(145deg, #eaf6ff 60%, #f8f9fa 100%);
   min-height: 85vh;
   position: relative;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-bottom: 2px solid rgba(163, 98, 255, 0.3);
+  border-bottom: 2px solid #b8d8ff;
 }
 
 /* pseudo-elementos pra efeito de particulas */
@@ -144,7 +144,7 @@ const banners = [
 .hero-section::before { 
   width: 300px;
   height: 300px;
-  background: #a362ff;
+  background: #b8d8ff;
   top: 15%;
   left: 10%;
   animation-delay: 0s;
@@ -153,7 +153,7 @@ const banners = [
 .hero-section::after { 
   width: 400px;
   height: 400px;
-  background: #00ffe1;
+  background: #399bff;
   bottom: 10%;
   right: 15%;
   animation-delay: 3s;
@@ -169,56 +169,57 @@ const banners = [
 }
 
 .badge-new-gen {
-  background: linear-gradient(90deg, #a362ff, #8f5fe8) !important;
-  color: white;
+  background: linear-gradient(90deg, #399bff, #8f5fe8) !important;
+  color: #fff;
   font-size: 0.95rem;
   letter-spacing: 0.5px;
-  box-shadow: 0 0 15px rgba(163, 98, 255, 0.5);
+  box-shadow: 0 0 15px #b8d8ff88;
   animation: fadeInDown 0.8s ease forwards;
 }
 
 .main-heading {
   font-family: 'Orbitron', sans-serif;
-  font-size: 3.8rem;
+  font-size: 3.2rem;
   line-height: 1.2;
-  text-shadow: 0 0 25px rgba(255, 255, 255, 0.4);
+  text-shadow: 0 0 25px #b8d8ff44;
+  color: #232e47;
   animation: fadeUp 1s ease-out forwards;
 }
 
 .text-gradient-main { 
-  background: linear-gradient(to right, #a362ff, #00ffe1); 
+  background: linear-gradient(to right, #399bff, #00ffe1); 
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   display: inline-block;
 }
 
 .text-secondary-highlight { 
-  color: #00ffe1;
-  filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.4));
+  color: #399bff;
+  filter: drop-shadow(0 0 10px #b8d8ff88);
 }
 
 .hero-description { 
-  color: #c0c0d0;
+  color: #232e47;
   line-height: 1.7;
   font-weight: 400;
   animation: fadeUp 1s ease-out forwards;
 }
 
 .btn-main-action {
-  background: linear-gradient(90deg, #a362ff, #8f5fe8);
+  background: linear-gradient(90deg, #399bff, #8f5fe8);
   color: #fff;
-  border: 2px solid #cbb6ff;
+  border: 2px solid #b8d8ff;
   font-size: 1.15rem;
   border-radius: 50px;
-  box-shadow: 0 4px 16px rgba(163,98,255,0.18);
+  box-shadow: 0 4px 16px #b8d8ff44;
   transition: all 0.3s ease;
   min-width: 200px;
 }
 
 .btn-main-action:hover { 
-  background: linear-gradient(90deg, #8f5fe8, #a362ff);
+  background: linear-gradient(90deg, #8f5fe8, #399bff);
   color: #fff;
-  box-shadow: 0 8px 25px rgba(163,98,255,0.28);
+  box-shadow: 0 8px 25px #399bff44;
   transform: translateY(-3px) scale(1.02);
 }
 
@@ -234,9 +235,9 @@ const banners = [
 
 .btn-outline-secondary-light:hover { 
   background-color: #00ffe1;
-  color: #1a1a2e;
+  color: #232e47;
   transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 8px 25px rgba(0, 255, 225, 0.4);
+  box-shadow: 0 8px 25px #00ffe144;
 }
 
 .animate-fade-up {
@@ -262,21 +263,21 @@ const banners = [
 }
 
 .hero-discount-banner {
-  background: linear-gradient(90deg, #a362ff, #00ffe1); 
-  color: #1a1a2e;
+  background: linear-gradient(90deg, #399bff, #00ffe1); 
+  color: #232e47;
   border-radius: 30px;
   padding: 0.7rem 1.5rem;
   font-size: 1.1rem;
   font-weight: 600;
-  box-shadow: 0 2px 12px rgba(163, 98, 255, 0.15);
+  box-shadow: 0 2px 12px #b8d8ff44;
   display: inline-block;
 }
 .discount-badge .see-offers-link {
-  color: #1a1a2e;
+  color: #232e47;
 }
 .discount-badge .see-offers-link:hover {
   color: #fff;
-  background: #a362ff;
+  background: #399bff;
   border-radius: 8px;
   padding: 0 0.3rem;
 }
@@ -335,8 +336,8 @@ const banners = [
 
 /* Selo de avaliação */
 .hero-rating-badge {
-  background: rgba(0,255,225,0.13);
-  color: #00ffe1;
+  background: #eaf6ff;
+  color: #399bff;
   border-radius: 18px;
   font-size: 1.08rem;
   font-weight: 600;
@@ -344,11 +345,11 @@ const banners = [
   align-items: center;
   gap: 7px;
   padding: 0.5rem 1.2rem;
-  box-shadow: 0 2px 12px rgba(0,255,225,0.10);
+  box-shadow: 0 2px 12px #b8d8ff22;
   margin-bottom: 0.5rem;
   margin-top: 0.5rem;
   letter-spacing: 0.2px;
-  border: 1.5px solid #00ffe1;
+  border: 1.5px solid #b8d8ff;
   transition: background 0.18s;
 }
 .hero-rating-badge i {
@@ -368,15 +369,16 @@ const banners = [
 /* Selos de confiança */
 .hero-trust {
   font-size: 1.05rem;
-  color: #b0f7f7;
+  color: #399bff;
   gap: 2rem;
 }
 
 /* Responsividade para Swiper e Hero */
 @media (max-width: 991.98px) {
-  .hero-section { 
-    min-height: 70vh;
-    padding: 3rem 1rem;
+  .hero-section {
+    flex-direction: column;
+    padding: 2rem 0.7rem;
+    gap: 1.2rem;
   }
   .main-heading { 
     font-size: 2.8rem;
@@ -501,5 +503,32 @@ const banners = [
 .hero-search-btn:hover {
   background: linear-gradient(90deg, #00ffe1, #a362ff);
   color: #fff;
+}
+@media (max-width: 991.98px) {
+  .hero-section {
+    flex-direction: column;
+    padding: 2rem 0.7rem;
+    gap: 1.2rem;
+  }
+  .hero-title {
+    font-size: 2rem;
+  }
+  .hero-img {
+    max-width: 100%;
+    height: auto;
+  }
+}
+@media (max-width: 600px) {
+  .hero-section {
+    padding: 1rem 0.2rem;
+    gap: 0.7rem;
+  }
+  .hero-title {
+    font-size: 1.2rem;
+  }
+  .hero-img {
+    max-width: 100%;
+    height: auto;
+  }
 }
 </style>

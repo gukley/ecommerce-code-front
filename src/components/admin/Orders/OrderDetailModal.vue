@@ -13,6 +13,7 @@
             <select v-model="selectedStatus" class="form-select mt-2" style="max-width:180px;">
               <option value="PENDING">Pendente</option>
               <option value="PROCESSING">Processando</option>
+              <option value="CONFIRMED">Confirmado</option>
               <option value="SHIPPED">Enviado</option>
               <option value="DELIVERED">Entregue</option>
               <option value="CANCELED">Cancelado</option>
@@ -95,6 +96,7 @@ function getStatusClass(status) {
   switch (status) {
     case 'PENDING': return 'bg-warning text-dark';
     case 'PROCESSING': return 'bg-info';
+    case 'CONFIRMED': return 'bg-info';
     case 'SHIPPED': return 'bg-primary';
     case 'DELIVERED': return 'bg-success';
     case 'CANCELED': return 'bg-danger';
@@ -105,6 +107,7 @@ function getStatusLabel(status) {
   switch (status) {
     case 'PENDING': return 'Pendente';
     case 'PROCESSING': return 'Processando';
+    case 'CONFIRMED': return 'Confirmado';
     case 'SHIPPED': return 'Enviado';
     case 'DELIVERED': return 'Entregue';
     case 'CANCELED': return 'Cancelado';

@@ -85,7 +85,7 @@ const itemsPerPage = 10;
 const overallFilteredOrders = computed(() => {
   let filtered = orders.value;
   if (selectedStatus.value) {
-    filtered = filtered.filter(order => order.status === selectedStatus.value);
+    filtered = filtered.filter(order => String(order.status).toUpperCase() === selectedStatus.value.toUpperCase());
   }
   if (searchId.value) {
     filtered = filtered.filter(order => order.id.toString().includes(searchId.value));
@@ -229,13 +229,18 @@ function downloadOrderPDF(order) {
 }
 
 async function changeOrderStatus(orderId, statusData) {
-  await orderStore.changeOrderStatus(orderId, statusData, authStore.user.id)
-  await orderStore.fetchOrdersByAdmin(authStore.user.id)
-  window.dispatchEvent(new Event('orders-updated'))
-  // Atualiza o modal para refletir o novo status
-  if (selectedOrder.value && selectedOrder.value.id === orderId) {
-    const updated = orders.value.find(o => o.id === orderId)
-    if (updated) selectedOrder.value = updated
+  try {
+    // statusData deve ser { status: "PROCESSING" } etc.
+    await orderStore.changeOrderStatus(orderId, statusData, authStore.user.id)
+    await orderStore.fetchOrdersByAdmin(authStore.user.id)
+    window.dispatchEvent(new Event('orders-updated'))
+    // Atualiza o modal para refletir o novo status
+    if (selectedOrder.value && selectedOrder.value.id === orderId) {
+      const updated = orders.value.find(o => o.id === orderId)
+      if (updated) selectedOrder.value = updated
+    }
+  } catch (error) {
+    console.error('Erro ao alterar status do pedido:', error)
   }
 }
 </script>
@@ -339,6 +344,7 @@ async function changeOrderStatus(orderId, statusData) {
   box-shadow: none;
   border: none;
   margin-bottom: 2rem;
+  padding: 0.5rem 0.5rem 0.5rem 0.5rem;
 }
 .glass-table {
   background: rgba(24,30,42,0.97);
@@ -346,9 +352,9 @@ async function changeOrderStatus(orderId, statusData) {
   box-shadow: 0 8px 32px 0 #232e4780;
   border: 1.5px solid #232e47;
   backdrop-filter: blur(8px);
-  padding: 0.5rem 0.5rem 0.5rem 0.5rem;
   margin-bottom: 2rem;
   transition: box-shadow 0.2s;
+  padding: 0.5rem;
 }
 .order-table th, .order-table td {
   border: none;

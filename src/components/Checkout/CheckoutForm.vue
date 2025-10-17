@@ -120,6 +120,7 @@
       v-model="metodoPagamento"
       @etapaChange="handleEtapaChangeFromPayment"
       @dadosColetados="handleDadosColetadosFromPayment"
+      @pagamentoAprovado="handlePagamentoAprovado"
     />
     <!-- Etapa 3: Confirmação (Sugestão para adicionar!) -->
     <!-- <OrderSummary v-if="etapa === 3" ... /> -->
@@ -128,7 +129,7 @@
 
 <script setup>
 import { reactive, ref, onMounted, watch } from 'vue';
-import { createAddress, getAllAddresses } from '@/services/apiService';
+import { createAddress, getAllAddresses, createOrder } from '@/services/apiService';
 import { useToast } from 'vue-toastification';
 import PaymentSelection from './PaymentSelection.vue';
 
@@ -136,7 +137,7 @@ const props = defineProps({
   etapa: Number
 });
 
-const emit = defineEmits(['etapaChange', 'dadosColetados']);
+const emit = defineEmits(['etapaChange', 'dadosColetados', 'pedidoCriado']);
 
 const toast = useToast();
 
@@ -225,6 +226,87 @@ async function avancarEtapaEndereco() {
   } catch (error) {
     console.error('Erro ao processar o endereço:', error);
     toast.error('Ocorreu um erro ao processar o endereço. Tente novamente.');
+  }
+}
+
+async function handlePagamentoAprovado({ paymentIntent, items, email, valorTotal }) {
+  try {
+    console.log('Dados recebidos do pagamento:', { paymentIntent, items, email, valorTotal });
+    
+    // Validações antes de criar o pedido
+    if (!enderecoSelecionadoId.value) {
+      toast.error('Endereço não selecionado');
+      return;
+    }
+    
+    if (!items || items.length === 0) {
+      toast.error('Nenhum item encontrado no carrinho');
+      return;
+    }
+    
+    // Valida cada item
+    const validItems = items.filter(item => {
+      if (!item.product_id) {
+        console.error('Item sem product_id:', item);
+        return false;
+      }
+      if (!item.quantity || item.quantity <= 0) {
+        console.error('Item com quantidade inválida:', item);
+        return false;
+      }
+      if (!item.unit_price || item.unit_price <= 0) {
+        console.error('Item com preço inválido:', item);
+        return false;
+      }
+      return true;
+    });
+    
+    if (validItems.length === 0) {
+      toast.error('Nenhum item válido encontrado');
+      return;
+    }
+    
+    // Monta o payload do pedido com dados corretos
+    const orderData = {
+      items: validItems.map(item => ({
+        product_id: Number(item.product_id),
+        quantity: Number(item.quantity),
+        unit_price: Number(item.unit_price)
+      })),
+      address_id: Number(enderecoSelecionadoId.value),
+      payment_method: 'card',
+      total_amount: Number(valorTotal),
+      shipping_cost: 0,
+      coupon_id: null
+    }
+    
+    console.log('Payload do pedido validado:', JSON.stringify(orderData, null, 2));
+    
+    const response = await createOrder(orderData)
+    if (response) {
+      toast.success('Pedido gerado com sucesso!')
+      emit('pedidoCriado', true)
+      emit('etapaChange', 3)
+    }
+  } catch (err) {
+    console.error('Erro detalhado ao criar pedido:', err);
+    console.error('Response data:', err.response?.data);
+    console.error('Response status:', err.response?.status);
+    
+    let errorMessage = 'Erro ao criar pedido';
+    if (err.response?.data?.detail) {
+      if (Array.isArray(err.response.data.detail)) {
+        errorMessage = err.response.data.detail.map(e => e.msg || e).join(', ');
+      } else {
+        errorMessage = err.response.data.detail;
+      }
+    } else if (err.response?.data?.message) {
+      errorMessage = err.response.data.message;
+    } else if (err.message) {
+      errorMessage = err.message;
+    }
+    
+    toast.error(errorMessage);
   }
 }
 

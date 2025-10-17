@@ -85,144 +85,84 @@
   
   .sidebar {
     height: 100%;
-    min-width: 280px;
-    max-width: 280px;
-    background-color: #1f1f33;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    min-width: 260px;
+    max-width: 260px;
+    background-color: #f8f9fa;
+    box-shadow: 0 4px 24px rgba(50, 50, 80, 0.08);
+    border: 1px solid #e5e7eb;
     margin: 2rem 0;
     top: 0;
     position: sticky;
     overflow-y: auto;
+    color: #232e47;
   }
   
   .sidebar-title {
-    color: #00ffe1;
-    font-size: 1.8rem;
+    color: #399bff;
+    font-size: 1.5rem;
     letter-spacing: 0.5px;
-    text-shadow: 0 0 10px rgba(0, 255, 225, 0.4);
     padding-bottom: 0.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    margin-bottom: 1.5rem !important;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 1.2rem !important;
   }
   
   .sidebar-nav-link {
-    padding: 12px 15px;
-    border-radius: 10px;
-    transition: all 0.3s ease;
-    font-size: 1.05rem;
+    padding: 10px 14px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    font-size: 1rem;
     font-weight: 500;
-    color: #c0c0d0 !important;
-    position: relative;
-    overflow: hidden;
-    z-index: 1;
-    user-select: none;
+    color: #232e47 !important;
+    background: transparent;
+    margin-bottom: 2px;
   }
   
   .sidebar-nav-link .sidebar-icon {
-    font-size: 1.3rem;
-    color: #9090a0;
-    transition: color 0.3s ease;
+    font-size: 1.2rem;
+    color: #b8d8ff;
+    transition: color 0.2s ease;
   }
   
-  .sidebar-nav-link::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #a362ff, #8f5fe8);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    z-index: -1;
-    border-radius: 10px;
-  }
-  
-  .sidebar-nav-link:hover::before,
-  .active-sidebar-link::before {
-    opacity: 1;
-  }
-  
-  .sidebar-nav-link:hover {
-    color: white !important;
-    transform: translateX(5px);
-  }
-  
+  .sidebar-nav-link:hover,
   .active-sidebar-link {
-    color: white !important;
+    background: #eaf6ff;
+    color: #399bff !important;
     font-weight: 600;
-    box-shadow: 0 2px 10px rgba(163, 98, 255, 0.4);
   }
   
   .active-sidebar-link .sidebar-icon {
-    color: #00ffe1 !important;
+    color: #399bff !important;
   }
   
   /* Offer box */
   .offer-box-promo {
-    background: linear-gradient(145deg, #2c2c42, #3a3a50);
-    border: 1px solid rgba(163, 98, 255, 0.3);
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-    position: relative;
-    overflow: hidden;
+    background: #eaf6ff;
+    border: 1px solid #b8d8ff;
+    box-shadow: 0 2px 8px rgba(50, 50, 80, 0.08);
     text-align: center;
-  }
-  
-  .offer-box-promo::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle at center, rgba(163, 98, 255, 0.15) 0%, transparent 70%);
-    transform: rotate(45deg);
-    animation: rotateGlow 10s linear infinite;
-    z-index: 0;
-  }
-  
-  @keyframes rotateGlow {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
+    color: #232e47;
   }
   
   .offer-box-promo p,
   .offer-box-promo small {
-    position: relative;
-    z-index: 1;
-  }
-  
-  .offer-box-promo strong {
-    font-family: 'Orbitron', sans-serif;
-    color: #00ffe1;
-    text-shadow: 0 0 5px rgba(0, 255, 225, 0.5);
-  }
-  
-  .text-white-75 {
-    color: rgba(255, 255, 255, 0.75);
+    color: #232e47;
   }
   
   .btn-offer-action {
-    background: linear-gradient(90deg, #00ffe1, #00c7b3);
-    color: #1a1a2e;
+    background: #399bff;
+    color: #fff;
     border: none;
-    border-radius: 50px;
-    padding: 0.6rem 1.2rem;
-    font-size: 0.9rem;
-    box-shadow: 0 3px 15px rgba(0, 255, 225, 0.3);
-    transition: all 0.3s ease;
+    border-radius: 30px;
+    padding: 0.5rem 1.1rem;
+    font-size: 0.95rem;
+    box-shadow: 0 2px 8px #399bff20;
+    transition: background 0.18s, color 0.18s;
     cursor: pointer;
   }
   
   .btn-offer-action:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(0, 255, 225, 0.5);
-    background: linear-gradient(90deg, #00c7b3, #00a090);
+    background: #232e47;
+    color: #fff;
   }
   
   /* animação para ícone de fogo */
@@ -242,6 +182,25 @@
     100% {
       transform: scale(1);
       opacity: 1;
+    }
+  }
+
+  @media (max-width: 991.98px) {
+    .sidebar {
+      width: 100%;
+      min-width: 0;
+      margin-bottom: 1.2rem;
+      border-radius: 1rem;
+      padding: 1rem;
+    }
+  }
+  @media (max-width: 600px) {
+    .sidebar {
+      width: 100%;
+      min-width: 0;
+      margin-bottom: 0.7rem;
+      border-radius: 0.7rem;
+      padding: 0.7rem;
     }
   }
   </style>

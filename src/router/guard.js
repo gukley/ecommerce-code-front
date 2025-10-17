@@ -1,24 +1,29 @@
+import { useAuthStore } from '@/stores/authStore';
+
 export const authGuard = (to, from, next) => {
-  const token = localStorage.getItem('token');
+  const authStore = useAuthStore();
+
+  // pega token do store (se já inicializado) ou do localStorage como fallback
+  const tokenFromStore = authStore?.token;
+  const token = tokenFromStore && tokenFromStore.value ? tokenFromStore.value : localStorage.getItem('token');
   let isAuthenticated = !!token;
 
   let userRole = null;
-
-  if (localStorage.getItem('user')) {
+  const userString = localStorage.getItem('user') || null;
+  if (userString) {
     try {
-      const userString = localStorage.getItem('user');
       const user = JSON.parse(userString);
-      userRole = user.role;
+      userRole = user?.role || null;
     } catch (e) {
-      console.error("Erro ao fazer parse do usuario do localStorage:", e);
+      console.error('Erro ao fazer parse do usuario do localStorage:', e);
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      isAuthenticated = false; 
+      isAuthenticated = false;
     }
   }
 
-  const requiredRoles = to.meta.roles;
-  const requiresAuth = to.meta.requiresAuth;
+  const requiredRoles = to.meta?.roles;
+  const requiresAuth = to.meta?.requiresAuth;
 
   if (requiresAuth) {
     if (!isAuthenticated) {
@@ -33,5 +38,5 @@ export const authGuard = (to, from, next) => {
       }
     }
   }
-  next();
+  return next();
 };

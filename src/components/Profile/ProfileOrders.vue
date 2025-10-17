@@ -4,15 +4,15 @@
       <h2 class="h5 fw-bold text-blue mb-3">Meus Pedidos</h2>
       <div v-if="orders.length === 0" class="alert alert-dark py-2">Nenhum pedido encontrado.</div>
       <ul v-else class="list-group orders-list">
-        <li v-for="order in orders" :key="order.id" class="list-group-item bg-dark border-0 shadow-sm rounded-3 mb-4 px-3 py-3 animate-fade modern-list-item">
+        <li v-for="order in orders" :key="order.id" class="list-group-item bg-orders border-0 shadow-sm rounded-3 mb-4 px-3 py-3 animate-fade modern-list-item">
           <div class="d-flex flex-wrap justify-content-between align-items-center mb-2 gap-2">
-            <span class="text-light">
+            <span class="text-orders">
               <strong>Pedido #{{ order.id }}</strong>
               <span :class="['badge', 'modern-badge', getStatusClass(order.status), 'ms-2']">
                 {{ translateStatus(order.status) }}
               </span>
             </span>
-            <span class="text-light small">
+            <span class="text-orders small">
               {{ new Date(order.order_date).toLocaleDateString('pt-BR') }}
             </span>
           </div>
@@ -28,8 +28,8 @@
                 class="order-product-img"
               />
               <div class="flex-grow-1">
-                <div class="fw-semibold text-light">{{ product.name }}</div>
-                <div class="text-light small">
+                <div class="fw-semibold text-orders">{{ product.name }}</div>
+                <div class="text-orders small">
                   Qtd: <strong>{{ product.quantity ?? 1 }}</strong> &nbsp;|&nbsp;
                   Unitário: <strong>{{ formatPrice(product.unit_price ?? product.price) }}</strong>
                   &nbsp;|&nbsp;
@@ -39,7 +39,7 @@
             </div>
           </div>
           <div class="d-flex justify-content-between align-items-center gap-3 mt-2">
-            <span class="fw-bold text-blue fs-5">
+            <span class="fw-bold text-orders fs-5">
               Total: {{ formatPrice(order.total_amount ?? order.total ?? getOrderTotal(order)) }}
             </span>
             <div class="d-flex gap-2">
@@ -154,65 +154,69 @@ function downloadOrderPDF(order) {
 <style scoped>
 .orders-card.modern-orders-card {
   border-radius: 18px;
-  background: rgba(24,30,42,0.85);
-  box-shadow: 0 8px 32px 0 #232e4780;
-  backdrop-filter: blur(8px);
-  border: 1.5px solid #232e47;
+  background: #f8f9fa;
+  box-shadow: 0 8px 32px 0 #b8d8ff30;
+  border: 1.5px solid #e5e7eb;
 }
-.bg-dark { background: #181e2a !important; }
-.text-blue { color: #50b8fe;}
+.bg-orders {
+  background: #f3f4f8 !important;
+}
+.text-orders {
+  color: #232e47 !important;
+}
 .modern-badge {
   font-size: 0.92rem;
   border-radius: 8px;
   letter-spacing: 0.5px;
-  box-shadow: 0 1px 6px #232e4720;
-  border: 1.5px solid #232e47;
-  background: rgba(80,184,254,0.08);
+  box-shadow: 0 1px 6px #b8d8ff20;
+  border: none;
+  font-weight: 600;
+  padding: 0.32em 1em;
+  color: #fff !important;
 }
 .bg-status-pending {
-  background: linear-gradient(90deg, #fbbf24 0%, #f59e0b 100%) !important;
-  color: #232e47 !important;
+  background: linear-gradient(90deg,#f9d423 0%,#ff4e50 100%) !important;
 }
-.bg-status-processing {
-  background: linear-gradient(90deg, #64b5f6 0%, #42a5f5 100%) !important;
-  color: #fff !important;
-}
-.bg-status-canceled {
-  background: linear-gradient(90deg, #ff6a6a 0%, #f44336 100%) !important;
-  color: #fff !important;
+.bg-status-processing, .bg-status-confirmed {
+  background: linear-gradient(90deg,#64b5f6 0%,#42a5f5 100%) !important;
 }
 .bg-status-shipped {
-  background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%) !important;
-  color: #232e47 !important;
+  background: linear-gradient(90deg,#667eea 0%,#764ba2 100%) !important;
 }
 .bg-status-delivered {
-  background: linear-gradient(90deg, #50b8fe 0%, #399bff 100%) !important;
-  color: #fff !important;
+  background: linear-gradient(90deg,#43e97b 0%,#38f9d7 100%) !important;
+}
+.bg-status-canceled, .bg-status-cancelled {
+  background: linear-gradient(90deg,#ff6b6b 0%,#f44336 100%) !important;
 }
 .modern-list-item {
   transition: box-shadow 0.2s, background 0.2s;
   border-radius: 14px !important;
+  background: #f3f4f8 !important;
 }
 .modern-list-item:hover {
   box-shadow: 0 4px 16px #399bff30;
-  background: #232e47 !important;
+  background: #eaf6ff !important;
 }
 .order-products-list {
-  border-left: 2px solid #399bff30;
+  border-left: 2px solid #b8d8ff30;
   margin-left: 2px;
   padding-left: 12px;
 }
 .order-product-item {
   min-height: 54px;
+  background: #eaf6ff;
+  border-radius: 8px;
+  padding: 7px 0;
 }
 .order-product-img {
   width: 48px;
   height: 48px;
   object-fit: cover;
   border-radius: 8px;
-  background: #232e47;
-  border: 1.5px solid #399bff40;
-  box-shadow: 0 2px 8px #399bff20;
+  background: #fff;
+  border: 1.5px solid #b8d8ff;
+  box-shadow: 0 2px 8px #b8d8ff20;
 }
 .btn-cancel-order {
   font-size: 0.98rem;
@@ -220,12 +224,15 @@ function downloadOrderPDF(order) {
   padding: 7px 18px;
   font-weight: 600;
   border-width: 2px;
+  background: #fff;
+  color: #ff4e50;
+  border-color: #ff4e50;
   transition: background 0.18s, color 0.18s, border 0.18s;
 }
 .btn-cancel-order:hover {
-  background: #ff6a6a;
+  background: #ff4e50;
   color: #fff;
-  border-color: #ff6a6a;
+  border-color: #ff4e50;
 }
 .btn-download-pdf {
   font-size: 0.98rem;
@@ -233,15 +240,15 @@ function downloadOrderPDF(order) {
   padding: 7px 18px;
   font-weight: 600;
   border-width: 2px;
-  border-color: #50b8fe;
-  color: #50b8fe;
-  background: transparent;
+  border-color: #399bff;
+  color: #399bff;
+  background: #fff;
   transition: background 0.18s, color 0.18s, border 0.18s;
 }
 .btn-download-pdf:hover {
-  background: #50b8fe;
+  background: #399bff;
   color: #fff;
-  border-color: #50b8fe;
+  border-color: #399bff;
 }
 @keyframes fadein {
   from { opacity: 0; transform: translateY(12px);}

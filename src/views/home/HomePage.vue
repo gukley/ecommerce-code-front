@@ -210,25 +210,22 @@ function getProductName(id) {
 </script>
 
 <style scoped>
-.main-layout {
+.main-layout { 
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   background-color: #11111c;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-
-.content-wrapper {
+.content-wrapper { 
   flex: 1 1 auto;
   align-items: stretch;
   min-height: 0;
 }
-
 .products-container {
   background: linear-gradient(145deg, #18182a 60%, #23233a 100%);
   border-radius: 2rem;
   box-shadow: 0 8px 32px rgba(143, 95, 232, 0.10);
-  padding: 2.5rem 2rem 2rem;
+  padding: 2.5rem 2rem 2rem 2rem;
   margin-bottom: 2rem;
   min-height: 500px;
   max-width: 1400px;
@@ -236,7 +233,6 @@ function getProductName(id) {
   border: 1.5px solid #23233a;
   position: relative;
 }
-
 .section-title {
   font-family: 'Orbitron', sans-serif;
   color: #00ffe1;
@@ -247,16 +243,14 @@ function getProductName(id) {
   margin-bottom: 2rem !important;
   user-select: none;
 }
-
 .animate-fade-in {
   opacity: 0;
   transform: translateY(20px);
   animation: fadeIn 0.8s ease-out forwards;
-  animation-delay: 0.2s;
+  animation-delay: 0.2s; 
 }
-
-@keyframes fadeIn {
-  to {
+@keyframes fadeIn { 
+  to { 
     opacity: 1;
     transform: translateY(0);
   }
@@ -388,5 +382,63 @@ function getProductName(id) {
   background: rgba(143,95,232,0.07);
 }
 
-/* Remover os estilos do .home-discount-banner, .discount-highlight, .see-offer-link se desejar */
+/* Responsivo */
+@media (max-width: 992px) {
+  .content-wrapper {
+    flex-direction: column;
+    padding: 0 !important;
+  }
+  .products-container {
+    padding: 1.5rem 0.5rem 1.2rem 0.5rem;
+    border-radius: 1.2rem;
+    min-height: 350px;
+  }
+  .section-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.2rem !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .products-container {
+    padding: 1rem 0.2rem 1rem 0.2rem;
+    min-height: auto;
+    border-radius: 1rem;
+  }
+  .section-title {
+    font-size: 1.2rem;
+    margin-bottom: 1rem !important;
+  }
+  .search-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+  }
+  .search-bar-box {
+    max-width: 100%;
+    margin-bottom: 0.7rem;
+    min-width: 0;
+  }
+  .filtro-ordenacao-box {
+    margin-left: 0;
+    min-width: 100%;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .products-container {
+    padding: 0.7rem 0.1rem 0.7rem 0.1rem;
+    border-radius: 0.7rem;
+  }
+  .section-title {
+    font-size: 1rem;
+    margin-bottom: 0.7rem !important;
+  }
+  .row.g-4 {
+    --bs-gutter-x: 0.5rem;
+    --bs-gutter-y: 0.5rem;
+  }
+}
 </style>

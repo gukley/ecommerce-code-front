@@ -61,6 +61,7 @@
     </div>
 
     <button
+      v-if="!pedidoCriado"
       class="btn-confirm"
       @click="$emit('confirmarPedido')"
       :disabled="!endereco || !endereco.id"
@@ -69,6 +70,21 @@
       <i class="bi bi-cart-check"></i>
       Confirmar Pedido
     </button>
+    
+    <div v-else class="pedido-criado-success">
+      <div class="success-icon">
+        <i class="bi bi-check-circle-fill"></i>
+      </div>
+      <h4>Pedido Criado com Sucesso!</h4>
+      <p>Seu pedido foi processado e está sendo preparado.</p>
+      <button
+        class="btn-confirm"
+        @click="$emit('confirmarPedido')"
+      >
+        <i class="bi bi-arrow-right"></i>
+        Finalizar
+      </button>
+    </div>
   </div>
 </template>
 
@@ -103,6 +119,10 @@ const props = defineProps({
   metodoPagamento: {
     type: String,
     default: ''
+  },
+  pedidoCriado: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -323,6 +343,37 @@ const metodoPagamentoLabel = computed(() => {
   background: linear-gradient(145deg, #8f5fe8 0%, #00ffe1 100%);
   transform: translateY(-1px) scale(1.04);
   box-shadow: 0 6px 22px rgba(0,255,225,0.19);
+}
+
+.pedido-criado-success {
+  text-align: center;
+  padding: 2rem 1rem;
+  background: rgba(0,255,225,0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(0,255,225,0.2);
+}
+
+.success-icon {
+  margin-bottom: 1rem;
+}
+
+.success-icon i {
+  font-size: 3rem;
+  color: #00ffe1;
+  filter: drop-shadow(0 0 10px #00ffe1);
+}
+
+.pedido-criado-success h4 {
+  color: #00ffe1;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.pedido-criado-success p {
+  color: #8fd6fb;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 @keyframes fadeIn {

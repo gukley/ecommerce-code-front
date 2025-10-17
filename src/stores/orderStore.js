@@ -148,6 +148,7 @@ export const useOrderStore = defineStore('order', () => {
     // atualizar status 
     const changeOrderStatus = async (orderId, statusData, adminId) => { 
         try { 
+            console.log('Alterando status do pedido:', orderId, 'para:', statusData)
             await updateOrderStatus(orderId, statusData)
             toast.success('Status atualizado com sucesso!')
             // Recarregue os pedidos do admin após alteração
@@ -158,7 +159,8 @@ export const useOrderStore = defineStore('order', () => {
             }
         } catch (error) { 
             toast.error('Erro ao atualizar status')
-            console.error(error)
+            console.error('Erro detalhado:', error)
+            throw error // Re-throw para que o componente possa tratar
         }
     }
 

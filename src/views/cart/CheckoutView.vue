@@ -25,6 +25,7 @@
               :etapa="etapaAtual"
               @etapaChange="etapaAtual = $event"
               @dadosColetados="handleDadosColetados"
+              @pedidoCriado="pedidoCriado = $event"
               @finalizado="etapaAtual = 3"
             />
             <OrderReview
@@ -37,6 +38,7 @@
               @confirmarPedido="confirmarPedido"
               :applied-coupon="appliedCoupon"
               :desconto-cupom="descontoCupom"
+              :pedido-criado="pedidoCriado"
             />
             <ConfirmationSuccess
               v-if="etapaAtual === 4"
@@ -179,6 +181,7 @@ const total = computed(() =>
 
 const enderecoSelecionado = ref(null);
 const metodoPagamento = ref(null);
+const pedidoCriado = ref(false);
 
 function handleDadosColetados(dados) {
   enderecoSelecionado.value = dados.endereco;
@@ -204,6 +207,17 @@ function verificarEnderecoSelecionado() {
 
 async function confirmarPedido() {
   try {
+    // Se o pedido já foi criado (via pagamento com cartão), apenas avança para confirmação
+    if (pedidoCriado.value) {
+      await cartStore.clearCart();
+      toast.success('Pedido realizado com sucesso! Você será redirecionado em instantes.');
+      etapaAtual.value = 4;
+      setTimeout(() => {
+        voltarParaHome();
+      }, 4000);
+      return;
+    }
+
     // Sempre obtenha os itens do carrinho diretamente do store no momento do clique
     const carrinhoAtual = cartStore.detailedItems;
     if (!carrinhoAtual || carrinhoAtual.length === 0) {
@@ -259,6 +273,7 @@ async function confirmarPedido() {
     const response = await createOrder(orderData);
 
     if (response) {
+      pedidoCriado.value = true;
       // Só limpa o carrinho após o pedido ser criado com sucesso
       await cartStore.clearCart();
       toast.success('Pedido realizado com sucesso! Você será redirecionado em instantes.');
@@ -468,8 +483,6 @@ watch(theme, (val) => {
 .theme-light-checkout .btn-theme-toggle:hover {
   background: #399bff !important;
   color: #fff !important;
-}
-.theme-dark-checkout {
 }
 
 @media (max-width: 991px) {

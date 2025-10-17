@@ -3,6 +3,8 @@ import App from './App.vue'
 import router from './router'
 import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
+import VueApexCharts from "vue3-apexcharts";
+
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap-icons/font/bootstrap-icons.css'
@@ -28,5 +30,8 @@ app.use(Toast, {
   timeout: 3000,
   position: "top-right",
 })
+
+app.use(VueApexCharts);
+app.component("apexchart", VueApexCharts);
 
 app.mount('#app')

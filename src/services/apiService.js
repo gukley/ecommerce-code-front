@@ -1,19 +1,46 @@
-import api from './api'
+import api from './api';
+import axios from 'axios';
 
-// Auth
+const baseURL = import.meta.env.VITE_API_URL;
+
+// ===== Auth =====
 export const login = (credentials) => 
     api.post('/login', credentials).then(res => res.data)
 
 export const register = (data) =>
     api.post('/register', data).then(res => res.data)
 
-export const renewToken = () =>
-    api.post('/renew-token').then(res => res.data)
+
+export const renewToken = async () => {
+  const refreshToken = localStorage.getItem('refreshToken') || localStorage.getItem('refresh_token') || null;
+  if (!refreshToken) {
+    console.error('Erro: Refresh token ausente.');
+    throw new Error('Refresh token ausente');
+  }
+
+  try {
+    const res = await axios.post(`${baseURL}/renew-token`, { refresh_token: refreshToken });
+    const data = res.data || {};
+    const token = data.access_token || data.token || data.new_token || null;
+    const refresh = data.refresh_token || data.refreshToken || data.new_refresh_token || null;
+
+    if (token) localStorage.setItem('token', token);
+    if (refresh) {
+      localStorage.setItem('refreshToken', refresh);
+      localStorage.setItem('refresh_token', refresh);
+    }
+
+    return { token, refreshToken: refresh, ...data };
+  } catch (error) {
+    console.error('Erro ao renovar o token (service):', error.response?.data || error.message);
+    throw error;
+  }
+};
+
 
 export const verifyToken = () => 
     api.get('/verify-token').then(res => res.data)
 
-// Obter perfil do usuario autenticado
 export const getUserProfile = () => 
     api.get('/users/me').then(res => res.data)
 
@@ -23,10 +50,14 @@ export const updateUserProfile = (data) =>
 export const deleteUser = () => 
     api.delete('/users/me').then(res => res.data)
 
-// criar moderador
 export const createModerator = (data) => 
     api.post('/users/create-moderator', data).then(res => res.data)
-  
+
+export const updateModerator = (moderatorId, data) =>
+    api.put(`/users/moderators/${moderatorId}`, data).then(res => res.data)
+
+export const getModerators = () =>
+    api.get('/users/moderators').then(res => res.data)
 
 export const updateUserImage = (file) => { 
     const formData = new FormData()
@@ -37,29 +68,25 @@ export const updateUserImage = (file) => {
     }).then(res => res.data)
 }
 
-// Produtos
+// ===== Produtos =====
 export const getAllProducts = () =>
     api.get('/products').then(res => res.data)
 
 export const getProductById = (productId) =>
     api.get(`/products/${productId}`).then(res => res.data)
 
-// Corrija este endpoint para buscar produtos por usuário (admin_id)
 export const getProductsByUser = (userId) =>
     api.get(`/products/user/${userId}`).then(res => res.data)
 
 export const getProductsByCategory = (categoryId) =>
     api.get(`/products/category/${categoryId}`).then(res => res.data)
 
-// Criar, atualizar e deletar
 export const createProduct = (data) => {
-  // If data is FormData (for image upload), use multipart/form-data
   if (data instanceof FormData) {
     return api.post('/products/', data, {
       headers: { 'Content-Type': 'multipart/form-data' }
     }).then(res => res.data)
   }
-  // Otherwise, send as JSON
   return api.post('/products/', data).then(res => res.data)
 }
 
@@ -77,42 +104,41 @@ export const updateProductImage = (productId, formData) =>
 export const deleteProduct = (productId) =>
     api.delete(`/products/${productId}`).then(res => res.data)
 
-// categorias
+// ===== Categorias =====
 export const getCategories = () =>
-    api.get('/categories/').then(res => res.data);
+    api.get('/categories/').then(res => res.data)
 
 export const getCategoryById = (categoryId) =>
-    api.get(`/categories/${categoryId}`).then(res => res.data);
+    api.get(`/categories/${categoryId}`).then(res => res.data)
 
-// Corrija este endpoint para buscar categorias por usuário (admin_id)
 export const getCategoriesByUser = (userId) =>
-    api.get(`/categories/user/${userId}`).then(res => res.data);
+    api.get(`/categories/user/${userId}`).then(res => res.data)
 
 export const createCategory = (data) =>
-    api.post('/categories/', data).then(res => res.data);
+    api.post('/categories/', data).then(res => res.data)
 
 export const updateCategory = (categoryId, data) =>
-    api.put(`/categories/${categoryId}`, data).then(res => res.data);
+    api.put(`/categories/${categoryId}`, data).then(res => res.data)
 
 export const deleteCategory = (categoryId) =>
-    api.delete(`/categories/${categoryId}`).then(res => res.data);
+    api.delete(`/categories/${categoryId}`).then(res => res.data)
 
 export const updateCategoryImage = (categoryId, file) => { 
-    const formData = new FormData();
-    formData.append('image', file);
+    const formData = new FormData()
+    formData.append('image', file)
 
-    return api.put(`/categories/${categoryId}/image`, formData, { 
+    return api.put(`/categories/${categoryId}/image`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
-    }).then(res => res.data);
+    }).then(res => res.data)
 }
 
-// Cart
+// ===== Carrinho =====
 export const getCart = () => api.get('/cart/')
 export const createCart = () => api.post('/cart/')
 export const getCartItems = () => api.get('/cart/items')
 
 export const addItemToCart = (productId, quantity = 1, unitPrice) =>
-    api.post('/cart/items', { product_id: productId, quantity, unit_price: unitPrice });
+    api.post('/cart/items', { product_id: productId, quantity, unit_price: unitPrice })
 
 export const updateCartItem = (productId, quantity) =>
     api.put('/cart/items', { product_id: productId, quantity })
@@ -122,150 +148,86 @@ export const removeCartItem = (productId) =>
 
 export const clearCart = () => api.delete('/cart/clear')
 
-// Address
-export const getAllAddresses = () => { 
-    return api.get('/addresses/').then(res => res.data)
-}
+// ===== Endereços =====
+export const getAllAddresses = () => api.get('/addresses/').then(res => res.data)
 
-export const createAddress = (addressData) => { 
+export const createAddress = (addressData) => {
+    const requiredFields = ['street', 'number', 'zip', 'bairro', 'city', 'state', 'country']
+    for (const field of requiredFields) {
+        if (!addressData[field]) {
+            throw new Error(`Campo obrigatório faltando: ${field}`)
+        }
+    }
+    if (typeof addressData.zip !== 'string' || addressData.zip.length !== 8) {
+        throw new Error('O campo CEP (zip) deve conter exatamente 8 dígitos.')
+    }
     return api.post('/addresses/', addressData).then(res => res.data)
 }
 
-export const getAddressById = (addressId) => { 
-    return api.get(`/addresses/${addressId}`).then(res => res.data)
-}
+export const getAddressById = (addressId) => api.get(`/addresses/${addressId}`).then(res => res.data)
+export const updateAddress = (addressId, updateData) => api.put(`/addresses/${addressId}`, updateData).then(res => res.data)
+export const deleteAddress = (addressId) => api.delete(`/addresses/${addressId}`).then(res => res.data)
 
-export const updateAddress = (addressId, updateData) => { 
-    return api.put(`/addresses/${addressId}`, updateData).then(res => res.data)
-}
-
-export const deleteAddress = (addressId) => { 
-    return api.delete(`/addresses/${addressId}`).then(res => res.data)  
-}
-
-// Orders
-export const getAllOrders = () =>
-    api.get('/orders/all').then(res => res.data)
-
-// Corrija este endpoint para buscar pedidos por admin_id
-export const getOrderByAdmin = (adminId) =>
-    api.get(`/orders/all/${adminId}`).then(res => res.data)
-
-export const getUsersOrders = () =>
-    api.get('/orders/').then(res => res.data)
-
-export const getOrdersById = (orderId) =>
-    api.get(`/orders/${orderId}`).then(res => res.data)
+// ===== Pedidos =====
+export const getAllOrders = () => api.get('/orders/all').then(res => res.data)
+export const getOrderByAdmin = (adminId) => api.get(`/orders/all/${adminId}`).then(res => res.data)
+export const getUsersOrders = () => api.get('/orders/').then(res => res.data)
+export const getOrdersById = (orderId) => api.get(`/orders/${orderId}`).then(res => res.data)
 
 export const createOrder = (orderData) => {
-    // Garante que coupon_id sempre existe (mesmo que null)
-    if (!('coupon_id' in orderData)) {
-        orderData.coupon_id = null;
-    }
-    // Garante que todos os unit_price são number (não string)
+    if (!('coupon_id' in orderData)) orderData.coupon_id = null
     if (Array.isArray(orderData.items)) {
         orderData.items = orderData.items.map(item => ({
             ...item,
             unit_price: Number(item.unit_price)
-        }));
+        }))
     }
     return api.post('/orders/', orderData).then(res => res.data)
 }
 
-export const updateOrderStatus = (orderId, statusData) =>
-    api.put(`/orders/${orderId}`, statusData).then(res => res.data)
+export const updateOrderStatus = (orderId, statusData) => api.put(`/orders/${orderId}`, statusData).then(res => res.data)
+export const cancelOrder = (orderId) => api.delete(`/orders/${orderId}`).then(res => res.data)
+export const getOrdersByUserId = (userId) => api.get(`/orders/user/${userId}`).then(res => res.data)
 
-export const cancelOrder = (orderId) =>
-    api.delete(`/orders/${orderId}`).then(res => res.data)
+// ===== Cupons =====
+export const getAllCoupons = () => api.get('/coupons/').then(res => res.data)
+export const getCouponById = (couponId) => api.get(`/coupons/${couponId}`).then(res => res.data)
+export const createCoupon = (couponData) => api.post('/coupons/', couponData).then(res => res.data)
+export const updateCoupon = (couponId, couponData) => api.put(`/coupons/${couponId}`, couponData).then(res => res.data)
+export const deleteCoupon = (couponId) => api.delete(`/coupons/${couponId}`).then(res => res.data)
 
-// Coupons
-export const getAllCoupons = () =>
-    api.get('/coupons/').then(res => res.data)
+// ===== Descontos =====
+export const getAllDiscounts = () => api.get('/discounts/').then(res => res.data)
+export const createDiscount = (discountData) => api.post('/discounts/', discountData).then(res => res.data)
+export const getDiscountById = (discountId) => api.get(`/discounts/${discountId}`).then(res => res.data)
+export const updateDiscount = (discountId, discountData) => api.put(`/discounts/${discountId}`, discountData).then(res => res.data)
+export const deleteDiscount = (discountId) => api.delete(`/discounts/${discountId}`).then(res => res.data)
 
-export const getCouponById = (couponId) =>
-    api.get(`/coupons/${couponId}`).then(res => res.data)
+// ===== Senha =====
+export const changeUserPassword = (data) => api.post('/users/me/change-password', data).then(res => res.data)
+export const forgotPassword = (data) => api.post('/users/forgot-password', data).then(res => res.data)
+export const resetPassword = (data) => api.post('/users/reset-password', data).then(res => res.data)
 
-export const createCoupon = (couponData) =>
-    api.post('/coupons/', couponData).then(res => res.data)
-
-export const updateCoupon = (couponId, couponData) =>
-    api.put(`/coupons/${couponId}`, couponData).then(res => res.data)
-
-export const deleteCoupon = (couponId) =>
-    api.delete(`/coupons/${couponId}`).then(res => res.data)
-
-// Discounts
-export const getAllDiscounts = () =>
-    api.get('/discounts/').then(res => res.data)
-
-export const createDiscount = (discountData) =>
-    api.post('/discounts/', {
-        description: discountData.description,
-        discount_percentage: discountData.discount_percentage,
-        start_date: discountData.start_date,
-        end_date: discountData.end_date,
-        product_id: discountData.product_id
-    }).then(res => res.data)
-
-export const getDiscountById = (discountId) =>
-    api.get(`/discounts/${discountId}`).then(res => res.data)
-
-export const updateDiscount = (discountId, discountData) =>
-    api.put(`/discounts/${discountId}`, {
-        description: discountData.description,
-        discount_percentage: discountData.discount_percentage,
-        start_date: discountData.start_date,
-        end_date: discountData.end_date,
-        product_id: discountData.product_id
-    }).then(res => res.data)
-
-export const deleteDiscount = (discountId) =>
-    api.delete(`/discounts/${discountId}`).then(res => res.data)
-
-export const changeUserPassword = (data) =>
-    api.post('/users/me/change-password', data).then(res => res.data) 
-
-export const getUserSummary = () =>
-    api.get('/users/me/summary').then(res => res.data)
-
-// Favoritos 
-export async function getFavorites() {
-  try {
-    // const response = await axios.get('/favorites/')
-    // return response.data
-    return []
-  } catch (e) {
-    return []
-  }
-}
+// ===== Favoritos =====
+export const getFavorites = async () => { return [] }
 export const addFavorite = (productId) => api.post('/favorites/', { product_id: productId }).then(res => res.data)
 export const removeFavorite = (favoriteId) => api.delete(`/favorites/${favoriteId}`).then(res => res.data)
 
-// Buscar todos clientes(admin)
-export const getAdminClients = () => {
-  return api.get('/admin/clients').then(res => res.data)
+// ===== Admin / Clientes =====
+export const getAdminClients = () => api.get('/admin/clients').then(res => res.data)
+export const getUserSummary = () => api.get('/users/me/summary').then(res => res.data)
+
+// ===== Pagamentos =====
+export const createCheckoutSession = async (payload) => {
+  const response = await fetch('http://localhost:8000/payments/create-checkout-session', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  if (!response.ok) throw new Error('Erro ao criar sessão de checkout')
+  return await response.json()
 }
 
-// Busca pedidos de um cliente específico (admin)
-export const getOrdersByUserId = (userId) =>
-  api.get(`/orders/user/${userId}`).then(res => res.data);
-
-// Editar moderador
-export const updateModerator = (moderatorId, data) =>
-    api.put(`/users/moderators/${moderatorId}`, data).then(res => res.data)
-
-export const getModerators = () =>
-    api.get('/users/moderators').then(res => res.data)
-
-export async function getUserMe() {
-  // Exemplo usando axios, ajuste conforme sua API
-  try {
-    const response = await axios.get('/users/me')
-    return response.data
-  } catch (e) {
-    return null
-  }
-}
 
 export default {
   login,
@@ -324,13 +286,14 @@ export default {
   updateDiscount,
   deleteDiscount,
   changeUserPassword,
-  getUserSummary,
+  forgotPassword,
+  resetPassword,
   getFavorites,
   addFavorite,
   removeFavorite,
   getAdminClients,
+  getUserSummary,
   getOrdersByUserId,
   getModerators,
-  
-};
-
+  createCheckoutSession
+}

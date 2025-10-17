@@ -17,9 +17,9 @@
 
             <div class="mb-3">
               <label for="productDescription" class="form-label">Descrição</label>
-              <textarea class="form-control modern-input" id="productDescription" rows="3" v-model="productFormData.description" required maxlength="500"></textarea>
-              <div class="text-end small mt-1" :style="{color: productFormData.description && productFormData.description.length >= 500 ? 'var(--admin-danger)' : 'var(--admin-text-muted)'}">
-                {{ (productFormData.description || '').length }}/500 caracteres
+              <textarea class="form-control modern-input" id="productDescription" rows="3" v-model="productFormData.description" required maxlength="800"></textarea>
+              <div class="text-end small mt-1" :style="{color: productFormData.description && productFormData.description.length >= 800 ? 'var(--admin-danger)' : 'var(--admin-text-muted)'}">
+                {{ (productFormData.description || '').length }}/800 caracteres
               </div>
             </div>
 

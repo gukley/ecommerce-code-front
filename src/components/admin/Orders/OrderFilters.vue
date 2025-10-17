@@ -7,6 +7,7 @@
           <option value="">Todos os Status</option>
           <option value="PENDING">Pendente</option>
           <option value="PROCESSING">Processando</option>
+          <option value="CONFIRMED">Confirmado</option>
           <option value="SHIPPED">Enviado</option>
           <option value="DELIVERED">Entregue</option>
           <option value="CANCELED">Cancelado</option>

@@ -166,4 +166,29 @@ const brands = [
   display: block;
   margin-top: 4px;
 }
+
+@media (max-width: 991.98px) {
+  .brands-carousel {
+    gap: 0.7rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .brand-logo {
+    max-width: 90px;
+    height: auto;
+    margin-bottom: 0.5rem;
+  }
+}
+@media (max-width: 600px) {
+  .brands-carousel {
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .brand-logo {
+    max-width: 60px;
+    height: auto;
+    margin-bottom: 0.3rem;
+  }
+}
 </style>
