@@ -87,6 +87,7 @@
           </div>
         </div>
       </div>
+      
 
       <div class="row g-4">
         <div class="col-lg-6">
@@ -161,6 +162,32 @@
           </div>
         </div>
       </div>
+
+      <!-- NOVA SEÇÃO DE GRÁFICOS -->
+      <div class="row g-4 mt-4">
+        <div class="col-12 col-md-6">
+          <div class="card p-4 shadow-sm h-100 dashboard-table-card dashboard-table-dark chart-card">
+            <h4 class="fw-bold text-primary-ggtech mb-3">Evolução das Vendas (Últimos 6 meses)</h4>
+            <apexchart
+              type="line"
+              height="320"
+              :options="lineChartOptions"
+              :series="lineChartSeries"
+            />
+          </div>
+        </div>
+        <div class="col-12 col-md-6">
+          <div class="card p-4 shadow-sm h-100 dashboard-table-card dashboard-table-dark chart-card">
+            <h4 class="fw-bold text-primary-ggtech mb-3">Pedidos por Status</h4>
+            <apexchart
+              type="bar"
+              height="320"
+              :options="barChartOptions"
+              :series="barChartSeries"
+            />
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -173,6 +200,8 @@ import { useAuthStore } from '@/stores/authStore';
 import { useCouponStore } from '@/stores/couponStore';
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
+import ApexCharts from 'apexcharts'
+import VueApexCharts from 'vue3-apexcharts'
 
 // Stores
 const orderStore = useOrderStore();
@@ -221,9 +250,29 @@ const isLoading = computed(() => {
   return !dashboardInitialized.value || loadingPedidos.value || loadingProdutos.value || loadingCupons.value;
 });
 
+// Corrige o total de vendas para considerar total_amount ou soma dos itens
 const totalVendas = computed(() => {
   if (!orders.value || orders.value.length === 0) return 0;
-  return orders.value.reduce((sum, order) => sum + Number(order.total || 0), 0);
+  return orders.value.reduce((sum, order) => {
+    if (order.total_amount !== undefined && order.total_amount !== null) {
+      return sum + Number(order.total_amount);
+    }
+    if (!order.items || !order.items.length) return sum;
+    return sum + order.items.reduce((s, item) => {
+      if (item.total_price !== undefined && item.total_price !== null) {
+        return s + Number(item.total_price);
+      }
+      const price = (item.unit_price !== undefined && item.unit_price !== null)
+        ? Number(item.unit_price)
+        : (item.price !== undefined && item.price !== null)
+          ? Number(item.price)
+          : (item.product && item.product.price !== undefined && item.product.price !== null)
+            ? Number(item.product.price)
+            : 0;
+      const qty = Number(item.quantity ?? 1) || 1;
+      return s + price * qty;
+    }, 0);
+  }, 0);
 });
 
 const totalPedidos = computed(() => {
@@ -320,6 +369,173 @@ const refreshDashboard = async () => {
   await fetchDashboardData();
   dashboardInitialized.value = true;
 };
+
+// Gera os últimos 6 meses dinamicamente
+function getLast6MonthsLabels() {
+  const labels = [];
+  const now = new Date();
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    labels.push(d.toLocaleString('pt-BR', { month: 'long' }).replace(/^./, m => m.toUpperCase()));
+  }
+  return labels;
+}
+
+// Calcula o total vendido por mês (dinâmico)
+const vendasPorMes = computed(() => {
+  if (!orders.value || !orders.value.length) return [];
+  const months = getLast6MonthsLabels();
+  const result = months.map((month, idx) => {
+    // Pega o mês e ano correspondente
+    const now = new Date();
+    const refDate = new Date(now.getFullYear(), now.getMonth() - (5 - idx), 1);
+    const refMonth = refDate.getMonth();
+    const refYear = refDate.getFullYear();
+    // Soma total_amount dos pedidos do mês
+    return orders.value
+      .filter(order => {
+        const d = new Date(order.order_date || order.created_at);
+        return d.getMonth() === refMonth && d.getFullYear() === refYear;
+      })
+      .reduce((sum, order) => {
+        if (order.total_amount !== undefined && order.total_amount !== null) {
+          return sum + Number(order.total_amount);
+        }
+        if (!order.items || !order.items.length) return sum;
+        return sum + order.items.reduce((s, item) => {
+          if (item.total_price !== undefined && item.total_price !== null) {
+            return s + Number(item.total_price);
+          }
+          const price = (item.unit_price !== undefined && item.unit_price !== null)
+            ? Number(item.unit_price)
+            : (item.price !== undefined && item.price !== null)
+              ? Number(item.price)
+              : (item.product && item.product.price !== undefined && item.product.price !== null)
+                ? Number(item.product.price)
+                : 0;
+          const qty = Number(item.quantity ?? 1) || 1;
+          return s + price * qty;
+        }, 0);
+      }, 0);
+  });
+  return result;
+});
+
+// Labels dos meses dinâmicos
+const meses = computed(() => getLast6MonthsLabels());
+
+// Gráfico de status dinâmico
+const statusLabels = ['Pendente', 'Processando', 'Concluído', 'Cancelado'];
+const statusMap = {
+  Pendente: ['PENDING'],
+  Processando: ['PROCESSING'],
+  Concluído: ['DELIVERED', 'COMPLETED', 'CONFIRMED'],
+  Cancelado: ['CANCELED']
+};
+const pedidosPorStatus = computed(() => {
+  if (!orders.value || !orders.value.length) return [0, 0, 0, 0];
+  return statusLabels.map(label => {
+    const statusList = statusMap[label];
+    return orders.value.filter(order =>
+      statusList.includes(String(order.status).toUpperCase())
+    ).length;
+  });
+});
+const statusColors = ['#f9d423', '#64b5f6', '#43e97b', '#ff6b6b'];
+
+// ApexCharts options para o gráfico de linhas
+const lineChartOptions = computed(() => ({
+  chart: {
+    type: 'line',
+    background: 'transparent',
+    toolbar: { show: false },
+    fontFamily: 'Inter, sans-serif'
+  },
+  theme: { mode: 'dark' },
+  grid: {
+    borderColor: '#232e47',
+    strokeDashArray: 4,
+    xaxis: { lines: { show: false } }
+  },
+  dataLabels: { enabled: false },
+  stroke: { curve: 'smooth', width: 3, colors: ['#64b5f6'] },
+  xaxis: {
+    categories: meses.value,
+    labels: { style: { colors: '#e8eaed', fontWeight: 600 } },
+    axisBorder: { color: '#374151' },
+    axisTicks: { color: '#374151' }
+  },
+  yaxis: {
+    labels: {
+      style: { colors: '#e8eaed', fontWeight: 600 },
+      formatter: val => `R$ ${val.toLocaleString('pt-BR')}`
+    }
+  },
+  tooltip: {
+    theme: 'dark',
+    y: { formatter: val => `R$ ${val.toLocaleString('pt-BR')}` }
+  },
+  legend: {
+    labels: { colors: '#e8eaed' }
+  }
+}));
+const lineChartSeries = computed(() => [
+  {
+    name: 'Vendas',
+    data: vendasPorMes.value
+  }
+]);
+
+// ApexCharts options para o gráfico de barras
+const barChartOptions = computed(() => ({
+  chart: {
+    type: 'bar',
+    background: 'transparent',
+    toolbar: { show: false },
+    fontFamily: 'Inter, sans-serif'
+  },
+  theme: { mode: 'dark' },
+  grid: {
+    borderColor: '#232e47',
+    strokeDashArray: 4,
+    xaxis: { lines: { show: false } }
+  },
+  plotOptions: {
+    bar: {
+      borderRadius: 6,
+      columnWidth: '45%',
+      distributed: true
+    }
+  },
+  dataLabels: { enabled: false },
+  xaxis: {
+    categories: statusLabels,
+    labels: { style: { colors: '#e8eaed', fontWeight: 600 } },
+    axisBorder: { color: '#374151' },
+    axisTicks: { color: '#374151' }
+  },
+  yaxis: {
+    labels: {
+      style: { colors: '#e8eaed', fontWeight: 600 }
+    }
+  },
+  colors: statusColors,
+  tooltip: {
+    theme: 'dark',
+    y: { formatter: val => `${val} pedidos` }
+  },
+  legend: {
+    show: true,
+    labels: { colors: '#e8eaed' },
+    markers: { fillColors: statusColors }
+  }
+}));
+const barChartSeries = computed(() => [
+  {
+    name: 'Pedidos',
+    data: pedidosPorStatus.value
+  }
+]);
 </script>
 
 <style scoped>
@@ -540,28 +756,110 @@ const refreshDashboard = async () => {
   font-weight: 500;
 }
 
-/* Responsividade */
-@media (max-width: 768px) {
+.chart-card {
+  background: linear-gradient(135deg, #181e2a 0%, #23233a 100%) !important;
+  border: 1.5px solid #232e47 !important;
+  border-radius: 1.2rem !important;
+  box-shadow: 0 2px 12px #232e4720 !important;
+  color: #e8eaed !important;
+  margin-bottom: 0;
+  min-height: 410px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+.chart-card h4 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 1.2rem;
+  color: #64b5f6;
+  letter-spacing: 0.01em;
+  background: linear-gradient(90deg, #64b5f6 0%, #42a5f5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.apexcharts-tooltip {
+  color: #23233a !important;
+}
+@media (max-width: 991.98px) {
+  .chart-card {
+    min-height: 340px;
+    margin-bottom: 1.2rem;
+  }
+}
+@media (max-width: 600px) {
+  .chart-card {
+    min-height: 280px;
+    padding: 1rem 0.3rem;
+  }
+}
+/* Responsividade: aplica para todo o painel admin */
+@media (max-width: 991.98px) {
   .dashboard-container {
-    padding: 1rem 0.5rem;
+    padding: 1.2rem 0.5rem;
+    max-width: 100vw;
   }
-  
+  .row.g-4 > [class^="col-"] {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+  .card,
+  .metric-card,
+  .dashboard-table-card {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 0 1.2rem 0 !important;
+    box-sizing: border-box;
+  }
+  .dashboard-table-responsive,
+  .table-responsive {
+    overflow-x: auto;
+  }
+  .dashboard-table,
+  .table {
+    min-width: 600px;
+  }
+  .btn {
+    width: 100%;
+    margin-bottom: 0.7rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .dashboard-container {
+    padding: 0.5rem 0.1rem;
+  }
   .text-primary-ggtech {
-    font-size: 1.8rem;
+    font-size: 1.2rem;
   }
-  
   .icon-container {
-    width: 50px;
-    height: 50px;
-    font-size: 1.2rem;
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+    margin-right: 0.7rem;
   }
-  
   .metric-card .card-title {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
   }
-  
   .metric-card .card-text {
-    font-size: 1.2rem;
+    font-size: 1rem;
+  }
+  .dashboard-table-card,
+  .card {
+    padding: 1rem 0.3rem;
+  }
+  .dashboard-table,
+  .table {
+    font-size: 0.95rem;
+  }
+  .btn {
+    padding: 0.4rem 1rem;
+    font-size: 0.95rem;
+  }
+  .badge {
+    font-size: 0.7rem;
+    padding: 0.4rem 0.6rem;
   }
 }
 </style>

@@ -104,7 +104,7 @@
     if (address.street) parts.push(address.street);
     if (address.number) parts.push(address.number);
     if (address.complement) parts.push(address.complement);
-    if (address.neighborhood) parts.push(address.neighborhood);
+    if (address.bairro) parts.push(address.bairro);
     if (address.city) parts.push(address.city);
     if (address.state) parts.push(address.state);
     if (address.zip_code) parts.push(address.zip_code);

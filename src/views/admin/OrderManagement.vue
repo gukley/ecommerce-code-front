@@ -154,12 +154,19 @@ const goToPage = (page) => {
 
 const getAddressData = async (addressId) => {
   if (!addressId) return null;
-  if (addresses.value[addressId]) return addresses.value[addressId];
+  // Não tente buscar novamente se já tentou antes (mesmo se for null)
+  if (addresses.value[addressId] !== undefined) return addresses.value[addressId];
   try {
     const address = await getAddressById(addressId);
     addresses.value[addressId] = address;
     return address;
   } catch (error) {
+    // Marque como null para não tentar novamente e evite poluir o console
+    addresses.value[addressId] = null;
+    // Opcional: log apenas se não for 404
+    if (error?.response?.status !== 404) {
+      console.error('Erro ao buscar endereço:', error);
+    }
     return null;
   }
 };

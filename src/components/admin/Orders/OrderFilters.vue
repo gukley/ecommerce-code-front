@@ -48,14 +48,15 @@
         <span class="text-muted">
           <i class="bi bi-info-circle me-1"></i>
           {{ filteredOrders.length }} de {{ orders.length }} pedidos |
-          <strong class="text-success">Total: R$ {{ totalPedidos }}</strong>
+          <strong class="text-success">Total: R$ {{ totalPedidosFiltrados.toFixed(2) }}</strong>
         </span>
       </div>
     </div>
   </div>
 </template>
 <script setup>
-defineProps({
+import { computed } from 'vue'
+const props = defineProps({
   selectedStatus: String,
   selectedPeriod: String,
   startDate: String,
@@ -63,8 +64,34 @@ defineProps({
   searchId: String,
   orders: Array,
   filteredOrders: Array,
-  totalPedidos: String
+  totalPedidos: [String, Number]
 })
+
+// Corrige o total para somar corretamente o valor dos pedidos filtrados
+const totalPedidosFiltrados = computed(() => {
+  if (!props.filteredOrders || !props.filteredOrders.length) return 0;
+  return props.filteredOrders.reduce((acc, order) => {
+    // Usa order.total_amount se existir, senão soma dos itens
+    if (order.total_amount !== undefined && order.total_amount !== null) {
+      return acc + Number(order.total_amount);
+    }
+    if (!order.items || !order.items.length) return acc;
+    return acc + order.items.reduce((s, item) => {
+      if (item.total_price !== undefined && item.total_price !== null) {
+        return s + Number(item.total_price);
+      }
+      const price = (item.unit_price !== undefined && item.unit_price !== null)
+        ? Number(item.unit_price)
+        : (item.price !== undefined && item.price !== null)
+          ? Number(item.price)
+          : (item.product && item.product.price !== undefined && item.product.price !== null)
+            ? Number(item.product.price)
+            : 0;
+      const qty = Number(item.quantity ?? 1) || 1;
+      return s + price * qty;
+    }, 0);
+  }, 0);
+});
 </script>
 <style scoped>
 /* ...estilos de filtro, copie da view original... */

@@ -42,8 +42,8 @@
           </router-link>
         </li>
         <li class="nav-item mb-2">
-          <router-link to="/admin/clientes" class="nav-link-custom">
-            <i class="bi bi-people me-2"></i> Clientes
+          <router-link :to="{ name: 'FinanceDashboard' }" class="nav-link-custom">
+            <i class="bi bi-bar-chart-line me-2"></i> Financeiro
           </router-link>
         </li>
        </ul>

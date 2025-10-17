@@ -38,20 +38,20 @@
             <strong>Produtos:</strong>
             <div class="order-products-list">
               <div
-                v-for="product in order.products"
-                :key="product.id"
+                v-for="item in order.items"
+                :key="item.id"
                 class="order-product-item"
               >
                 <img
-                  :src="product.image_url || 'https://placehold.co/60x60?text=Produto'"
+                  :src="getProductImage(item)"
                   alt="Imagem do produto"
                   class="order-product-img"
                 />
                 <div class="order-product-info">
-                  <div class="order-product-name">{{ product.name }}</div>
+                  <div class="order-product-name">{{ item.product?.name || 'Produto' }}</div>
                   <div class="order-product-qty-price">
-                    <span class="badge bg-secondary me-2">Qtd: {{ product.quantity }}</span>
-                    <span class="text-light">R$ {{ Number(product.price).toFixed(2) }}</span>
+                    <span class="badge bg-secondary me-2">Qtd: {{ item.quantity }}</span>
+                    <span class="text-light">R$ {{ Number(item.unit_price).toFixed(2) }}</span>
                   </div>
                 </div>
               </div>
@@ -116,9 +116,25 @@ function getStatusLabel(status) {
 }
 function formatAddress(address) {
   if (!address) return '-';
-  return `${address.street}, ${address.number} - ${address.neighborhood}, ${address.city} - ${address.state}, ${address.zip_code}`;
+  return `${address.street}, ${address.number} - ${address.bairro}, ${address.city} - ${address.state}, ${address.zip_code}`;
+}
+
+// Utilitário para imagem do produto
+function getProductImage(item) {
+  // Use VITE_API_URL para garantir compatibilidade com seu .env
+  if (item.product && item.product.image_path) {
+    let base = import.meta.env.VITE_API_URL?.replace(/\/$/, '') || '';
+    let path = item.product.image_path.startsWith('/') ? item.product.image_path : '/' + item.product.image_path;
+    return base + path;
+  }
+  if (item.product && item.product.image) return item.product.image;
+  if (item.product && item.product.image_url) return item.product.image_url;
+  if (item.image) return item.image;
+  if (item.image_url) return item.image_url;
+  return 'https://placehold.co/60x60?text=Produto';
 }
 </script>
+
 <style scoped>
 /* ...estilos do modal, copie da view original... */
 .order-detail-modal {

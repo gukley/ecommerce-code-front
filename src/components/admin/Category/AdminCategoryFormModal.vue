@@ -110,12 +110,6 @@
         await updateCategory(props.category.id, updatePayload);
         toast.success('Categoria atualizada com sucesso!');
       } else {
-        // --- LÓGICA DE CRIAÇÃO ---
-        // CORREÇÃO APLICADA AQUI:
-        // O 'user_id' foi removido. A API (FastAPI) deve usar o token de
-        // autenticação para identificar o usuário e associá-lo à nova categoria.
-        // Enviar 'user_id' do frontend causa o erro 422, pois a API não espera
-        // este campo no corpo da requisição de criação.
         const createPayload = {
           name: form.value.name.trim(),
           description: form.value.description.trim() || '',

@@ -40,7 +40,7 @@
             <td>
               <ul class="mb-0 ps-3">
                 <li v-for="address in client.addresses" :key="address.id">
-                  {{ address.street }}, {{ address.number }} - {{ address.neighborhood }},
+                  {{ address.street }}, {{ address.number }} - {{ address.bairro}},
                   {{ address.city }} / {{ address.state }} - CEP: {{ address.cep }}
                 </li>
               </ul>

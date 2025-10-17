@@ -19,25 +19,25 @@
           <td>
             <div class="order-products-list">
               <div
-                v-for="product in order.products"
-                :key="product.id"
+                v-for="item in order.items"
+                :key="item.id"
                 class="order-product-item"
               >
                 <img
-                  :src="getProductImage(product)"
+                  :src="getProductImage(item)"
                   alt="Imagem do produto"
                   class="order-product-img"
                 />
                 <div class="order-product-info">
-                  <div class="order-product-name">{{ product.name }}</div>
+                  <div class="order-product-name">{{ getProductName(item) }}</div>
                   <div class="order-product-qty-price">
-                    <span class="badge bg-secondary me-2">Qtd: {{ product.quantity }}</span>
+                    <span class="badge bg-secondary me-2">Qtd: {{ item.quantity }}</span>
                     <span class="text-light">
-                      R$ {{ getUnitPrice(product, order).toFixed(2) }}
+                      R$ {{ getUnitPrice(item).toFixed(2) }}
                     </span>
-                    <span v-if="getDiscount(product)"> 
+                    <span v-if="getDiscount(item)"> 
                       <span class="badge bg-success ms-2">
-                        -{{ getDiscount(product).discount_percentage }}%
+                        -{{ getDiscount(item).discount_percentage }}%
                       </span>
                     </span>
                   </div>
@@ -102,32 +102,51 @@ const props = defineProps({
 })
 const emit = defineEmits(['change-status', 'show-detail', 'download-pdf'])
 
-// Função para buscar desconto do produto (se existir)
-function getDiscount(product) {
-  // Se o produto veio com discount, retorna
-  if (product.discount && product.discount.discount_percentage) {
-    return product.discount
+// Função para buscar desconto do item (se existir)
+function getDiscount(item) {
+  if (item.discount && item.discount.discount_percentage) {
+    return item.discount
   }
-  // Se veio do pedido, pode estar em product.discount ou order.discount
   return null
 }
 
-// Retorna o preço unitário já com desconto se houver
-function getUnitPrice(product, order) {
-  const price = Number(product.unit_price ?? product.price)
-  const discount = getDiscount(product)
-  if (discount && discount.discount_percentage > 0) {
-    return price * (1 - discount.discount_percentage / 100)
-  }
-  return price
+// Nome do produto
+function getProductName(item) {
+  return (item.product && item.product.name) || item.name || 'Produto'
 }
 
-// Calcula o total do pedido considerando descontos
+// Exibe imagem do produto usando item.product.image_path
+function getProductImage(item) {
+  if (item.product && item.product.image_path) {
+    let base = import.meta.env.VITE_API_URL?.replace(/\/$/, '') || '';
+    let path = item.product.image_path.startsWith('/') ? item.product.image_path : '/' + item.product.image_path;
+    return base + path;
+  }
+  return '/placeholder-product.png';
+}
+
+
+// Corrige o preço unitário para qualquer estrutura possível
+function getUnitPrice(item) {
+  if (item.unit_price !== undefined && item.unit_price !== null) return Number(item.unit_price);
+  if (item.price !== undefined && item.price !== null) return Number(item.price);
+  if (item.product && item.product.price !== undefined && item.product.price !== null) return Number(item.product.price);
+  return 0;
+}
+
+// Calcula o total do pedido usando order.total_amount ou soma dos itens
 function getOrderTotal(order) {
-  if (!order.products || !order.products.length) return 0;
-  return order.products.reduce((sum, p) => {
-    const price = getUnitPrice(p, order)
-    const qty = Number(p.quantity ?? 1) || 1;
+  if (order.total_amount !== undefined && order.total_amount !== null) {
+    return Number(order.total_amount);
+  }
+  if (!order.items || !order.items.length) return 0;
+  return order.items.reduce((sum, item) => {
+    // Se item.total_price existir, use, senão calcula
+    if (item.total_price !== undefined && item.total_price !== null) {
+      return sum + Number(item.total_price);
+    }
+    const price = getUnitPrice(item)
+    const qty = Number(item.quantity ?? 1) || 1;
     return sum + price * qty;
   }, 0);
 }
@@ -179,7 +198,7 @@ function formatAddress(address) {
   if (!address) return '-';
   const street = address.street ?? '';
   const number = address.number ?? '';
-  const neighborhood = address.neighborhood ?? '';
+  const bairro = address.bairro ?? '';
   const city = address.city ?? '';
   const state = address.state ?? '';
   const zip = address.zip_code ?? address.zip ?? '';
@@ -188,25 +207,15 @@ function formatAddress(address) {
   if (number) parts.push(number);
   let line = parts.join(', ');
   let loc = [];
-  if (neighborhood) loc.push(neighborhood);
+  if (bairro) loc.push(bairro);
   if (city) loc.push(city);
   if (state) loc.push(state);
   let locStr = loc.join(', ');
   let zipStr = zip ? ` (${zip})` : '';
   return `${line}${locStr ? ' - ' + locStr : ''}${zipStr}`;
 }
-
-// Corrige imagem do produto
-function getProductImage(product) {
-  if (product.image_url) return product.image_url
-  if (product.image_path) {
-    let base = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') || ''
-    let path = product.image_path.startsWith('/') ? product.image_path : '/' + product.image_path
-    return base + path
-  }
-  return '/placeholder-product.png'
-}
 </script>
+
 <style scoped>
 /* ...copie os estilos da tabela da view OrderManagement.vue... */
 .table-responsive {
