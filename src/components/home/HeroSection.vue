@@ -1,75 +1,71 @@
 <template>
-  <section class="hero-section text-white py-5 d-flex align-items-center">
-    <div class="container position-relative z-index-1">
-      <div class="row justify-content-center text-center">
-        <div class="col-lg-10 col-xl-9">
-          <!-- Banner de desconto -->
-          <div class="hero-discount-banner mb-3 animate-fade-up" style="animation-delay: 0.1s;">
-            <span class="discount-badge">
-              🎉 SUPER OFERTA: 20% OFF em GPUs selecionadas!
-              <router-link to="/produtos" class="see-offers-link">Ver ofertas</router-link>
-            </span>
-          </div>
-
-          <div class="badge-new-gen mb-4 px-4 py-2 fw-medium animate-fade-up" style="animation-delay: 0.2s;">
-            🚀 NOVA GERAÇÃO DISPONÍVEL
-          </div>
-
-
-          <!-- Swiper Banner full width (maior e centralizado) -->
-          <Swiper
-            :modules="[Navigation, Pagination, Autoplay]"
-            :slides-per-view="1"
-            :loop="true"
-            :autoplay="{ delay: 4000 }"
-            navigation
-            pagination
-            class="hero-swiper-full mb-5 animate-fade-up hero-swiper-clean"
-            style="animation-delay: 0.3s;"
-          >
-            <SwiperSlide v-for="(banner, idx) in banners" :key="idx">
-              <div class="swiper-banner-full">
-                <img :src="banner.img" alt="Banner" class="banner-img-full" />
-                <div class="banner-overlay">
-                  <h2 class="banner-title">{{ banner.title }}</h2>
-                  <p class="banner-desc">{{ banner.desc }}</p>
-                  <router-link :to="banner.link" class="btn btn-main-action">Ver produto</router-link>
-                </div>
+  <section class="hero-section-ggtech d-flex align-items-center">
+    <div class="container">
+      <div class="row align-items-center justify-content-center flex-lg-nowrap hero-row-custom">
+        <!-- Coluna Esquerda: Texto -->
+        <div class="col-lg-6 col-12 mb-5 mb-lg-0 hero-text-col">
+          <transition name="fade-slide" appear>
+            <div class="d-flex flex-column align-items-start justify-content-center h-100 hero-text-content">
+              <div class="hero-badge mb-3 glow-badge">
+                <span>⚡ NOVA GERAÇÃO DISPONÍVEL</span>
               </div>
-            </SwiperSlide>
-          </Swiper>
-
-          <h1 class="display-3 fw-bold mb-4 main-heading animate-fade-up" style="animation-delay: 0.4s;">
-            <span class="text-gradient-main">EVOLUA SEU</span><br />
-            <span class="text-secondary-highlight">SETUP GAMER</span>
-          </h1>
-
-          <p class="hero-description mt-4 fs-5 animate-fade-up" style="max-width: 700px; margin: 0 auto; animation-delay: 0.6s;">
-            Escolha sua máquina ideal com os melhores periféricos e acessórios gamers.
-          </p>
-
-          <!-- Selo de avaliação -->
-          <div class="hero-rating-badge animate-fade-up mx-auto mb-3" style="animation-delay: 0.65s;">
-            <i class="bi bi-star-fill"></i> 4.9/5 &nbsp;|&nbsp; +2.000 avaliações de clientes reais
-          </div>
-
-          <div class="d-flex justify-content-center gap-4 mt-5 animate-fade-up hero-main-actions" style="animation-delay: 0.8s;">
-            <router-link to="/produtos" class="btn btn-main-action px-5 py-3 fw-bold">
-              ⚡ Explorar Produtos
-            </router-link>
-            <router-link to="/produtos" class="btn btn-outline-secondary-light px-5 py-3 fw-bold">
-              Ver Ofertas
-            </router-link>
-          </div>
-
-          <!-- Selos de confiança -->
-          <div class="hero-trust d-flex justify-content-center gap-4 mt-4 animate-fade-up" style="animation-delay: 0.9s;">
-            <span>✔️ Site 100% seguro</span>
-            <span>🚚 Frete grátis acima de R$500</span>
-            <span>💳 Parcele em até 10x</span>
-          </div>
+              <h1 class="hero-title mb-3">
+                Monte seu <span class="hero-title-gradient">Setup</span><span class="hero-title-gradient2"> Gamer</span>
+              </h1>
+              <p class="hero-desc mb-4">
+                Computadores de alta performance para todos os estilos de jogo.<br />
+                Configure seu PC ideal com os melhores componentes do mercado.
+              </p>
+              <div class="hero-rating mb-3">
+                <i class="bi bi-star-fill"></i> 4.9/5 &nbsp; <span class="divider">|</span> &nbsp; +2.000 avaliações de clientes reais
+              </div>
+              <transition-group name="fade-slide" tag="div" class="d-flex gap-3 flex-wrap mb-4 hero-btns-row">
+                <router-link
+                  to="/produtos"
+                  class="btn hero-btn-main shadow-btn"
+                  key="explorar"
+                >
+                  <span>🔥 Explorar Produtos</span>
+                  <i class="bi bi-arrow-right ms-2"></i>
+                </router-link>
+                <router-link
+                  to="/produtos"
+                  class="btn hero-btn-outline shadow-btn"
+                  key="ofertas"
+                >
+                  Ver Ofertas
+                </router-link>
+              </transition-group>
+              <div class="hero-trust d-flex gap-4 flex-wrap">
+                <span><i class="bi bi-shield-check"></i> Site 100% seguro</span>
+                <span><i class="bi bi-credit-card"></i> Parcele em até 12x</span>
+                <span><i class="bi bi-truck"></i> Frete grátis acima de R$500</span>
+              </div>
+            </div>
+          </transition>
+        </div>
+        <!-- Coluna Direita: Imagem -->
+        <div class="col-lg-6 col-12 d-flex justify-content-center align-items-center hero-img-col">
+          <transition name="fade-slide" appear>
+            <div class="hero-img-box position-relative">
+              <img
+                src="@/assets/hero-pc-setup.jpg"
+                alt="PC Gamer Setup"
+                class="hero-img-main"
+              />
+              <span class="hero-img-badge glow-badge">
+                <i class="bi bi-controller"></i> Performance Extrema
+              </span>
+            </div>
+          </transition>
         </div>
       </div>
+      <!-- Banner de oferta superior -->
+      <transition name="fade-slide" appear>
+        <div class="hero-offer-banner glow-offer">
+          <span>🔥 <strong>SUPER OFERTA:</strong> 20% OFF em GPUs selecionadas! <router-link to="/produtos">Ver ofertas →</router-link></span>
+        </div>
+      </transition>
     </div>
   </section>
 </template>
@@ -118,417 +114,374 @@ const banners = [
   font-family: 'Rajdhani', sans-serif;
 }
 
-.hero-section { 
-  background: linear-gradient(145deg, #eaf6ff 60%, #f8f9fa 100%);
-  min-height: 85vh;
+.hero-section-ggtech {
+  background: linear-gradient(120deg, #f8fafc 60%, #e9f1ff 100%);
+  min-height: 80vh;
+  padding: 3.5rem 0 2.5rem 0;
   position: relative;
   overflow: hidden;
+  font-family: 'Inter', 'Poppins', Arial, sans-serif;
+  box-shadow: 0 4px 32px #4f46e510;
+}
+
+.hero-row-custom {
+  min-height: 540px;
+  align-items: center;
+}
+
+.hero-text-col {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-bottom: 2px solid #b8d8ff;
+  min-height: 480px;
 }
 
-/* pseudo-elementos pra efeito de particulas */
-.hero-section::before,
-.hero-section::after { 
-  content: '';
-  position: absolute;
-  border-radius: 50%;
-  opacity: 0.15;
-  filter: blur(80px); /* efeito de brilho */
-  z-index: 0;
-  animation: pulse 6s infinite ease-in-out alternate;
+.hero-text-content {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
 }
 
-.hero-section::before { 
-  width: 300px;
-  height: 300px;
-  background: #b8d8ff;
-  top: 15%;
-  left: 10%;
-  animation-delay: 0s;
-}
-
-.hero-section::after { 
-  width: 400px;
-  height: 400px;
-  background: #399bff;
-  bottom: 10%;
-  right: 15%;
-  animation-delay: 3s;
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); }
-  100% { transform: scale(1.1); }
-}
-
-.z-index-1 {
-  z-index: 1;
-}
-
-.badge-new-gen {
-  background: linear-gradient(90deg, #399bff, #8f5fe8) !important;
+.hero-badge {
+  background: linear-gradient(90deg, #64b5f6 0%, #8f5fe8 100%);
   color: #fff;
-  font-size: 0.95rem;
+  font-weight: 800;
+  border-radius: 1.2rem;
+  padding: 0.6rem 1.5rem;
+  font-size: 1.08rem;
   letter-spacing: 0.5px;
-  box-shadow: 0 0 15px #b8d8ff88;
-  animation: fadeInDown 0.8s ease forwards;
+  box-shadow: 0 2px 16px #64b5f633, 0 0 8px #8f5fe855;
+  display: inline-block;
+  text-shadow: 0 2px 8px #23233a22;
+  border: 1.5px solid #8f5fe8;
+  filter: drop-shadow(0 0 8px #64b5f6cc);
+  transition: box-shadow 0.2s;
 }
 
-.main-heading {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 3.2rem;
-  line-height: 1.2;
-  text-shadow: 0 0 25px #b8d8ff44;
+.glow-badge {
+  box-shadow: 0 0 16px #64b5f6cc, 0 0 8px #8f5fe855;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 900;
   color: #232e47;
-  animation: fadeUp 1s ease-out forwards;
+  letter-spacing: 0.5px;
+  line-height: 1.08;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 12px #8f5fe820;
 }
 
-.text-gradient-main { 
-  background: linear-gradient(to right, #399bff, #00ffe1); 
+.hero-title-gradient {
+  background: linear-gradient(90deg, #06b6d4 0%, #4f46e5 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  display: inline-block;
+  background-clip: text;
+  font-weight: 900;
+  filter: drop-shadow(0 0 8px #64b5f6cc);
+}
+.hero-title-gradient2 {
+  background: linear-gradient(90deg, #4f46e5 0%, #9333ea 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 900;
+  filter: drop-shadow(0 0 8px #8f5fe8cc);
 }
 
-.text-secondary-highlight { 
-  color: #399bff;
-  filter: drop-shadow(0 0 10px #b8d8ff88);
-}
-
-.hero-description { 
-  color: #232e47;
+.hero-desc {
+  color: #4b5563;
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin-bottom: 0.7rem;
   line-height: 1.7;
-  font-weight: 400;
-  animation: fadeUp 1s ease-out forwards;
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 8px #fff8;
 }
 
-.btn-main-action {
-  background: linear-gradient(90deg, #399bff, #8f5fe8);
-  color: #fff;
-  border: 2px solid #b8d8ff;
-  font-size: 1.15rem;
-  border-radius: 50px;
-  box-shadow: 0 4px 16px #b8d8ff44;
-  transition: all 0.3s ease;
-  min-width: 200px;
-}
-
-.btn-main-action:hover { 
-  background: linear-gradient(90deg, #8f5fe8, #399bff);
-  color: #fff;
-  box-shadow: 0 8px 25px #399bff44;
-  transform: translateY(-3px) scale(1.02);
-}
-
-.btn-outline-secondary-light { 
-  border: 2px solid #00ffe1;
-  color: #00ffe1;
-  background-color: transparent;
-  font-size: 1.15rem;
-  border-radius: 50px;
-  transition: all 0.3s ease;
-  min-width: 200px;
-}
-
-.btn-outline-secondary-light:hover { 
-  background-color: #00ffe1;
-  color: #232e47;
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 8px 25px #00ffe144;
-}
-
-.animate-fade-up {
-  opacity: 0;
-  transform: translateY(20px);
-  animation: fadeUp 0.8s ease-out forwards;
-}
-@keyframes fadeUp { 
-  to { 
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-@keyframes fadeInDown { 
-  0% { 
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  100% { 
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.hero-discount-banner {
-  background: linear-gradient(90deg, #399bff, #00ffe1); 
-  color: #232e47;
-  border-radius: 30px;
-  padding: 0.7rem 1.5rem;
-  font-size: 1.1rem;
-  font-weight: 600;
-  box-shadow: 0 2px 12px #b8d8ff44;
-  display: inline-block;
-}
-.discount-badge .see-offers-link {
-  color: #232e47;
-}
-.discount-badge .see-offers-link:hover {
-  color: #fff;
-  background: #399bff;
-  border-radius: 8px;
-  padding: 0 0.3rem;
-}
-
-/* Swiper Custom - Banner grande (maior e mais clean) */
-.hero-swiper-full.hero-swiper-clean {
-  max-width: 1200px;
-  min-height: 340px;
-  margin: 0 auto 3rem auto;
-  border-radius: 32px;
-  overflow: hidden;
-  box-shadow: 0 2px 24px rgba(163,98,255,0.18);
-}
-.swiper-banner-full {
-  position: relative;
-  width: 100%;
-  height: 340px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.banner-img-full {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  border-radius: 32px;
-}
-.banner-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, rgba(26,26,46,0.78) 60%, rgba(26,26,46,0.35) 100%);
-  color: #fff;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 2rem 3rem;
-  box-sizing: border-box;
-}
-.banner-title {
-  font-size: 2.4rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-  text-shadow: 0 0 25px rgba(0,0,0,0.36);
-}
-.banner-desc {
-  font-size: 1.2rem;
-  color: #c0c0d0;
-  margin-bottom: 1.2rem;
-  text-shadow: 0 0 12px rgba(0,0,0,0.24);
-}
-
-/* Selo de avaliação */
-.hero-rating-badge {
-  background: #eaf6ff;
-  color: #399bff;
-  border-radius: 18px;
+.hero-rating {
+  background: #ede9fe;
+  color: #4f46e5;
+  border-radius: 1.2rem;
   font-size: 1.08rem;
   font-weight: 600;
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 0.5rem 1.2rem;
-  box-shadow: 0 2px 12px #b8d8ff22;
+  padding: 0.4rem 1.1rem;
+  box-shadow: 0 2px 8px #9333ea10;
   margin-bottom: 0.5rem;
-  margin-top: 0.5rem;
   letter-spacing: 0.2px;
-  border: 1.5px solid #b8d8ff;
-  transition: background 0.18s;
 }
-.hero-rating-badge i {
-  color: #ffe066;
-  font-size: 1.2rem;
+.hero-rating i {
+  color: #fbbf24;
+  font-size: 1.1rem;
 }
-
-/* Ajuste nos botões principais para maior destaque */
-.hero-main-actions .btn {
-  min-width: 220px;
-  font-size: 1.18rem;
-  padding-top: 1.1rem !important;
-  padding-bottom: 1.1rem !important;
-  margin-bottom: 0.5rem;
+.hero-rating .divider {
+  color: #a1a1aa;
+  font-weight: 400;
 }
 
-/* Selos de confiança */
-.hero-trust {
-  font-size: 1.05rem;
-  color: #399bff;
-  gap: 2rem;
+.hero-btns-row {
+  width: 100%;
+  display: flex;
+  gap: 1.2rem;
+  justify-content: flex-start;
+  align-items: center;
 }
 
-/* Responsividade para Swiper e Hero */
-@media (max-width: 991.98px) {
-  .hero-section {
-    flex-direction: column;
-    padding: 2rem 0.7rem;
-    gap: 1.2rem;
-  }
-  .main-heading { 
-    font-size: 2.8rem;
-  }
-  .hero-description { 
-    font-size: 1.1rem;
-  }
-  .btn-main-action, .btn-outline-secondary-light { 
-    padding: 0.8rem 1.5rem;
-    font-size: 1rem;
-    min-width: unset; 
-    width: 100%;
-  }
-  .d-flex.justify-content-center.gap-3.mt-5 { 
-    flex-direction: column;
-    gap: 1rem !important;
-  }
-  .hero-section::before, .hero-section::after { 
-    display: none;
-  }
-  .badge-new-gen { 
-    font-size: 0.85rem;
-  }
-  .hero-swiper-full.hero-swiper-clean {
-    min-height: 200px;
-    border-radius: 18px;
-  }
-  .swiper-banner-full {
-    height: 200px;
-  }
-  .banner-img-full {
-    height: 200px;
-    border-radius: 18px;
-  }
-  .banner-title { font-size: 1.3rem; }
-  .banner-desc { font-size: 0.98rem; }
-  .banner-overlay { padding: 1rem 1rem;}
-  .hero-main-actions .btn {
-    min-width: unset;
-    width: 100%;
-    font-size: 1rem;
-    padding-top: 0.8rem !important;
-    padding-bottom: 0.8rem !important;
-  }
-  .hero-trust {
-    flex-direction: column;
-    gap: 0.5rem;
-    font-size: 0.98rem;
-  }
-  .hero-discount-banner {
-    font-size: 0.98rem;
-    padding: 0.5rem 1rem;
-  }
-}
-@media (max-width: 575.98px) {
-  .main-heading {
-    font-size: 2.2rem;
-  }
-  .hero-description {
-    font-size: 0.95rem;
-  }
-  .hero-swiper-full.hero-swiper-clean {
-    min-height: 120px;
-    border-radius: 10px;
-  }
-  .swiper-banner-full {
-    height: 120px;
-  }
-  .banner-img-full {
-    height: 120px;
-    border-radius: 10px;
-  }
-  .banner-title { font-size: 1rem; }
-  .banner-desc { font-size: 0.87rem; }
-}
-
-/* Barra de busca hero */
-.hero-search-bar {
-  position: relative;
+.hero-btn-main,
+.hero-btn-outline {
+  min-width: 170px;
+  font-size: 1.13rem;
+  font-weight: 700;
+  border-radius: 2rem;
+  padding: 0.85rem 2.2rem;
+  box-shadow: 0 2px 12px #9333ea22;
+  transition: background 0.22s, box-shadow 0.18s, transform 0.18s, color 0.18s;
   display: flex;
   align-items: center;
-  background: rgba(26,26,46,0.92);
-  border-radius: 40px;
-  box-shadow: 0 2px 12px rgba(163,98,255,0.10);
-  padding: 0.25rem 0.5rem;
-  margin-bottom: 1.5rem;
-  max-width: 540px;
-  width: 100%;
-}
-.hero-search-input {
-  border: none;
-  background: transparent;
-  color: #fff;
-  font-size: 1.13rem;
-  padding: 0.9rem 1.2rem;
-  border-radius: 40px;
-  width: 100%;
+  gap: 0.5em;
   outline: none;
-  box-shadow: none;
-}
-.hero-search-input::placeholder {
-  color: #b0b0c0;
-  opacity: 1;
-  font-size: 1.05rem;
-}
-.hero-search-btn {
-  background: linear-gradient(90deg, #a362ff, #00ffe1);
   border: none;
-  color: #181e2a;
-  border-radius: 50%;
-  width: 44px;
-  height: 44px;
+  position: relative;
+}
+
+.hero-btn-main {
+  background: linear-gradient(90deg, #4f46e5 0%, #9333ea 100%);
+  color: #fff;
+}
+.hero-btn-main:hover, .hero-btn-main:focus {
+  background: linear-gradient(90deg, #9333ea 0%, #4f46e5 100%);
+  color: #fff;
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 4px 18px #9333ea40, 0 0 12px #64b5f6cc;
+  filter: brightness(1.08);
+}
+
+.hero-btn-outline {
+  background: #fff;
+  color: #4f46e5;
+  border: 2px solid #e5e7eb;
+}
+.hero-btn-outline:hover, .hero-btn-outline:focus {
+  background: #ede9fe;
+  color: #9333ea;
+  border-color: #9333ea;
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 4px 18px #9333ea30, 0 0 8px #8f5fe8cc;
+}
+
+.shadow-btn {
+  box-shadow: 0 2px 12px #8f5fe822;
+}
+
+.hero-trust {
+  font-size: 1.05rem;
+  color: #4f46e5;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+}
+.hero-trust i {
+  color: #9333ea;
+  margin-right: 0.3em;
+}
+
+.hero-img-col {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.3rem;
-  margin-left: 0.3rem;
-  transition: background 0.2s, color 0.2s;
-  box-shadow: 0 2px 8px rgba(163,98,255,0.18);
-  cursor: pointer;
 }
-.hero-search-btn:hover {
-  background: linear-gradient(90deg, #00ffe1, #a362ff);
+
+.hero-img-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 340px;
+  min-width: 340px;
+  max-width: 480px;
+  width: 100%;
+  border-radius: 2.2rem;
+  overflow: hidden;
+  box-shadow: 0 8px 32px #9333ea22;
+  background: linear-gradient(120deg, #ede9fe 60%, #f9fafb 100%);
+  margin-top: 2.5rem;
+  transition: box-shadow 0.22s;
+}
+.hero-img-main {
+  width: 100%;
+  height: auto;
+  max-width: 480px;
+  border-radius: 2.2rem;
+  box-shadow: 0 4px 24px #4f46e520;
+  display: block;
+  transition: transform 0.35s cubic-bezier(.4,2,.3,1), box-shadow 0.22s;
+  z-index: 1;
+}
+.hero-img-box:hover .hero-img-main {
+  transform: scale(1.035) rotate(-1.5deg);
+  box-shadow: 0 12px 48px #4f46e540, 0 2px 16px #9333ea30;
+}
+.hero-img-badge {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.2rem;
+  background: linear-gradient(90deg, #64b5f6 0%, #8f5fe8 100%);
   color: #fff;
+  font-weight: 700;
+  border-radius: 1.2rem;
+  padding: 0.5rem 1.2rem;
+  font-size: 1rem;
+  box-shadow: 0 2px 8px #9333ea10, 0 0 12px #64b5f6cc;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  z-index: 2;
+  border: 1.5px solid #8f5fe8;
+  filter: drop-shadow(0 0 8px #64b5f6cc);
+  transition: box-shadow 0.2s;
 }
+
+.glow-offer {
+  box-shadow: 0 0 16px #64b5f6cc, 0 0 8px #8f5fe855;
+  border: 1.5px solid #8f5fe8;
+  filter: drop-shadow(0 0 8px #64b5f6cc);
+}
+
+.hero-offer-banner {
+  position: absolute;
+  top: 2rem;
+  right: 2.5rem;
+  left: auto;
+  background: linear-gradient(90deg, #7c3aed 0%, #4f46e5 100%);
+  color: #fff;
+  font-weight: 700;
+  border-radius: 2rem;
+  padding: 0.7rem 2.2rem;
+  font-size: 1.13rem;
+  box-shadow: 0 4px 24px #9333ea22, 0 0 12px #64b5f6cc;
+  z-index: 10;
+  letter-spacing: 0.2px;
+  display: inline-block;
+  pointer-events: auto;
+  text-shadow: 0 2px 8px #23233a22;
+  border: 1.5px solid #8f5fe8;
+  filter: drop-shadow(0 0 8px #64b5f6cc);
+  transition: box-shadow 0.2s;
+}
+.hero-offer-banner span {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+.hero-offer-banner a {
+  color: #fff;
+  text-decoration: underline;
+  font-weight: 700;
+}
+.hero-offer-banner a:hover {
+  color: #f9fafb;
+  text-decoration: none;
+}
+
+/* Animações de entrada */
+.fade-slide-enter-active, .fade-slide-leave-active {
+  transition: opacity 0.7s cubic-bezier(.4,.2,.2,1), transform 0.7s cubic-bezier(.4,.2,.2,1);
+}
+.fade-slide-enter-from, .fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(30px);
+}
+.fade-slide-enter-to, .fade-slide-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Responsivo */
 @media (max-width: 991.98px) {
-  .hero-section {
-    flex-direction: column;
-    padding: 2rem 0.7rem;
-    gap: 1.2rem;
+  .hero-section-ggtech {
+    padding: 2rem 0 1.2rem 0;
+    min-height: 60vh;
   }
   .hero-title {
-    font-size: 2rem;
+    font-size: 2.3rem;
   }
-  .hero-img {
+  .hero-img-box {
+    min-width: 220px;
+    min-height: 220px;
+    max-width: 320px;
+    border-radius: 1.2rem;
+    margin-top: 1.2rem;
+  }
+  .hero-img-main {
+    border-radius: 1.2rem;
+    max-width: 320px;
+  }
+  .hero-img-badge {
+    font-size: 0.92rem;
+    padding: 0.4rem 0.8rem;
+    top: 0.7rem;
+    right: 0.7rem;
+  }
+  .hero-offer-banner {
+    top: 1rem;
+    right: 1rem;
+    font-size: 0.98rem;
+    padding: 0.5rem 1.2rem;
+  }
+  .hero-text-content {
     max-width: 100%;
-    height: auto;
+    padding-left: 0;
+    padding-right: 0;
   }
 }
+
 @media (max-width: 600px) {
-  .hero-section {
-    padding: 1rem 0.2rem;
+  .hero-section-ggtech {
+    padding: 1rem 0 0.7rem 0;
+    min-height: 40vh;
+  }
+  .hero-title {
+    font-size: 1.3rem;
+  }
+  .hero-img-box {
+    min-width: 120px;
+    min-height: 120px;
+    max-width: 180px;
+    border-radius: 0.7rem;
+    margin-top: 0.7rem;
+  }
+  .hero-img-main {
+    border-radius: 0.7rem;
+    max-width: 180px;
+  }
+  .hero-img-badge {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.6rem;
+    top: 0.3rem;
+    right: 0.3rem;
+  }
+  .hero-offer-banner {
+    top: 0.5rem;
+    right: 0.5rem;
+    font-size: 0.85rem;
+    padding: 0.3rem 0.7rem;
+  }
+  .hero-trust {
+    font-size: 0.92rem;
     gap: 0.7rem;
   }
-  .hero-title {
-    font-size: 1.2rem;
+  .hero-text-content {
+    padding-left: 0;
+    padding-right: 0;
   }
-  .hero-img {
-    max-width: 100%;
-    height: auto;
+  .hero-btns-row {
+    flex-direction: column;
+    gap: 0.7rem;
+    align-items: stretch;
   }
 }
 </style>

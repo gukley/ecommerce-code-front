@@ -161,33 +161,30 @@ function discountedPrice(produto) {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@600&display=swap');
 .product-detail-page {
-  background: linear-gradient(135deg, #18182a 60%, #23233a 100%);
+  background-color: #f9f9f9; /* Fundo claro */
   min-height: 100vh;
-  font-family: 'Rajdhani', Arial, sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 .card-glass {
-  background: rgba(30, 33, 51, 0.93);
-  border-radius: 2.4rem;
-  box-shadow: 0 24px 64px #a362ff44, 0 6px 24px #8f5fe844;
-  border: 1.5px solid #a362ff33;
-  backdrop-filter: blur(8px);
-  transition: box-shadow 0.2s, background 0.2s;
+  background: #ffffff; /* Fundo branco */
+  border-radius: 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); /* Sombra leve */
+  border: 1.5px solid #e0e0e0; /* Borda cinza clara */
+  padding: 2rem;
+  transition: box-shadow 0.2s, transform 0.2s;
 }
 
 .image-glass {
-  background: rgba(143, 95, 232, 0.11);
-  border-radius: 2rem;
-  box-shadow: 0 8px 32px #8f5fe822, 0 4px 15px #a362ff22;
-  padding: 18px;
-  display: inline-block;
-  margin-bottom: 10px;
-  border: 1.5px solid #a362ff44;
-  backdrop-filter: blur(2px);
+  background: #ffffff; /* Fundo branco */
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); /* Sombra leve */
+  padding: 1rem;
+  border: 1.5px solid #e0e0e0; /* Borda cinza clara */
   transition: box-shadow 0.22s, transform 0.22s;
 }
 .image-glass:hover {
-  box-shadow: 0 12px 40px #a362ff77, 0 8px 22px #8f5fe877;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2); /* Sombra mais forte ao passar o mouse */
   transform: scale(1.04) translateY(-3px);
 }
 
@@ -195,189 +192,150 @@ function discountedPrice(produto) {
   max-width: 420px;
   max-height: 420px;
   object-fit: contain;
-  background: #23233a;
-  border: 2px solid #8f5fe8;
-  box-shadow: 0 8px 32px rgba(143, 95, 232, 0.10);
+  background: #f8f9fa; /* Fundo cinza claro */
+  border: 2px solid #e0e0e0; /* Borda cinza clara */
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1); /* Sombra leve */
   transition: box-shadow 0.18s, transform 0.22s;
 }
 .product-image:hover {
-  box-shadow: 0 16px 50px #a362ffcc, 0 14px 32px #8f5fe899;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); /* Sombra mais forte */
   transform: scale(1.05) translateY(-4px);
 }
 
-/* Ajuste: fonte do nome do produto menos extravagante */
 .product-title {
-  color: #a362ff;
-  font-size: 2.1rem;
-  font-family: 'Rajdhani', Arial, sans-serif; /* Troca Orbitron por Rajdhani */
+  color: #333333; /* Texto escuro */
+  font-size: 2rem;
   font-weight: 700;
   letter-spacing: 0.5px;
-  text-shadow: 0 1px 8px #a362ff33;
-  background: none;
-  -webkit-background-clip: initial;
-  -webkit-text-fill-color: initial;
-  background-clip: initial;
+  margin-bottom: 1rem;
 }
 
 .product-price {
-  color: #8f5fe8;
-  font-size: 2rem;
+  color: #399bff; /* Azul para preço */
+  font-size: 1.8rem;
   font-weight: 700;
-  text-shadow: 0 1px 8px #8f5fe888;
   margin-bottom: 1rem;
 }
 
 .product-price-original {
-  color: #b0b7c3;
+  color: #b0b0b0; /* Cinza para preço original */
   font-size: 1.05rem;
   text-decoration: line-through;
-  opacity: 0.7;
 }
 .product-price-discount {
-  color: #00ffe1;
-  font-size: 1.22rem;
-  font-weight: 800;
+  color: #e53935; /* Vermelho para preço com desconto */
+  font-size: 1.2rem;
+  font-weight: 700;
 }
 .badge-discount {
-  background: linear-gradient(90deg,#00ffe1 0%,#8f5fe8 100%);
-  color: #23233a;
+  background: linear-gradient(90deg, #399bff 0%, #e53935 100%);
+  color: #ffffff; /* Texto branco */
   font-weight: 700;
   border-radius: 8px;
-  font-size: 0.98rem;
-  padding: 0.22em 0.7em;
-  box-shadow: 0 1px 6px #232e4720;
+  font-size: 0.95rem;
+  padding: 0.3rem 0.8rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Sombra leve */
 }
 
 .product-desc {
-  color: #e0e6f8;
-  font-size: 1.16rem;
-  line-height: 1.7;
-  opacity: 0.98;
-  font-family: 'Rajdhani', Arial, sans-serif;
+  color: #666666; /* Texto cinza */
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
 }
 
 .badge-stock {
-  background: linear-gradient(90deg, #00ffe1 65%, #00bfff 100%);
-  color: #23233a;
+  background: #399bff; /* Fundo azul */
+  color: #ffffff; /* Texto branco */
   font-weight: 700;
-  font-size: 1.08rem;
-  border-radius: 15px;
-  padding: 8px 19px;
-  box-shadow: 0 2px 10px #00ffe144;
-  border: none;
-  text-shadow: 0 1px 5px #00ffe1cc;
+  font-size: 1rem;
+  border-radius: 12px;
+  padding: 0.5rem 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Sombra leve */
 }
 .badge-outstock {
-  background: linear-gradient(90deg, #ff4f8f 70%, #ff7aac 100%);
-  color: #fff;
+  background: #e53935; /* Fundo vermelho */
+  color: #ffffff; /* Texto branco */
   font-weight: 700;
-  font-size: 1.08rem;
-  border-radius: 15px;
-  padding: 8px 19px;
-  box-shadow: 0 2px 10px #ff4f8f44;
+  font-size: 1rem;
+  border-radius: 12px;
+  padding: 0.5rem 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Sombra leve */
 }
 
 .btn-main-action {
-  background: linear-gradient(90deg, #a362ff, #8f5fe8 90%);
-  color: #23233a;
+  background: #399bff; /* Fundo azul */
+  color: #ffffff; /* Texto branco */
   border: none;
-  font-size: 1.22rem;
+  font-size: 1.1rem;
   border-radius: 50px;
-  box-shadow: 0 6px 22px #a362ff99;
-  transition: all 0.22s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra leve */
+  transition: all 0.2s;
   font-weight: 700;
-  letter-spacing: 0.7px;
-  text-shadow: 0 1px 8px #8f5fe888;
-  will-change: transform;
-  position: relative;
-  overflow: hidden;
+  padding: 0.7rem 1.5rem;
 }
 .btn-main-action:disabled {
-  opacity: 0.47;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 .btn-main-action:hover,
 .btn-main-action:focus {
-  background: linear-gradient(90deg, #8f5fe8, #a362ff 90%);
-  color: #fff;
-  transform: translateY(-3px) scale(1.04);
-  box-shadow: 0 12px 40px #a362ffcc;
-  outline: none;
-}
-.cart-icon-glow {
-  display: inline-block;
-  vertical-align: middle;
-  animation: glow-cart 1.7s infinite alternate;
-}
-@keyframes glow-cart {
-  0% { text-shadow: 0 0 8px #8f5fe8, 0 0 16px #a362ff44;}
-  100% { text-shadow: 0 0 16px #a362ff, 0 0 24px #8f5fe8;}
+  background: #555555; /* Fundo mais escuro ao passar o mouse */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2); /* Sombra mais forte */
 }
 
 .btn-fav-detail {
-  background: #23233a;
-  border: 2px solid #ff4f8f33;
-  color: #ff4f8f;
+  background: #ffffff; /* Fundo branco */
+  border: 2px solid #399bff; /* Borda azul */
+  color: #399bff; /* Ícone azul */
   border-radius: 50%;
   width: 50px;
   height: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 10px #ff4f8f44;
-  transition: background 0.22s, color 0.22s, transform 0.18s;
-  z-index: 2;
-  font-size: 1.55rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Sombra leve */
+  transition: background 0.2s, color 0.2s, transform 0.2s;
 }
 .btn-fav-detail:hover,
 .btn-fav-detail:focus {
-  background: #ff4f8f;
-  color: #fff;
-  transform: scale(1.13);
-  outline: none;
-  box-shadow: 0 4px 16px #ff4f8f88;
-}
-.btn-fav-detail .bi-heart-fill {
-  color: #ff4f8f;
-}
-.btn-fav-detail .bi-heart {
-  color: #fff;
+  background: #399bff; /* Fundo azul ao passar o mouse */
+  color: #ffffff; /* Ícone branco */
+  transform: scale(1.1);
 }
 
 .qty-input-detail {
   width: 90px;
-  border-radius: 1.7rem;
-  border: 2px solid #8f5fe8;
-  background: #18182a;
-  color: #fff;
-  font-size: 1.13rem;
-  font-family: 'Rajdhani', Arial, sans-serif;
-  box-shadow: 0 2px 8px #a362ff44;
-  padding: 0.4rem 1rem;
-  transition: border 0.22s, box-shadow 0.22s, background 0.2s;
+  border-radius: 1rem;
+  border: 1.5px solid #e0e0e0; /* Borda cinza clara */
+  background: #ffffff; /* Fundo branco */
+  color: #333333; /* Texto escuro */
+  font-size: 1rem;
+  padding: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Sombra leve */
+  transition: border 0.2s, box-shadow 0.2s;
 }
 .qty-input-detail:focus {
-  border-color: #00ffe1;
-  box-shadow: 0 0 0 3px #8f5fe899;
+  border-color: #399bff; /* Borda azul ao focar */
+  box-shadow: 0 0 0 3px rgba(57, 155, 255, 0.2); /* Destaque azul */
   outline: none;
-  background: #23233a;
 }
 
 .btn-outline-back {
   background: none;
-  border: 2px solid #a362ff;
-  color: #a362ff;
+  border: 2px solid #399bff; /* Borda azul */
+  color: #399bff; /* Texto azul */
   font-weight: 600;
   border-radius: 18px;
   padding: 0.5rem 1.2rem;
-  transition: background 0.22s, color 0.22s, border-color 0.18s;
-  box-shadow: 0 2px 8px #a362ff44;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Sombra leve */
 }
 .btn-outline-back:hover,
 .btn-outline-back:focus {
-  background: #a362ff;
-  color: #23233a;
-  border-color: #8f5fe8;
+  background: #399bff; /* Fundo azul ao passar o mouse */
+  color: #ffffff; /* Texto branco */
+  border-color: #555555; /* Borda mais escura */
 }
 
 .spinner-border.text-accent {

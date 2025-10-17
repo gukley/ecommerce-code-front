@@ -98,9 +98,7 @@ onBeforeUnmount(() => {
           <router-link class="nav-link custom-nav-link" :to="{ name: 'Home' }" active-class="active">Home</router-link>
           <router-link class="nav-link custom-nav-link" :to="'/produtos'" active-class="active">Produtos</router-link>
           <router-link class="nav-link custom-nav-link" :to="'/categorias'" active-class="active">Categorias</router-link>
-          <router-link to="/monte-seu-pc" class="nav-link nav-pcbuilder-link">
-            <i class="bi bi-cpu me-1"></i> Monte seu PC
-          </router-link>
+
         </div>
 
         <div class="d-flex align-items-center gap-4 ms-lg-3 mt-2 mt-lg-0">
@@ -137,10 +135,10 @@ onBeforeUnmount(() => {
             </div>
           </div>
 
-          <button class="btn-theme-toggle" @click="toggleTheme">
+          <!-- <button class="btn-theme-toggle" @click="toggleTheme">
             <i :class="theme === 'dark' ? 'bi bi-brightness-high' : 'bi bi-moon-stars'"></i>
             {{ theme === 'dark' ? 'Light' : 'Dark' }}
-          </button>
+          </button> -->
 
           <router-link
             v-if="authStore.user && (authStore.user.role === 'ADMIN' || authStore.user.role === 'MODERATOR')"

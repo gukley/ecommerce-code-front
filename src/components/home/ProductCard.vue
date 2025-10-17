@@ -159,10 +159,10 @@ const adicionarAoCarrinho = () => {
 @import '@/styles/theme.css';
 
 .product-card {
-  background: #fff;
+  background: #ffffff; /* Fundo branco */
   border-radius: 1.2rem;
-  box-shadow: 0 4px 18px #399bff18;
-  border: 1.5px solid #e5e7eb;
+  box-shadow: 0 6px 20px rgba(57, 155, 255, 0.15); /* Sombra mais visível */
+  border: 1.5px solid #d6d8db; /* Borda um pouco mais escura */
   padding: 1.5rem 1.5rem 2rem 1.5rem;
   color: #232e47;
   display: flex;
@@ -173,8 +173,8 @@ const adicionarAoCarrinho = () => {
   transition: box-shadow 0.22s, border 0.22s, transform 0.22s;
 }
 .product-card:hover {
-  box-shadow: 0 12px 36px #399bff33;
-  border-color: #399bff;
+  box-shadow: 0 12px 36px rgba(57, 155, 255, 0.25); /* Sombra mais forte ao passar o mouse */
+  border-color: #399bff; /* Destaque na borda ao passar o mouse */
   transform: translateY(-6px) scale(1.02);
 }
 .card-img-top {
@@ -184,7 +184,7 @@ const adicionarAoCarrinho = () => {
   object-fit: cover;
   border-radius: 1rem 1rem 0 0;
   background: #f8f9fa;
-  box-shadow: 0 2px 8px #399bff10;
+  box-shadow: 0 2px 8px rgba(57, 155, 255, 0.1); /* Sombra leve na imagem */
   margin-bottom: 1rem;
   margin-top: 18px;
 }
@@ -223,29 +223,30 @@ const adicionarAoCarrinho = () => {
   font-weight: 700;
 }
 .badge-discount {
-  background: linear-gradient(90deg,#399bff 0%,#e53935 100%);
+  background: linear-gradient(90deg, #399bff 0%, #e53935 100%);
   color: #fff;
   font-size: 1.05rem;
   font-weight: 700;
   border-radius: 8px;
   padding: 0.25em 0.85em;
-  box-shadow: 0 2px 8px #399bff22;
+  box-shadow: 0 2px 8px rgba(57, 155, 255, 0.2);
   letter-spacing: 0.5px;
 }
 .btn-cart {
   border: none;
   color: #fff;
-  background: linear-gradient(90deg,#399bff 0%,#8f5fe8 100%);
+  background: linear-gradient(90deg, #399bff 0%, #8f5fe8 100%);
   font-weight: 700;
   font-size: 1.09rem;
   transition: background 0.18s, color 0.18s, box-shadow 0.18s;
-  box-shadow: 0 2px 8px #399bff22;
+  box-shadow: 0 2px 8px rgba(57, 155, 255, 0.2);
   padding: 0.55rem 0;
 }
-.btn-cart:hover, .btn-cart:focus {
-  background: linear-gradient(90deg,#8f5fe8 0%,#399bff 100%);
+.btn-cart:hover,
+.btn-cart:focus {
+  background: linear-gradient(90deg, #8f5fe8 0%, #399bff 100%);
   color: #fff;
-  box-shadow: 0 4px 14px #399bff44;
+  box-shadow: 0 4px 14px rgba(57, 155, 255, 0.4);
 }
 .btn-cart:disabled {
   background: #e5e7eb;
@@ -259,9 +260,9 @@ const adicionarAoCarrinho = () => {
   z-index: 3;
   background: #fff;
   border-radius: 50%;
-  box-shadow: 0 2px 8px #399bff22;
+  box-shadow: 0 2px 8px rgba(57, 155, 255, 0.2);
   padding: 6px 8px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid #d6d8db; /* Borda mais visível */
   color: #399bff;
   transition: background 0.18s, color 0.18s, border 0.18s;
 }
