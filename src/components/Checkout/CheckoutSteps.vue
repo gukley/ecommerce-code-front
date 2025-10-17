@@ -1,29 +1,29 @@
 <template>
-  <div class="checkout-steps">
-    <div class="steps-indicator">
-      <div class="step" :class="{ active: etapa >= 1, done: etapa > 1 }">
-        <div class="step-circle">
+  <div class="checkout-steps-modern">
+    <div class="steps-indicator-modern">
+      <div class="step-modern" :class="{ active: etapa >= 1, done: etapa > 1 }">
+        <div class="step-circle-modern">
           <i v-if="etapa > 1" class="bi bi-check"></i>
           <span v-else>1</span>
         </div>
-        <span class="step-label">Endereço</span>
+        <span class="step-label-modern">Endereço</span>
       </div>
-      <div class="step" :class="{ active: etapa >= 2, done: etapa > 2 }">
-        <div class="step-circle">
+      <div class="step-modern" :class="{ active: etapa >= 2, done: etapa > 2 }">
+        <div class="step-circle-modern">
           <i v-if="etapa > 2" class="bi bi-check"></i>
           <span v-else>2</span>
         </div>
-        <span class="step-label">Pagamento</span>
+        <span class="step-label-modern">Pagamento</span>
       </div>
-      <div class="step" :class="{ active: etapa >= 3, done: etapa > 3 }">
-        <div class="step-circle">
+      <div class="step-modern" :class="{ active: etapa >= 3, done: etapa > 3 }">
+        <div class="step-circle-modern">
           <i v-if="etapa > 3" class="bi bi-check"></i>
           <span v-else>3</span>
         </div>
-        <span class="step-label">Confirmação</span>
+        <span class="step-label-modern">Confirmação</span>
       </div>
-      <div class="progress-bar-bg">
-        <div class="progress-bar-fg" :style="{ width: progressWidth }"></div>
+      <div class="progress-bar-bg-modern">
+        <div class="progress-bar-fg-modern" :style="{ width: progressWidth }"></div>
       </div>
     </div>
   </div>
@@ -41,119 +41,112 @@ const progressWidth = computed(() => {
 </script>
 
 <style scoped>
-.checkout-steps {
-  margin-bottom: 3rem;
-  padding: 0 1rem;
-  user-select: none;
+.checkout-steps-modern {
+  background: #fff;
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 32px #7c3aed10;
+  padding: 2.2rem 1.2rem 1.2rem 1.2rem;
+  margin-bottom: 2.5rem;
 }
-.steps-indicator {
+.steps-indicator-modern {
   display: flex;
   justify-content: center;
-  gap: 2.5rem;
-  margin-bottom: 2rem;
+  gap: 3.5rem;
   position: relative;
   align-items: flex-end;
+  margin-bottom: 0.5rem;
 }
-.progress-bar-bg {
+.progress-bar-bg-modern {
   position: absolute;
   left: 0;
   right: 0;
-  top: 1.7rem;
-  height: 6px;
-  background: #232e47;
+  top: 2.2rem;
+  height: 7px;
+  background: #f3f4fa;
   border-radius: 4px;
   z-index: 0;
   width: 100%;
 }
-.progress-bar-fg {
+.progress-bar-fg-modern {
   height: 100%;
-  background: linear-gradient(90deg, #399bff 0%, #42a5f5 100%);
+  background: linear-gradient(90deg, #4f46e5 0%, #9333ea 100%);
   border-radius: 4px;
   transition: width 0.4s cubic-bezier(.4,2,.3,1);
 }
-.step {
+.step-modern {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.95rem;
-  color: #9ca3af;
+  gap: 0.7rem;
+  font-size: 1.08rem;
+  color: #b8b8d8;
   font-weight: 600;
   opacity: 0.7;
   position: relative;
   z-index: 2;
+  min-width: 90px;
 }
-.step.active, .step.done {
-  color: #399bff;
+.step-modern.active, .step-modern.done {
+  color: #4f46e5;
   opacity: 1;
 }
-.step-label {
-  font-size: 0.93rem;
-  font-weight: 600;
+.step-label-modern {
+  font-size: 1.08rem;
+  font-weight: 700;
   text-align: center;
-  max-width: 100px;
-  line-height: 1.2;
-  color: inherit;
   margin-top: 0.2rem;
+  color: inherit;
+  letter-spacing: 0.01em;
 }
-.step-circle {
-  width: 2.5rem;
-  height: 2.5rem;
+.step-circle-modern {
+  width: 3.2rem;
+  height: 3.2rem;
   border-radius: 50%;
-  background: #232e47;
-  border: 2.5px solid #232e47;
+  background: #f3f4fa;
+  border: 3px solid #e5e7eb;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   font-weight: 700;
-  color: #fff;
+  color: #7c3aed;
   margin-bottom: 0.1rem;
   transition: border 0.3s, background 0.3s;
-  box-shadow: 0 2px 8px #399bff10;
+  box-shadow: 0 2px 12px #7c3aed10;
 }
-.step.active .step-circle,
-.step.done .step-circle {
-  border-color: #399bff;
-  background: linear-gradient(135deg, #399bff 0%, #42a5f5 100%);
+.step-modern.active .step-circle-modern,
+.step-modern.done .step-circle-modern {
+  border-color: #7c3aed;
+  background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
   color: #fff;
-  box-shadow: 0 4px 16px #399bff30;
+  box-shadow: 0 4px 16px #7c3aed30;
 }
-.step.done .step-circle {
-  background: linear-gradient(135deg, #42a5f5 0%, #399bff 100%);
+.step-modern.done .step-circle-modern {
+  background: linear-gradient(135deg, #9333ea 0%, #4f46e5 100%);
 }
-.step-circle i {
-  font-size: 1.3rem;
+.step-circle-modern i {
+  font-size: 1.5rem;
   color: #fff;
 }
 @media (max-width: 768px) {
-  .steps-indicator {
-    gap: 1.2rem;
-    margin-bottom: 1.1rem;
+  .checkout-steps-modern {
+    padding: 1.2rem 0.5rem 0.7rem 0.5rem;
+    margin-bottom: 1.2rem;
   }
-  .step-circle {
-    width: 1.7rem;
-    height: 1.7rem;
+  .steps-indicator-modern {
+    gap: 1.2rem;
+  }
+  .step-circle-modern {
+    width: 2.1rem;
+    height: 2.1rem;
     font-size: 1rem;
   }
-  .step-label {
-    font-size: 0.82rem;
+  .step-label-modern {
+    font-size: 0.92rem;
   }
-  .progress-bar-bg {
-    top: 1.1rem;
+  .progress-bar-bg-modern {
+    top: 1.3rem;
     height: 4px;
-  }
-}
-@media (max-width: 480px) {
-  .checkout-steps {
-    margin-bottom: 1.2rem;
-    padding: 0 0.3rem;
-  }
-  .steps-indicator {
-    gap: 0.7rem;
-  }
-  .step-label {
-    font-size: 0.75rem;
   }
 }
 </style>

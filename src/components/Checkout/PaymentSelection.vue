@@ -1,3 +1,4 @@
+<!-- filepath: src/components/PaymentSelection.vue -->
 <template>
   <div class="form-section payment-section">
     <div class="section-header">
@@ -5,22 +6,21 @@
       <h4>Método de Pagamento</h4>
     </div>
     
+    <!-- Campo de e-mail dinâmico -->
+    <div class="form-group">
+      <label for="checkout-email">E-mail para recebimento</label>
+      <input
+        id="checkout-email"
+        v-model="checkoutEmail"
+        type="email"
+        class="form-input"
+        required
+        placeholder="seu@email.com"
+      />
+    </div>
+
     <!-- Seleção do método de pagamento -->
     <div class="payment-methods">
-      <div class="payment-option">
-        <input
-          type="radio"
-          id="pix"
-          value="pix"
-          v-model="selectedMethod"
-          class="payment-radio"
-        />
-        <label for="pix" class="payment-label">
-          <i class="bi bi-qr-code"></i>
-          <span>PIX</span>
-        </label>
-      </div>
-      
       <div class="payment-option">
         <input
           type="radio"
@@ -34,23 +34,26 @@
           <span>Cartão de Crédito</span>
         </label>
       </div>
-    </div>
-
-    <!-- PIX Payment -->
-    <div v-if="selectedMethod === 'pix'" class="pix-section">
-      <div class="pix-info">
-        <i class="bi bi-info-circle"></i>
-        <p>Você será redirecionado para o PIX após confirmar o pedido.</p>
+      
+      <div class="payment-option">
+        <input
+          type="radio"
+          id="boleto"
+          value="boleto"
+          v-model="selectedMethod"
+          class="payment-radio"
+        />
+        <label for="boleto" class="payment-label">
+          <i class="bi bi-receipt"></i>
+          <span>Boleto Bancário</span>
+        </label>
       </div>
-      <button class="btn-primary" @click="avancarComPix">
-        Continuar com PIX
-      </button>
     </div>
 
     <!-- Card Payment -->
     <div v-if="selectedMethod === 'card'" class="card-section">
       <div v-if="!clientSecret">
-        <button class="btn-primary" @click="criarPaymentIntent" :disabled="loading">
+        <button class="btn-primary" @click="criarPaymentIntent" :disabled="loading || !checkoutEmail">
           {{ loading ? 'Processando...' : 'Gerar pagamento' }}
         </button>
       </div>
@@ -61,15 +64,37 @@
         </button>
       </div>
     </div>
+
+    <!-- Boleto Payment -->
+    <div v-if="selectedMethod === 'boleto'" class="boleto-section">
+      <div class="boleto-info">
+        <i class="bi bi-info-circle"></i>
+        <p>Preencha os dados para gerar o boleto bancário.</p>
+      </div>
+      <form @submit.prevent="criarCheckoutBoleto">
+        <div class="form-group">
+          <label for="boleto-nome">Nome completo</label>
+          <input id="boleto-nome" v-model="boletoNome" type="text" class="form-input" required />
+        </div>
+        <div class="form-group">
+          <label for="boleto-cpf">CPF</label>
+          <input id="boleto-cpf" v-model="boletoCpf" type="text" class="form-input" required maxlength="14" placeholder="000.000.000-00" />
+        </div>
+        <button class="btn-primary" type="submit" :disabled="loading || !boletoNome || !boletoCpf || !checkoutEmail">
+          {{ loading ? 'Processando...' : 'Gerar Boleto' }}
+        </button>
+      </form>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { loadStripe } from '@stripe/stripe-js';
 import axios from 'axios';
 import { useToast } from 'vue-toastification';
 import { useCartStore } from '@/stores/cartStore';
+import { createCheckoutSession } from '@/services/apiService'
 
 const props = defineProps({
   modelValue: String
@@ -84,11 +109,16 @@ const clientSecret = ref(null);
 const stripe = ref(null);
 const elements = ref(null);
 const card = ref(null);
-const selectedMethod = ref(props.modelValue || 'pix');
+const selectedMethod = ref(props.modelValue || 'card');
 
+// Campos para boleto e e-mail dinâmico
+const boletoNome = ref('');
+const boletoCpf = ref('');
+const checkoutEmail = ref('');
+
+// Stripe public key (coloque em .env se desejar)
 const STRIPE_PUBLIC_KEY = 'pk_test_51S3OdoAyTfunaRVJZVCU8yQouIu9PtRQlkMaIYZeqPhWAW7EhKSZJK3f9vFV5uylSUyvnnpRQSQrLnCHNUQMkgKk00GuNvTFTz';
 
-// Watch para atualizar o v-model
 watch(selectedMethod, (newValue) => {
   emit('update:modelValue', newValue);
 });
@@ -98,13 +128,13 @@ async function criarPaymentIntent() {
   try {
     const items = cartStore.detailedItems.map(p => ({
       name: p.product?.name || p.name || 'Produto',
-      amount: Number(p.product?.price || p.price) * 100, // Converter para centavos
+      amount: Number(p.product?.price || p.price),
       quantity: p.quantity
     }));
 
     const payload = {
       items,
-      email: 'cliente@email.com',
+      email: checkoutEmail.value,
       metadata: { order_id: cartStore.orderId }
     };
 
@@ -141,8 +171,6 @@ async function confirmarPagamento() {
     
     if (paymentIntent.status === 'succeeded') {
       toast.success('Pagamento realizado com sucesso!');
-      
-      // Emitir evento de pagamento aprovado com dados corretos
       emit('pagamentoAprovado', {
         paymentIntent,
         items: cartStore.detailedItems.map(item => ({
@@ -152,12 +180,11 @@ async function confirmarPagamento() {
           name: item.product?.name || 'Produto',
           amount: Number(item.product?.price || item.unit_price || 0) * item.quantity
         })),
-        email: 'cliente@email.com',
+        email: checkoutEmail.value,
         valorTotal: cartStore.detailedItems.reduce((sum, item) => 
           sum + (item.product?.price || 0) * item.quantity, 0
         )
       });
-      
       emit('etapaChange', 3);
     }
   } catch (err) {
@@ -167,15 +194,78 @@ async function confirmarPagamento() {
   }
 }
 
-function avancarComPix() {
-  emit('dadosColetados', {
-    metodoPagamento: 'pix'
-  });
-  emit('etapaChange', 3);
+  async function criarCheckoutBoleto() {
+  loading.value = true;
+  try {
+    if (!boletoNome.value || !boletoCpf.value || !checkoutEmail.value) {
+      toast.error('Preencha nome, CPF e e-mail.');
+      loading.value = false;
+      return;
+    }
+    const items = cartStore.detailedItems.map(p => ({
+      name: p.product?.name || p.name || 'Produto',
+      amount: Number(p.product?.price || p.price),
+      quantity: p.quantity
+    }));
+
+  const payload = {
+      items,
+      email: checkoutEmail.value,
+      payer: {
+        name: boletoNome.value,
+        tax_id: boletoCpf.value
+      },
+      metadata: { order_id: cartStore.orderId },
+      success_url: window.location.origin + '/sucesso',
+      cancel_url: window.location.origin + '/cancelado'
+    };
+
+   const data = await createCheckoutSession(payload);
+    if (data && data.url) {
+      window.location.href = data.url;
+    } else {
+      toast.error('Erro ao gerar boleto.');
+    }
+  } catch (err) {
+    toast.error('Erro ao gerar boleto: ' + (err.response?.data?.detail || err.message || err));
+  } finally {
+    loading.value = false;
+  }
 }
 </script>
 
 <style scoped>
+.payment-section {
+  background: #f9fafb;
+  border-radius: 1.2rem;
+  padding: 1.2rem 1rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 12px #7c3aed10;
+  border: 1.5px solid #e5e7eb;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #b8d8ff;
+  background: linear-gradient(90deg, #ede9fe 0%, #f9fafb 100%);
+}
+
+.section-header i {
+  font-size: 1.5rem;
+  color: #7c3aed;
+}
+
+.section-header h4 {
+  margin: 0;
+  color: #4f46e5;
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: 0.01em;
+}
+
 .payment-methods {
   display: flex;
   gap: 1rem;
@@ -196,18 +286,20 @@ function avancarComPix() {
   align-items: center;
   gap: 0.5rem;
   padding: 1rem;
-  border: 2px solid #374151;
+  border: 2px solid #e5e7eb;
   border-radius: 0.75rem;
-  background: #23233a;
-  color: #e8eaed;
+  background: #fff;
+  color: #4f46e5;
   cursor: pointer;
   transition: all 0.3s ease;
   text-align: center;
+  font-weight: 600;
+  box-shadow: 0 1px 6px #7c3aed10;
 }
 
 .payment-label i {
   font-size: 1.5rem;
-  color: #64b5f6;
+  color: #7c3aed;
 }
 
 .payment-label span {
@@ -216,16 +308,17 @@ function avancarComPix() {
 }
 
 .payment-radio:checked + .payment-label {
-  border-color: #399bff;
-  background: linear-gradient(135deg, #232e47 0%, #399bff20 100%);
-  box-shadow: 0 4px 20px #399bff30;
+  border-color: #7c3aed;
+  background: linear-gradient(135deg, #ede9fe 0%, #f9fafb 100%);
+  box-shadow: 0 4px 20px #7c3aed20;
+  color: #7c3aed;
 }
 
 .payment-radio:checked + .payment-label i {
-  color: #00ffe1;
+  color: #4f46e5;
 }
 
-.pix-section, .card-section {
+.pix-section, .card-section, .boleto-section {
   margin-top: 1rem;
 }
 
@@ -234,11 +327,11 @@ function avancarComPix() {
   align-items: center;
   gap: 0.5rem;
   padding: 1rem;
-  background: rgba(100, 181, 246, 0.1);
-  border: 1px solid #64b5f6;
+  background: #ede9fe;
+  border: 1.5px solid #b8d8ff;
   border-radius: 0.5rem;
   margin-bottom: 1rem;
-  color: #64b5f6;
+  color: #7c3aed;
 }
 
 .pix-info i {
@@ -255,15 +348,15 @@ function avancarComPix() {
   padding: 1rem;
   background: #fff;
   border-radius: 0.75rem;
-  border: 2px solid #399bff;
+  border: 2px solid #7c3aed;
   color: #232e47;
   font-size: 1.15rem;
-  box-shadow: 0 2px 12px #399bff22;
+  box-shadow: 0 2px 12px #7c3aed22;
   min-height: 56px;
 }
 
 .card-element ::placeholder {
-  color: #399bff;
+  color: #b8d8ff;
   opacity: 0.9;
   font-size: 1.08rem;
 }
@@ -277,7 +370,7 @@ function avancarComPix() {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%);
+  background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
   color: white;
   border: none;
   padding: 0.875rem 1.5rem;
@@ -286,19 +379,69 @@ function avancarComPix() {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(100, 181, 246, 0.3);
+  box-shadow: 0 4px 15px #7c3aed30;
   width: 100%;
 }
 
 .btn-primary:hover {
+  background: linear-gradient(90deg, #7c3aed 0%, #4f46e5 100%);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(100, 181, 246, 0.4);
+  box-shadow: 0 6px 20px #7c3aed40;
 }
 
 .btn-primary:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+}
+
+.boleto-section {
+  margin-top: 1rem;
+  background: #ede9fe;
+  border-radius: 0.7rem;
+  padding: 1.2rem 1rem;
+  border: 1.5px solid #b8d8ff;
+  box-shadow: 0 1px 6px #7c3aed10;
+}
+
+.boleto-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  color: #7c3aed;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  color: #4f46e5;
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 7px;
+  margin-left: 2px;
+  letter-spacing: 0.01em;
+}
+
+.form-input {
+  background: #fff;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 0.7rem;
+  padding: 12px 16px;
+  color: #232e47;
+  font-size: 16px;
+  transition: all 0.2s;
+  min-width: 0;
+  box-shadow: 0 1px 6px #7c3aed10;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #7c3aed;
+  background: #f9fafb;
+  box-shadow: 0 0 0 2px #7c3aed30;
 }
 
 @media (max-width: 768px) {

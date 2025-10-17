@@ -1,21 +1,6 @@
 <template>
-  <div class="checkout-form glass-card">
-    <!-- Indicador de etapas -->
-    <div class="steps-indicator">
-      <div :class="['step', etapa === 1 ? 'active' : '', etapa > 1 ? 'done' : '']">
-        <i class="bi bi-geo-alt"></i>
-        <span>Endereço</span>
-      </div>
-      <div :class="['step', etapa === 2 ? 'active' : '', etapa > 2 ? 'done' : '']">
-        <i class="bi bi-credit-card"></i>
-        <span>Pagamento</span>
-      </div>
-      <div :class="['step', etapa === 3 ? 'active' : '', etapa > 3 ? 'done' : '']">
-        <i class="bi bi-check2-circle"></i>
-        <span>Confirmação</span>
-      </div>
-    </div>
-
+  <div class="checkout-form-modern glass-card">
+    <CheckoutSteps :etapa="etapa" />
     <!-- Etapa 1: Endereço -->
     <div v-if="etapa === 1" class="form-section">
       <div class="section-header">
@@ -132,6 +117,7 @@ import { reactive, ref, onMounted, watch } from 'vue';
 import { createAddress, getAllAddresses, createOrder } from '@/services/apiService';
 import { useToast } from 'vue-toastification';
 import PaymentSelection from './PaymentSelection.vue';
+import CheckoutSteps from './CheckoutSteps.vue';
 
 const props = defineProps({
   etapa: Number
@@ -337,25 +323,19 @@ function getSelectedAddressInfo() {
 </script>
 
 <style scoped>
-.checkout-form {
-  max-width: 520px;
+.checkout-form-modern {
+  max-width: 540px;
   margin: 0 auto;
-  font-family: 'Inter', sans-serif;
-  background: transparent;
-}
-.glass-card {
-  background: rgba(24, 30, 42, 0.92);
+  background: #fff;
   border-radius: 1.5rem;
-  box-shadow: 0 8px 32px 0 #232e4780;
-  border: 1.5px solid #232e47;
-  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 32px #7c3aed10;
   padding: 2.2rem 2rem 2rem 2rem;
-  margin-bottom: 2rem;
+  border: 1.5px solid #e5e7eb;
   transition: box-shadow 0.2s;
 }
-.glass-card:focus-within, .glass-card:hover {
-  box-shadow: 0 12px 40px #399bff40;
-  border-color: #399bff;
+.checkout-form-modern:focus-within, .checkout-form-modern:hover {
+  box-shadow: 0 12px 40px #7c3aed30;
+  border-color: #7c3aed;
 }
 .steps-indicator {
   display: flex;
@@ -369,7 +349,7 @@ function getSelectedAddressInfo() {
   align-items: center;
   gap: 0.4rem;
   font-size: 1.03rem;
-  color: #bbb;
+  color: #b8d8ff;
   font-weight: 600;
   opacity: 0.7;
   position: relative;
@@ -381,12 +361,12 @@ function getSelectedAddressInfo() {
   opacity: 0.85;
 }
 .step.active, .step.done {
-  color: #00ffe1;
+  color: #399bff;
   opacity: 1;
 }
 .step.active i, .step.done i {
-  color: #00ffe1;
-  filter: drop-shadow(0 0 10px #00ffe1);
+  color: #399bff;
+  filter: drop-shadow(0 0 10px #399bff);
 }
 .step.done span::after {
   content: '';
@@ -394,7 +374,7 @@ function getSelectedAddressInfo() {
   margin: 3px auto 0 auto;
   width: 22px;
   height: 3px;
-  background: linear-gradient(90deg, #00ffe1 0%, #8f5fe8 100%);
+  background: linear-gradient(90deg, #399bff 0%, #b8d8ff 100%);
   border-radius: 2px;
 }
 .form-section {
@@ -413,34 +393,30 @@ function getSelectedAddressInfo() {
   align-items: center;
   gap: 1rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #374151;
+  border-bottom: 1px solid #b8d8ff;
+  background: linear-gradient(90deg, #ede9fe 0%, #f9fafb 100%);
 }
 
 .section-header i {
   font-size: 1.5rem;
-  color: #64b5f6;
+  color: #7c3aed;
 }
 
 .section-header h4 {
   margin: 0;
-  color: #f9fafb;
+  color: #4f46e5;
   font-weight: 700;
   font-size: 1.25rem;
   letter-spacing: 0.01em;
 }
 
 .address-selection {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.selection-header label {
-  font-weight: 600;
-  font-size: 1rem;
-  color: #e8eaed;
-  margin-bottom: 0.5rem;
-  display: block;
+  background: #f9fafb;
+  border-radius: 1.2rem;
+  padding: 1.2rem 1rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 12px #7c3aed10;
+  border: 1.5px solid #e5e7eb;
 }
 
 .address-options {
@@ -468,30 +444,19 @@ function getSelectedAddressInfo() {
   display: flex;
   align-items: center;
   padding: 1rem;
-  border: 2px solid #232e47;
-  background: rgba(36, 44, 60, 0.85);
+  border: 2px solid #e5e7eb;
+  background: #fff;
   transition: border 0.2s, background 0.2s;
-  border-radius: 0.75rem;
+  border-radius: 0.9rem;
   cursor: pointer;
-  transition: all 0.3s ease;
-  color: #e8eaed;
+  color: #232e47;
+  box-shadow: 0 1px 6px #7c3aed10;
 }
 
 .address-radio:checked + .address-label {
-  border-color: #399bff;
-  background: linear-gradient(135deg, #232e47 0%, #399bff20 100%);
-  box-shadow: 0 4px 20px #399bff30;
-}
-
-.address-radio:checked + .address-label::before {
-  content: '✓';
-  position: absolute;
-  right: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #64b5f6;
-  font-size: 1.25rem;
-  font-weight: bold;
+  border-color: #7c3aed;
+  background: linear-gradient(135deg, #f3f4fa 0%, #ede9fe 100%);
+  box-shadow: 0 4px 20px #7c3aed20;
 }
 
 .address-info {
@@ -499,26 +464,39 @@ function getSelectedAddressInfo() {
 }
 
 .address-street {
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 1.08rem;
+  color: #232e47;
+  margin-bottom: 0.2rem;
+}
+
+.address-details, .address-country {
+  font-size: 0.97rem;
+  color: #7c3aed;
+}
+
+.btn-secondary {
+  background: #fff;
+  color: #7c3aed;
+  border: 2px solid #7c3aed;
+  border-radius: 0.9rem;
+  padding: 0.85rem 1.5rem;
   font-size: 1rem;
-  color: #f9fafb;
-  margin-bottom: 0.25rem;
+  font-weight: 700;
+  transition: all 0.2s;
+  margin-top: 1rem;
 }
-
-.address-details {
-  font-size: 0.875rem;
-  color: #b0b7c3;
-}
-
-.address-country {
-  font-size: 0.875rem;
-  color: #9ca3af;
-  margin-top: 0.25rem;
+.btn-secondary:hover {
+  background: #7c3aed;
+  color: #fff;
 }
 .address-form {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px 16px;
+  background: #f9fafb;
+  border-radius: 1.2rem;
+  padding: 1.2rem 1rem;
+  box-shadow: 0 2px 12px #7c3aed10;
+  border: 1.5px solid #e5e7eb;
+  margin-bottom: 1.5rem;
 }
 .form-group.full-width {
   grid-column: 1 / -1;
@@ -529,7 +507,7 @@ function getSelectedAddressInfo() {
   gap: 0.3rem;
 }
 .form-label {
-  color: #8fd6fb;
+  color: #4f46e5;
   font-weight: 600;
   font-size: 15px;
   margin-bottom: 7px;
@@ -537,26 +515,25 @@ function getSelectedAddressInfo() {
   letter-spacing: 0.01em;
 }
 .form-input {
-  background: #23233a;
-  border: 1.5px solid #399bff40;
-  border-radius: 8px;
+  background: #fff;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 0.7rem;
   padding: 12px 16px;
-  color: #fff;
+  color: #232e47;
   font-size: 16px;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
   min-width: 0;
-  box-shadow: 0 2px 8px #399bff10;
+  box-shadow: 0 1px 6px #7c3aed10;
 }
 .form-input:focus {
   outline: none;
-  border-color: #399bff;
-  background: #23233a;
-  box-shadow: 0 0 0 2px #399bff30;
+  border-color: #7c3aed;
+  background: #f9fafb;
+  box-shadow: 0 0 0 2px #7c3aed30;
 }
 .form-input::placeholder {
-  color: rgba(255, 255, 255, 0.4);
+  color: #b8d8ff;
 }
-/* Botões */
 .form-actions {
   display: flex;
   justify-content: flex-end;
@@ -576,107 +553,55 @@ function getSelectedAddressInfo() {
   gap: 8px;
 }
 .btn-primary {
-  background: linear-gradient(135deg, #399bff 0%, #42a5f5 100%);
-  color: white;
+  background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+  color: #fff;
   border: none;
-  border-radius: 0.75rem;
-  padding: 0.875rem 1.5rem;
+  border-radius: 0.9rem;
+  padding: 0.85rem 1.5rem;
   font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  box-shadow: 0 4px 15px #399bff30;
+  font-weight: 700;
+  box-shadow: 0 2px 12px #9333ea22;
+  transition: background 0.22s, box-shadow 0.18s, transform 0.18s;
 }
 .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px #399bff40;
-  background: linear-gradient(135deg, #42a5f5 0%, #399bff 100%);
+  background: linear-gradient(90deg, #7c3aed 0%, #4f46e5 100%);
+  color: #fff;
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 4px 18px #9333ea30;
 }
-.btn-secondary {
-  background: transparent;
-  color: #399bff;
-  border: 2px solid #399bff;
-  border-radius: 0.75rem;
-  padding: 0.875rem 1.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
+.selected-address-info {
+  background: #f9fafb;
+  border-radius: 1.2rem;
+  padding: 1rem 1rem 0.5rem 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 12px #7c3aed10;
+  border: 1.5px solid #e5e7eb;
 }
-.btn-secondary:hover {
-  background: #399bff;
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px #399bff30;
-}
-
-.w-100 {
-  width: 100%;
-}
-
-.address-continue {
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.selected-address-info h5 {
-  color: #399bff;
-  font-size: 18px;
-  margin-bottom: 10px;
-}
-
 .selected-address {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 12px 16px;
-  background: rgba(57, 155, 255, 0.08);
-  border: 1.5px solid #399bff40;
+  background: #ede9fe;
+  border: 1.5px solid #b8d8ff;
   border-radius: 10px;
-  color: #fff;
-  box-shadow: 0 2px 8px #399bff10;
+  color: #232e47;
+  box-shadow: 0 2px 8px #7c3aed10;
 }
-
 .selected-address i {
   font-size: 24px;
-  color: #399bff;
-}
-
-.address-details {
-  font-size: 16px;
-  color: rgba(255, 255, 255, 0.8);
+  color: #7c3aed;
 }
 
 /* Responsividade */
 @media (max-width: 768px) {
-  .glass-card {
+  .checkout-form-modern {
     padding: 1.2rem 0.7rem;
+    border-radius: 1rem;
   }
-  .form-section {
-    padding: 0;
-  }
-  .address-form {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-  .form-actions {
-    flex-direction: column;
-    gap: 12px;
-  }
-  .btn-primary,
-  .btn-secondary {
-    width: 100%;
-    justify-content: center;
-    padding: 14px 24px;
+  .address-form, .address-selection, .selected-address-info {
+    padding: 0.7rem 0.4rem;
+    border-radius: 0.7rem;
   }
 }
 @media (max-width: 480px) {

@@ -136,9 +136,9 @@ function formatPrice(value) {
 
 const metodoPagamentoLabel = computed(() => {
   switch (props.metodoPagamento) {
-    case 'pix': return 'PIX';
+    case 'card': return 'Cartão de Crédito';
     case 'boleto': return 'Boleto Bancário';
-    case 'credito': return 'Cartão de Crédito';
+    case 'pix': return 'PIX';
     default: return props.metodoPagamento || '-';
   }
 });

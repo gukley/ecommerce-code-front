@@ -1,18 +1,18 @@
 <template>
-  <div class="coupon-input-container mb-3">
+  <div class="coupon-input-modern mb-3">
     <label class="form-label" for="coupon-code">Cupom de desconto</label>
     <div class="input-group">
       <input
         id="coupon-code"
         v-model="couponCode"
         type="text"
-        class="form-control"
+        class="form-control coupon-input-box"
         placeholder="Digite o código do cupom"
         :disabled="loading"
         @keyup.enter="applyCoupon"
       />
       <button
-        class="btn btn-primary"
+        class="btn btn-coupon-modern"
         :disabled="loading || !couponCode"
         @click="applyCoupon"
       >
@@ -78,42 +78,52 @@ async function applyCoupon() {
 </script>
 
 <style scoped>
-.coupon-input-container {
-  background: #181828;
-  border-radius: 0.75rem;
+.coupon-input-modern {
+  background: #fff;
+  border-radius: 1.1rem;
   padding: 1.2rem 1rem;
   margin-bottom: 1.5rem;
-  box-shadow: 0 2px 12px #00ffe120;
+  box-shadow: 0 2px 12px #7c3aed10;
+  border: 1.5px solid #e5e7eb;
 }
 .form-label {
-  color: #8fd6fb;
-  font-weight: 600;
+  color: #7c3aed;
+  font-weight: 700;
   margin-bottom: 0.5rem;
 }
 .input-group {
   display: flex;
   gap: 0.5rem;
 }
-.form-control {
-  border-radius: 0.5rem;
-  border: 1.5px solid #399bff40;
-  background: #23233a;
-  color: #fff;
+.coupon-input-box {
+  border-radius: 1.5rem 0 0 1.5rem;
+  border: 1.5px solid #e5e7eb;
+  background: #fff;
+  color: #23233a;
   font-size: 1rem;
-  padding: 0.7rem 1rem;
+  padding: 0.7rem 1.1rem;
+  box-shadow: 0 2px 8px #7c3aed10;
+  transition: border 0.2s, background 0.2s;
 }
-.btn-primary {
-  background: linear-gradient(135deg, #399bff 0%, #42a5f5 100%);
+.coupon-input-box:focus {
+  border-color: #7c3aed;
+  background: #f9fafb;
+  outline: none;
+}
+.btn-coupon-modern {
+  border-radius: 0 1.5rem 1.5rem 0;
+  background: linear-gradient(90deg, #4f46e5 0%, #9333ea 100%);
   color: #fff;
+  font-weight: 700;
   border: none;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  padding: 0.7rem 1.2rem;
-  transition: all 0.2s;
+  transition: background 0.18s, box-shadow 0.18s, transform 0.18s;
+  padding: 0.5em 1.2em;
+  box-shadow: 0 2px 8px #9333ea10;
 }
-.btn-primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+.btn-coupon-modern:hover {
+  background: linear-gradient(90deg, #9333ea 0%, #4f46e5 100%);
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 4px 18px #9333ea30;
 }
 .text-danger {
   color: #ff6b6b;
