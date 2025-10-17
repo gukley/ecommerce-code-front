@@ -17,8 +17,8 @@
           <svg width="64" height="64" viewBox="0 0 64 64">
             <defs>
               <radialGradient id="avatarGradient" cx="50%" cy="50%" r="80%">
-                <stop offset="0%" stop-color="#a362ff"/>
-                <stop offset="100%" stop-color="#00ffe1"/>
+                <stop offset="0%" stop-color="#4f8cff"/>
+                <stop offset="100%" stop-color="#a362ff"/>
               </radialGradient>
             </defs>
             <circle cx="32" cy="32" r="32" fill="url(#avatarGradient)" />
@@ -33,7 +33,7 @@
         <form @submit.prevent="handleLogin">
           <div class="login-input-group">
             <span class="login-input-icon">
-              <i class="bi bi-person-fill"></i>
+              <i class="fa-regular fa-user"></i>
             </span>
             <input
               v-model="email"
@@ -45,7 +45,7 @@
           </div>
           <div class="login-input-group">
             <span class="login-input-icon">
-              <i class="bi bi-lock-fill"></i>
+              <i class="fa-regular fa-lock"></i>
             </span>
             <input
               v-model="password"
@@ -55,15 +55,15 @@
               required
             />
             <span class="login-input-icon login-eye" @click="togglePassword">
-              <i :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+              <i :class="showPassword ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye'"></i>
             </span>
           </div>
-          <button type="submit" class="login-btn">
-            Entrar
+          <button type="submit" class="login-btn" :disabled="isSubmitting">
+            {{ isSubmitting ? 'Entrando...' : 'Entrar' }}
           </button>
         </form>
         <div class="login-links d-flex justify-content-between align-items-center mt-3 mb-2">
-          <a href="#" class="login-link">Esqueceu a senha?</a>
+          <router-link to="/forgot-password" class="login-link">Esqueceu a senha?</router-link>
           <router-link to="/register" class="login-link login-link-right">Cadastre-se</router-link>
         </div>
       </div>
@@ -74,42 +74,56 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { login } from '@/services/apiService'
 import { useToast } from 'vue-toastification'
+import { useAuthStore } from '@/stores/authStore' // usar a store para centralizar lógica
 
 const router = useRouter()
+const authStore = useAuthStore()
 const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
+const isSubmitting = ref(false)
 const toast = useToast()
 
 const togglePassword = () => { showPassword.value = !showPassword.value }
 
+// Handler recomendado: usa authStore.loginUser(...) que já normaliza e salva tokens
 const handleLogin = async () => {
   try {
-    const response = await login({ email: email.value, password: password.value })
-    localStorage.setItem('token', response.token)
-    localStorage.setItem('user', JSON.stringify(response.user))
+    isSubmitting.value = true
+    // aguarda a store processar o login e salvar tokens/user no localStorage
+    await authStore.loginUser(email.value, password.value)
+
     toast.success('Login realizado com sucesso!')
+
+    // determina redirecionamento
     const redirectPath = router.currentRoute.value.query.redirect || '/'
-    if (response.user && ['ADMIN', 'MODERATOR'].includes(response.user.role)) {
-      router.push({ name: 'AdminDashboard' })
+    // usa user que a store salvou (ou localStorage)
+    const user = authStore.user || JSON.parse(localStorage.getItem('user') || 'null')
+
+    if (user && ['ADMIN', 'MODERATOR'].includes(user.role)) {
+      await router.push({ name: 'AdminDashboard' })
     } else {
-      router.push(redirectPath)
+      await router.push(redirectPath)
     }
   } catch (error) {
+    console.error('Login error:', error)
     toast.error('Erro ao logar: ' + (error.response?.data?.message || error.message || 'Credenciais inválidas.'))
+  } finally {
+    isSubmitting.value = false
   }
 }
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@400;600;700&family=Nunito+Sans:wght@400;600;700&display=swap');
+/* Font Awesome CDN (para ícones minimalistas) */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css');
 
 .login-root {
-  background: linear-gradient(120deg, #0a0a1a 60%, #1a1a2e 100%);
+  background: linear-gradient(120deg, #f8fafc 60%, #e9f1ff 100%);
   min-height: 100vh;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', 'Poppins', 'Nunito Sans', sans-serif;
 }
 
 .login-left {
@@ -124,7 +138,7 @@ const handleLogin = async () => {
 .login-left-bg {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 60% 40%, #a362ff33 0%, #00ffe133 60%, transparent 100%);
+  background: radial-gradient(circle at 60% 40%, #4f8cff22 0%, #a362ff22 60%, transparent 100%);
   z-index: 0;
   opacity: 1;
 }
@@ -134,26 +148,28 @@ const handleLogin = async () => {
   text-align: center;
 }
 .login-logo {
-  font-size: 3.5rem;
+  font-size: 3.2rem;
   font-weight: 700;
   letter-spacing: 2px;
-  background: linear-gradient(90deg, #399bff 0%, #a362ff 100%);
+  background: linear-gradient(90deg, #4f8cff 0%, #a362ff 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   margin-bottom: 1.2rem;
+  font-family: 'Poppins', 'Inter', sans-serif;
 }
 .login-slogan {
-  color: #e0e0e0;
-  font-size: 1.25rem;
+  color: #3b3b4f;
+  font-size: 1.15rem;
   font-weight: 400;
   margin-top: 1.5rem;
   line-height: 1.6;
-  text-shadow: 0 0 18px #a362ff33;
+  text-shadow: none;
+  letter-spacing: 0.2px;
 }
 
 .login-right {
   flex: 1 1 0;
-  background: linear-gradient(120deg, #18182c 60%, #1a1a2e 100%);
+  background: none;
   min-width: 0;
   justify-content: center;
   align-items: center;
@@ -161,13 +177,13 @@ const handleLogin = async () => {
 }
 
 .login-card {
-  background: rgba(31, 31, 51, 0.92);
-  border-radius: 2rem;
-  box-shadow: 0 8px 32px 0 rgba(163, 98, 255, 0.18);
-  padding: 2.8rem 2.2rem 2.2rem 2.2rem;
+  background: #fff;
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 32px 0 rgba(79, 140, 255, 0.08), 0 1.5px 8px 0 rgba(163, 98, 255, 0.07);
+  padding: 2.5rem 2rem 2rem 2rem;
   max-width: 400px;
   width: 100%;
-  border: 1.5px solid rgba(255,255,255,0.07);
+  border: none;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -175,50 +191,56 @@ const handleLogin = async () => {
 }
 
 .login-avatar {
-  width: 80px;
-  height: 80px;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
-  margin: 0 auto 1.2rem auto;
+  margin: 0 auto 1.1rem auto;
   display: flex;
   align-items: center;
   justify-content: center;
   background: none;
-  box-shadow: 0 2px 18px #a362ff33;
+  box-shadow: 0 2px 12px #4f8cff22;
 }
 
 .login-title {
-  color: #fff;
-  font-size: 2.2rem;
+  color: #23233a;
+  font-size: 1.7rem;
   font-weight: 700;
   margin-bottom: 0.3rem;
   letter-spacing: 0.5px;
+  font-family: 'Poppins', 'Inter', sans-serif;
 }
 .login-subtitle {
-  color: #b0b0b0;
+  color: #6b6b8d;
   font-size: 1rem;
   font-weight: 400;
   letter-spacing: 0.2px;
 }
 .login-logo-small {
-  background: linear-gradient(90deg, #399bff 0%, #a362ff 100%);
+  background: linear-gradient(90deg, #4f8cff 0%, #a362ff 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   font-weight: 700;
+  font-family: 'Poppins', 'Inter', sans-serif;
 }
 
 .login-input-group {
   display: flex;
   align-items: center;
-  background: rgba(44,44,66,0.85);
-  border-radius: 2.2rem;
-  margin-bottom: 1.3rem;
-  border: 1.5px solid #3d3d5a;
+  background: #f5f7fa;
+  border-radius: 2rem;
+  margin-bottom: 1.1rem;
+  border: 1.2px solid #e0e7ef;
   padding: 0 0.2rem;
   position: relative;
+  transition: border 0.18s;
+}
+.login-input-group:focus-within {
+  border: 1.5px solid #a362ff;
 }
 .login-input-icon {
-  color: #b0b0b0;
-  font-size: 1.25rem;
+  color: #8fa2c7;
+  font-size: 1.18rem;
   padding: 0 1rem;
   display: flex;
   align-items: center;
@@ -230,32 +252,33 @@ const handleLogin = async () => {
   right: 0.7rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #8f5fe8;
-  font-size: 1.25rem;
+  color: #a362ff;
+  font-size: 1.18rem;
   padding: 0;
 }
 .login-eye:hover {
-  color: #00ffe1;
+  color: #4f8cff;
 }
 .login-input {
   background: transparent;
   border: none;
-  color: #fff;
-  font-size: 1.08rem;
+  color: #23233a;
+  font-size: 1.05rem;
   font-weight: 500;
-  padding: 0.95rem 1rem 0.95rem 0.2rem;
+  padding: 0.9rem 1rem 0.9rem 0.2rem;
   flex: 1 1 0;
-  border-radius: 2.2rem;
+  border-radius: 2rem;
   outline: none;
   box-shadow: none;
   transition: background 0.18s, color 0.18s;
+  font-family: 'Inter', 'Nunito Sans', sans-serif;
 }
 .login-input:focus {
-  background: rgba(44,44,66,0.98);
-  color: #fff;
+  background: #f0f4ff;
+  color: #23233a;
 }
 .login-input::placeholder {
-  color: #b0b0b0;
+  color: #b0b0c7;
   font-weight: 400;
   letter-spacing: 0.5px;
   opacity: 1;
@@ -265,36 +288,39 @@ const handleLogin = async () => {
   width: 100%;
   border: none;
   border-radius: 2rem;
-  background: linear-gradient(90deg, #a362ff 0%, #00ffe1 100%);
+  background: linear-gradient(90deg, #4f8cff 0%, #a362ff 100%);
   color: #fff;
-  font-size: 1.18rem;
+  font-size: 1.13rem;
   font-weight: 700;
-  padding: 0.95rem 0;
-  margin-top: 1.2rem;
-  box-shadow: 0 4px 18px #a362ff33;
+  padding: 0.9rem 0;
+  margin-top: 1.1rem;
+  box-shadow: 0 2px 12px #a362ff22;
   transition: background 0.22s, box-shadow 0.18s, transform 0.18s;
   position: relative;
   overflow: hidden;
+  font-family: 'Poppins', 'Inter', sans-serif;
+  letter-spacing: 0.2px;
 }
 .login-btn:hover {
-  background: linear-gradient(90deg, #00ffe1 0%, #a362ff 100%);
-  box-shadow: 0 8px 28px #00ffe144;
-  transform: translateY(-2px) scale(1.03);
+  background: linear-gradient(90deg, #a362ff 0%, #4f8cff 100%);
+  box-shadow: 0 6px 18px #4f8cff22;
+  transform: translateY(-1px) scale(1.02);
 }
 
 .login-links {
   width: 100%;
-  margin-top: 1.2rem;
-  font-size: 1.02rem;
+  margin-top: 1.1rem;
+  font-size: 1.01rem;
 }
 .login-link {
-  color: #8f5fe8;
+  color: #4f8cff;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.2s;
+  font-family: 'Inter', 'Nunito Sans', sans-serif;
 }
 .login-link:hover {
-  color: #00ffe1;
+  color: #a362ff;
   text-decoration: underline;
 }
 .login-link-right {
@@ -308,6 +334,17 @@ const handleLogin = async () => {
   .login-right {
     flex: 1 1 100%;
     min-width: 0;
+  }
+}
+@media (max-width: 600px) {
+  .login-card {
+    max-width: 100vw;
+    border-radius: 0.7rem;
+    padding: 2rem 0.7rem 1.5rem 0.7rem;
+    box-shadow: 0 2px 12px 0 rgba(79, 140, 255, 0.10);
+  }
+  .login-root {
+    padding: 0;
   }
 }
 </style>
