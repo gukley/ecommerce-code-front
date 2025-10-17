@@ -13,53 +13,83 @@
 </template>
 
 <script setup>
-import { useRoute } from 'vue-router';
-import { onMounted, ref, computed, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useAuthStore } from './stores/authStore';
-import { useCartStore } from '@/stores/cartStore';
+import { useCartStore } from './stores/cartStore';
+import router from './router';
 
-const route = useRoute();
 const authStore = useAuthStore();
 const cartStore = useCartStore();
 const isLoading = ref(true);
 
-// Função para carregar dados iniciais
+// retorna true se a rota atual requer autenticação (meta.requiresAuth ou similar)
+const isRouteProtected = () => {
+  const r = router.currentRoute.value;
+  return r?.meta?.requiresAuth === true;
+};
+
+// (substitua a função initializeApp existente por esta)
 const initializeApp = async () => {
+  isLoading.value = true;
   try {
-    if (authStore.token) {
-      await authStore.getUserProfile();
+    // DEBUG: inspeciona o que existe antes de qualquer verificação
+    console.log('BOOT: localStorage token=', localStorage.getItem('token'));
+    console.log('BOOT: localStorage refreshToken=', localStorage.getItem('refreshToken') || localStorage.getItem('refresh_token'));
+    console.log('BOOT: authStore.token (ref) =', authStore.token);
+    console.log('BOOT: authStore.refreshTokenValue (ref) =', authStore.refreshTokenValue);
+
+    const tokenFromStore = (authStore.token && authStore.token.value) || localStorage.getItem('token');
+    console.log('BOOT: tokenFromStore=', tokenFromStore);
+
+    if (!tokenFromStore) {
+      console.log('BOOT: sem token. rota atual requiresAuth=', router.currentRoute.value?.meta?.requiresAuth);
+      if (router.currentRoute.value?.meta?.requiresAuth) {
+        authStore.logout();
+        router.push('/login');
+      }
+      return;
     }
+
+    const isTokenValid = await authStore.verifyToken();
+    console.log('BOOT: verifyToken returned =', isTokenValid);
+
+    if (!isTokenValid) {
+      // não jogar imediatamente — logamos e tratamos dependendo da rota
+      console.warn('BOOT: token inválido/expirado e verifyToken = false');
+      if (router.currentRoute.value?.meta?.requiresAuth) {
+        throw new Error('Invalid or expired token');
+      } else {
+        // rota pública: só termina inicialização
+        return;
+      }
+    }
+
+    await authStore.getUserProfile();
     await cartStore.initCart();
   } catch (error) {
     console.error('Erro ao inicializar app:', error);
-    // Se houver erro, limpa o token inválido
-    if (error.response?.status === 401) {
-      authStore.logout();
-    }
+    authStore.logout();
+    router.push('/login');
   } finally {
     isLoading.value = false;
   }
 };
 
+
 onMounted(async () => {
+  // aguarda router para ter meta das rotas disponíveis
+  await router.isReady();
   await initializeApp();
 });
 
-// Observa mudanças no token para recarregar dados
+// reinicia inicialização quando o token do store mudar (ex.: após login)
 watch(() => authStore.token, async (newToken) => {
-  if (newToken) {
-    isLoading.value = true;
-    await initializeApp();
-  } else {
-    isLoading.value = false;
-  }
+  if (newToken) await initializeApp();
 });
 
-// Observa mudanças no usuário
+// quando o usuário estiver carregado, garante que o spinner suma
 watch(() => authStore.user, (newUser) => {
-  if (newUser && isLoading.value) {
-    isLoading.value = false;
-  }
+  if (newUser && isLoading.value) isLoading.value = false;
 });
 </script>
 
