@@ -44,104 +44,69 @@
       </div>
       <div class="profile-sections">
         <!-- Seção Meus Dados Editável -->
-        <div v-if="activeTab === 'dados'" class="profile-user-data-card editable">
-          <div class="profile-section-header">
-            <h3 class="profile-section-title">
-              <i class="bi bi-person-circle"></i>
-              Meus Dados Pessoais
-            </h3>
-            <p class="profile-section-desc">Gerencie suas informações pessoais e foto de perfil</p>
-          </div>
-          
-          <form @submit.prevent="saveUserData" class="profile-user-form">
-            <div class="profile-user-data-header grid-user-data">
-              <div class="profile-avatar-section">
-                <div class="profile-avatar-box">
-                  <img
-                    :src="avatarPreview || (userForm.image_path ? BASE_URL + userForm.image_path : '/default-avatar.png')"
-                    alt="Foto de perfil"
-                    class="profile-avatar-img"
-                  />
-                  <label class="avatar-edit-btn" title="Alterar foto">
-                    <i class="bi bi-camera"></i>
-                    <input type="file" accept="image/*" class="avatar-input" @change="onAvatarChange" />
-                  </label>
-                </div>
-                <p class="avatar-help-text">Clique no ícone da câmera para alterar sua foto</p>
+        <div v-if="activeTab === 'dados'" class="profile-user-data-horizontal">
+          <div class="profile-user-data-center">
+            <div class="profile-avatar-upload">
+              <div class="profile-avatar-box big">
+                <img
+                  :src="avatarPreview || (userForm.image_path ? BASE_URL + userForm.image_path : '/default-avatar.png')"
+                  alt="Foto de perfil"
+                  class="profile-avatar-img big"
+                />
+                <label class="avatar-edit-btn" title="Alterar foto">
+                  <i class="bi bi-camera"></i>
+                  <input type="file" accept="image/*" class="avatar-input" @change="onAvatarChange" />
+                </label>
               </div>
-              
-              <div class="profile-user-fields">
-                <div class="form-group">
-                  <label class="profile-label" for="profile-name">
-                    <i class="bi bi-person"></i>
-                    Nome Completo
-                  </label>
+              <p class="avatar-help-text">Clique no ícone da câmera para alterar sua foto</p>
+            </div>
+            <form @submit.prevent="saveUserData" class="profile-user-fields-form">
+              <div class="profile-user-fields-grid">
+                <div class="form-group horizontal">
+                  <label for="profile-name"><i class="bi bi-person"></i> Nome</label>
                   <input
                     v-model="userForm.name"
                     type="text"
                     id="profile-name"
-                    class="form-control profile-input-name"
-                    placeholder="Digite seu nome completo"
+                    class="form-control horizontal-input"
+                    placeholder="Nome completo"
                     required
                   />
                 </div>
-                
-                <div class="form-group">
-                  <label class="profile-label" for="profile-email">
-                    <i class="bi bi-envelope"></i>
-                    E-mail
-                  </label>
+                <div class="form-group horizontal">
+                  <label for="profile-email"><i class="bi bi-envelope"></i> E-mail</label>
                   <input
                     v-model="userForm.email"
                     type="email"
                     id="profile-email"
-                    class="form-control profile-input-email"
-                    placeholder="Digite seu e-mail"
+                    class="form-control horizontal-input"
+                    placeholder="E-mail"
                     required
                   />
                 </div>
+                <div class="form-group horizontal">
+                  <label><i class="bi bi-calendar"></i> Membro desde</label>
+                  <span class="horizontal-value">{{ formatDate(user?.created_at) }}</span>
+                </div>
               </div>
-            </div>
-            
-            <div class="profile-user-data-body info-user-data">
-              <h4 class="info-section-title">
-                <i class="bi bi-info-circle"></i>
-                Resumo das Informações
-              </h4>
-              <div class="profile-user-info-row">
-                <span class="profile-user-info-label">Nome:</span>
-                <span class="profile-user-info-value">{{ userForm.name || 'Não informado' }}</span>
+              <div class="form-actions-section horizontal">
+                <button type="submit" class="btn btn-profile-save horizontal">
+                  <i class="bi bi-save"></i> Salvar
+                </button>
+                <button type="button" class="btn btn-profile-cancel horizontal" @click="resetForm">
+                  <i class="bi bi-arrow-clockwise"></i> Cancelar
+                </button>
               </div>
-              <div class="profile-user-info-row">
-                <span class="profile-user-info-label">E-mail:</span>
-                <span class="profile-user-info-value">{{ userForm.email || 'Não informado' }}</span>
+              <div v-if="saveError" class="alert alert-danger mt-3">
+                <i class="bi bi-exclamation-triangle"></i>
+                {{ saveError }}
               </div>
-              <div class="profile-user-info-row">
-                <span class="profile-user-info-label">Membro desde:</span>
-                <span class="profile-user-info-value">{{ formatDate(user?.created_at) }}</span>
+              <div v-if="saveSuccess" class="alert alert-success mt-3">
+                <i class="bi bi-check-circle"></i>
+                {{ saveSuccess }}
               </div>
-            </div>
-            
-            <div class="form-actions-section">
-              <button type="submit" class="btn btn-profile-save">
-                <i class="bi bi-save"></i> 
-                Salvar Alterações
-              </button>
-              <button type="button" class="btn btn-profile-cancel" @click="resetForm">
-                <i class="bi bi-arrow-clockwise"></i>
-                Cancelar
-              </button>
-            </div>
-            
-            <div v-if="saveError" class="alert alert-danger mt-3">
-              <i class="bi bi-exclamation-triangle"></i>
-              {{ saveError }}
-            </div>
-            <div v-if="saveSuccess" class="alert alert-success mt-3">
-              <i class="bi bi-check-circle"></i>
-              {{ saveSuccess }}
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
         <!-- Exemplo: só mostra a seção ativa -->
         <ProfileOrders v-if="activeTab === 'pedidos'" :orders="orders" @cancel="(id) => emit('cancel-order', id)" />
@@ -312,7 +277,7 @@ function refreshAddresses() {
   gap: 32px;
   align-items: flex-start;
   min-height: 90vh;
-  background: var(--bg-main);
+  background: linear-gradient(120deg, #eaf6ff 60%, #b8d8ff 100%);
   padding: 32px 0;
   transition: background-color var(--transition-normal);
 }
@@ -326,7 +291,7 @@ function refreshAddresses() {
 }
 .profile-breadcrumb {
   font-size: 1.08rem;
-  color: var(--text-secondary);
+  color: #399bff;
   margin-bottom: 18px;
   display: flex;
   align-items: center;
@@ -337,27 +302,31 @@ function refreshAddresses() {
   align-items: center;
   gap: 18px;
   margin-bottom: 8px;
+  background: linear-gradient(90deg, #eaf6ff 60%, #b8d8ff 100%);
+  border-radius: 1.2rem;
+  box-shadow: 0 4px 24px #399bff20;
+  padding: 1.2rem 1.5rem;
 }
 .profile-header-icon {
   font-size: 3.2rem;
-  color: var(--accent-primary);
+  color: #399bff;
   margin-right: 8px;
 }
 .profile-title {
   font-size: 2.1rem;
   font-weight: 800;
-  color: var(--text-main);
+  color: #232e47;
   margin-bottom: 2px;
 }
 .profile-desc {
   font-size: 1.08rem;
-  color: var(--text-secondary);
+  color: #399bff;
   opacity: 0.85;
   margin-bottom: 0;
 }
 .profile-divider {
   border: none;
-  border-top: 3px solid var(--accent-primary);
+  border-top: 3px solid #399bff;
   margin: 18px 0 24px 0;
 }
 .profile-cards-row {
@@ -367,9 +336,9 @@ function refreshAddresses() {
 }
 .profile-card {
   flex: 1;
-  background: var(--bg-card);
+  background: #fff;
   border-radius: var(--border-radius);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 2px 12px #399bff20;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -378,24 +347,25 @@ function refreshAddresses() {
   padding: 28px 0 22px 0;
   font-size: 1.15rem;
   font-weight: 700;
-  color: var(--text-main);
-  border: 2px solid var(--border-color);
+  color: #232e47;
+  border: 2px solid #b8d8ff;
   cursor: pointer;
   transition: all var(--transition-normal);
 }
 .profile-card i {
   font-size: 2.1rem;
-  color: var(--text-secondary);
+  color: #399bff;
   transition: all var(--transition-normal);
 }
 .profile-card:hover, .profile-card.active {
-  border: 2px solid var(--accent-primary);
-  color: var(--accent-primary);
-  box-shadow: var(--shadow-glow);
+  border: 2px solid #399bff;
+  color: #399bff;
+  box-shadow: 0 4px 18px #399bff40;
   transform: translateY(-2px);
+  background: linear-gradient(90deg, #eaf6ff 60%, #b8d8ff 100%);
 }
 .profile-card:hover i, .profile-card.active i {
-  color: var(--accent-primary);
+  color: #399bff;
   transform: scale(1.1);
 }
 .profile-sections {
@@ -403,258 +373,178 @@ function refreshAddresses() {
   flex-direction: column;
   gap: 28px;
 }
-.profile-user-data-card {
-  background: #fff;
-  border-radius: 1.5rem;
-  box-shadow: 0 4px 24px #399bff20;
-  border: 1.5px solid #e5e7eb;
-  padding: 2rem 2.2rem;
+.profile-user-data-horizontal {
+  width: 100%;
   margin-bottom: 2rem;
-  color: #232e47;
-  max-width: 480px;
+  padding: 0;
+  background: none;
 }
-.profile-user-data-card.editable {
-  background: #eaf6ff;
-  color: #232e47;
-  box-shadow: 0 4px 24px #399bff20;
-  border-radius: 1.5rem;
-  border: 1.5px solid #b8d8ff;
-  padding: 2.5rem 2.2rem;
-  margin-bottom: 2rem;
-  max-width: 480px;
-  margin-left: auto;
-  margin-right: auto;
-}
-.profile-user-form {
+.profile-user-data-center {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-}
-.profile-user-data-header {
-  display: flex;
   align-items: center;
-  gap: 2rem;
-  margin-bottom: 1.2rem;
-  justify-content: center;
+  gap: 2.2rem;
+  width: 100%;
+  margin-bottom: 2rem;
 }
-.profile-avatar-box {
-  position: relative;
-  width: 110px;
-  height: 110px;
+.profile-avatar-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+.profile-avatar-box.big {
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
-  overflow: hidden;
-  background: #f8f9fa;
+  background: #eaf6ff;
+  border: 2px solid #399bff;
+  box-shadow: 0 2px 16px #399bff20;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 16px #399bff20;
-  border: 2px solid #50b8fe;
+  margin-bottom: 0;
 }
-.profile-avatar-img {
-  width: 110px;
-  height: 110px;
+.profile-avatar-img.big {
+  width: 120px;
+  height: 120px;
   object-fit: cover;
   border-radius: 50%;
-  background: #f8f9fa;
-  display: block;
+  background: #eaf6ff;
 }
 .avatar-edit-btn {
   position: absolute;
   bottom: 8px;
   right: 8px;
-  background: #b8d8ff;
-  color: #232e47;
+  background: linear-gradient(90deg,#50b8fe 60%, #399bff 100%);
+  color: #181e2a;
   border: none;
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  width: 38px;
+  height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.1rem;
-  box-shadow: 0 2px 8px #399bff10;
+  font-size: 1.25rem;
+  box-shadow: 0 2px 8px #399bff30;
   cursor: pointer;
   transition: background 0.18s, color 0.18s;
   z-index: 2;
+  overflow: hidden;
+}
+.avatar-edit-btn input[type="file"] {
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0; top: 0;
+  cursor: pointer;
 }
 .avatar-edit-btn:hover {
-  background: #399bff;
+  background: linear-gradient(90deg,#399bff 60%, #50b8fe 100%);
   color: #fff;
 }
-.avatar-input {
-  display: none;
+.avatar-help-text {
+  font-size: 0.95rem;
+  color: #399bff;
+  margin-top: 0.5rem;
+  text-align: center;
+  opacity: 0.85;
 }
-.profile-input-name,
-.profile-input-email {
-  background: #f8f9fa;
-  border: 1.5px solid #e5e7eb;
+.profile-user-fields-form {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+.profile-user-fields-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem 2.2rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  background: none;
+}
+.form-group.horizontal {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+}
+.form-group.horizontal label {
+  color: #399bff;
+  font-size: 1.08rem;
+  font-weight: 600;
+  margin-bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  text-align: left;
+}
+.horizontal-input {
+  background: #eaf6ff;
+  border: 1.5px solid #b8d8ff;
   border-radius: 10px;
   font-size: 1.12rem;
   font-weight: 600;
   color: #232e47;
-  margin-bottom: 0.7rem;
   padding: 0.7rem 1rem;
   box-shadow: 0 2px 8px #232e4710;
   transition: border 0.2s, background 0.2s;
   width: 100%;
+  max-width: 320px;
 }
-.profile-input-name:focus,
-.profile-input-email:focus {
+.horizontal-input:focus {
   border-color: #399bff;
   background: #fff;
   outline: none;
 }
-.btn-profile-save {
-  background: linear-gradient(90deg,#50b8fe 60%, #399bff 100%);
+.horizontal-value {
+  font-size: 1.08rem;
+  color: #232e47;
+  font-weight: 500;
+  padding: 0.7rem 0.2rem;
+  min-width: 120px;
+  text-align: left;
+  background: #eaf6ff;
+  border-radius: 10px;
+  border: 1.5px solid #b8d8ff;
+  max-width: 320px;
+}
+.form-actions-section.horizontal {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #b8d8ff;
+}
+.btn-profile-save.horizontal {
+  background: linear-gradient(90deg,#399bff 60%, #50b8fe 100%);
   color: #fff;
   border: none;
   font-weight: 700;
   border-radius: 10px;
-  box-shadow: 0 2px 8px #50b8fe20;
+  box-shadow: 0 2px 8px #399bff20;
   transition: background 0.18s, color 0.18s, box-shadow 0.18s;
   padding: 0.7em 1.5em;
   font-size: 1.08rem;
 }
-.btn-profile-save:hover {
-  background: linear-gradient(90deg,#399bff 60%, #50b8fe 100%);
+.btn-profile-save.horizontal:hover {
+  background: linear-gradient(90deg,#50b8fe 60%, #399bff 100%);
   color: #fff;
-  box-shadow: 0 4px 18px #50b8fe40;
+  box-shadow: 0 4px 18px #399bff40;
 }
-.profile-user-data-body {
-  margin-top: 1.2rem;
-}
-.profile-user-info-row {
-  display: flex;
-  gap: 1.2rem;
-  margin-bottom: 0.7rem;
-}
-.profile-user-info-label {
-  font-weight: 600;
-  color: #399bff;
-  min-width: 80px;
-}
-.profile-user-info-value {
+.btn-profile-cancel.horizontal {
+  background: #b8d8ff;
   color: #232e47;
-  font-weight: 500;
-}
-/* CSS extra para layout profissional */
-.profile-section-header {
-  text-align: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid #e5e7eb;
-}
-
-.profile-section-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #232e47;
-  margin-bottom: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.profile-section-title i {
-  color: #399bff;
-  font-size: 1.3rem;
-}
-
-.profile-section-desc {
-  color: #6b7280;
-  font-size: 1rem;
-  margin: 0;
-}
-
-.profile-avatar-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.avatar-help-text {
-  font-size: 0.85rem;
-  color: #6b7280;
-  text-align: center;
-  margin: 0;
-  font-style: italic;
-}
-
-.grid-user-data {
-  display: grid;
-  grid-template-columns: 140px 1fr;
-  gap: 2.2rem;
-  align-items: flex-start;
-  margin-bottom: 1.2rem;
-}
-
-.profile-user-fields {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-}
-
-.profile-label {
-  font-weight: 600;
-  color: #399bff;
-  margin-bottom: 0.2rem;
-  font-size: 1.08rem;
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-}
-
-.profile-label i {
-  font-size: 0.9rem;
-}
-
-.info-section-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #232e47;
-  margin-bottom: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.info-section-title i {
-  color: #399bff;
-}
-
-.info-user-data {
-  margin-top: 1.2rem;
-  padding: 1.2rem 1.2rem;
-  background: #f8f9fa;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px #b8d8ff10;
-  border: 1px solid #e5e7eb;
-}
-
-.form-actions-section {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  margin-top: 2rem;
-  padding-top: 1rem;
-  border-top: 1px solid #e5e7eb;
-}
-
-.btn-profile-cancel {
-  background: #6b7280;
-  color: #fff;
   border: none;
   font-weight: 600;
   border-radius: 10px;
-  box-shadow: 0 2px 8px #6b728020;
+  box-shadow: 0 2px 8px #b8d8ff20;
   transition: background 0.18s, box-shadow 0.18s;
   padding: 0.7em 1.5em;
   font-size: 1.08rem;
@@ -662,197 +552,52 @@ function refreshAddresses() {
   align-items: center;
   gap: 0.5rem;
 }
-
-.btn-profile-cancel:hover {
-  background: #4b5563;
-  box-shadow: 0 4px 18px #6b728040;
+.btn-profile-cancel.horizontal:hover {
+  background: #399bff;
+  color: #fff;
+  box-shadow: 0 4px 18px #399bff40;
 }
 
-.alert {
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.alert-danger {
-  background: #fef2f2;
-  color: #dc2626;
-  border: 1px solid #fecaca;
-}
-
-.alert-success {
-  background: #f0fdf4;
-  color: #16a34a;
-  border: 1px solid #bbf7d0;
-}
+/* Responsivo */
 @media (max-width: 991.98px) {
-  .profile-layout {
-    flex-direction: column;
-    gap: 0;
-    padding: 0;
-    min-height: unset;
+  .profile-user-data-center {
+    gap: 1.2rem;
   }
-  .profile-sidebar-area {
-    min-width: 100%;
-    max-width: 100%;
-    margin-bottom: 1.2rem;
-  }
-  .profile-main-area {
-    padding-right: 0;
-    width: 100%;
-  }
-  .profile-cards-row {
-    flex-direction: column;
-    gap: 14px;
-    margin-bottom: 18px;
-  }
-  .profile-card {
-    width: 100%;
-    min-width: 0;
-    padding: 18px 0 14px 0;
-    font-size: 1rem;
-  }
-  .profile-header {
-    flex-direction: column;
-    gap: 10px;
-    align-items: flex-start;
-  }
-  .profile-header-icon {
-    font-size: 2.2rem;
-    margin-right: 0;
-  }
-  .profile-title {
-    font-size: 1.3rem;
-  }
-  .profile-desc {
-    font-size: 0.98rem;
-  }
-  .profile-divider {
-    margin: 12px 0 16px 0;
-  }
-  .profile-user-data-card,
-  .profile-user-data-card.editable {
-    padding: 1.2rem 0.7rem;
-    max-width: 99vw;
-    border-radius: 1rem;
-  }
-  .profile-user-data-header {
-    gap: 1rem;
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .profile-avatar-box {
-    width: 70px;
-    height: 70px;
-  }
-  .profile-avatar-img {
-    width: 70px;
-    height: 70px;
-  }
-  .profile-input-name,
-  .profile-input-email {
-    font-size: 1rem;
-    padding: 0.5rem 0.7rem;
-  }
-  .grid-user-data {
+  .profile-user-fields-grid {
     grid-template-columns: 1fr;
-    gap: 1rem;
+    gap: 1rem 0;
   }
-  .profile-user-fields {
-    gap: 0.5rem;
+  .form-actions-section.horizontal {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.7rem;
+  }
+  .profile-avatar-box.big,
+  .profile-avatar-img.big {
+    width: 90px;
+    height: 90px;
   }
 }
+
 @media (max-width: 600px) {
-  .profile-layout {
-    padding: 0;
-  }
-  .profile-sidebar-area {
-    min-width: 100%;
-    max-width: 100%;
-    margin-bottom: 0.7rem;
-  }
-  .profile-main-area {
-    padding-right: 0;
-    width: 100%;
-  }
-  .profile-cards-row {
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 12px;
-  }
-  .profile-card {
-    width: 100%;
-    min-width: 0;
-    padding: 12px 0 10px 0;
-    font-size: 0.95rem;
-  }
-  .profile-header {
-    flex-direction: column;
-    gap: 7px;
-    align-items: flex-start;
-  }
-  .profile-header-icon {
-    font-size: 1.4rem;
-    margin-right: 0;
-  }
-  .profile-title {
-    font-size: 1.05rem;
-  }
-  .profile-desc {
-    font-size: 0.92rem;
-  }
-  .profile-divider {
-    margin: 8px 0 10px 0;
-  }
-  .profile-user-data-card,
-  .profile-user-data-card.editable {
-    padding: 0.7rem 0.2rem;
-    max-width: 99vw;
-    border-radius: 0.7rem;
-  }
-  .profile-user-data-header {
-    gap: 0.5rem;
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .profile-avatar-box {
-    width: 48px;
-    height: 48px;
-  }
-  .profile-avatar-img {
-    width: 48px;
-    height: 48px;
-  }
-  .profile-input-name,
-  .profile-input-email {
-    font-size: 0.95rem;
-    padding: 0.4rem 0.5rem;
-  }
-  .btn-profile-save {
-    font-size: 0.95rem;
-    padding: 0.5em 1em;
-  }
-  .profile-section-title {
-    font-size: 1.05rem;
-  }
-  .profile-section-desc {
-    font-size: 0.92rem;
-  }
-  .info-section-title {
-    font-size: 0.98rem;
-  }
-  .info-user-data {
-    padding: 0.7rem 0.5rem;
-    border-radius: 8px;
-  }
-  .form-actions-section {
-    flex-direction: column;
+  .profile-user-data-center {
     gap: 0.7rem;
-    margin-top: 1rem;
-    padding-top: 0.5rem;
+  }
+  .profile-user-fields-form {
+    max-width: 99vw;
+    padding: 0 0.2rem;
+  }
+  .profile-avatar-box.big,
+  .profile-avatar-img.big {
+    width: 70px;
+    height: 70px;
+  }
+  .horizontal-input,
+  .horizontal-value {
+    font-size: 0.98rem;
+    padding: 0.5rem 0.7rem;
+    max-width: 100%;
   }
 }
 </style>
+  
