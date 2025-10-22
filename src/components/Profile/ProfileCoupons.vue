@@ -68,26 +68,22 @@ function formatDate(dateStr) {
   font-size: 1.3rem;
 }
 .cupom-card {
-  background: linear-gradient(120deg, #00aaff22 0%, #8f5fe822 100%);
-  border: 1.5px solid #00aaff;
-  border-radius: 1.1rem;
-  padding: 1.1rem 1.2rem;
-  color: #232e47;
-  box-shadow: 0 2px 10px #00aaff22;
-  margin-bottom: 0.5rem;
-  transition: box-shadow 0.2s, border-color 0.2s;
+  background: #ffffff; /* Fundo branco */
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Sombra leve */
+  border: 1.5px solid #e0e7ff; /* Borda azul clara */
+  padding: 1rem;
+  transition: all 0.2s ease-in-out;
 }
 .cupom-card:hover {
-  box-shadow: 0 4px 18px #00ffe1aa;
-  border-color: #00ffe1;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1); /* Sombra mais forte */
+  transform: translateY(-4px);
 }
 .cupom-code {
-  font-family: 'Orbitron', monospace;
-  color: #00ffe1;
-  font-size: 1.3rem;
+  font-family: 'Orbitron', sans-serif;
+  color: #007bff; /* Azul vibrante */
+  font-size: 1.2rem;
   font-weight: 700;
-  letter-spacing: 2px;
-  margin-bottom: 0.2rem;
 }
 .cupom-desc {
   color: #00aaff;

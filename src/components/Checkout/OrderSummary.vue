@@ -1,5 +1,5 @@
 <template> 
-    <div class="order-summary-modern">
+    <div class="order-summary">
         <div class="summary-header-modern">
             <i class="bi bi-cart-check"></i>
             <h5>Resumo do Pedido</h5>
@@ -60,14 +60,13 @@ function numberFormat(value) {
 </script>
 
 <style scoped>
-.order-summary-modern {
-  background: #fff;
-  border-radius: 1.3rem;
-  box-shadow: 0 8px 32px #7c3aed10;
-  border: 1.5px solid #e5e7eb;
-  padding: 2.2rem 2rem;
-  color: #232e47;
-  font-family: 'Inter', sans-serif;
+.order-summary {
+  background: #ffffff; /* Fundo branco */
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06); /* Sombra leve */
+  border: 1.5px solid #e5e7eb; /* Borda cinza clara */
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .summary-header-modern {
@@ -75,19 +74,21 @@ function numberFormat(value) {
   align-items: center;
   gap: 12px;
   margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #b8d8ff;
-  background: linear-gradient(90deg, #ede9fe 0%, #f9fafb 100%);
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  background: linear-gradient(90deg, #f8fafc 0%, #f3f4fa 100%);
+  border-radius: 1rem 1rem 0 0;
+  margin: -1.5rem -1.5rem 24px -1.5rem;
 }
 
 .summary-header-modern i {
   font-size: 24px;
-  color: #7c3aed;
+  color: #6a5ae0;
 }
 
 .summary-header-modern h5 {
   margin: 0;
-  color: #4f46e5;
+  color: #4a90e2;
   font-weight: 700;
   font-size: 20px;
   letter-spacing: 0.02em;
@@ -101,12 +102,13 @@ function numberFormat(value) {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 0;
+  padding: 16px 20px;
   border-bottom: 1px solid #e5e7eb;
   gap: 12px;
   background: #f9fafb;
   border-radius: 0.7rem;
   margin-bottom: 8px;
+  transition: all 0.2s;
 }
 
 .product-item:last-child {
@@ -138,12 +140,12 @@ function numberFormat(value) {
 
 .product-quantity {
   font-size: 14px;
-  color: #4f46e5;
+  color: #6a5ae0;
 }
 
 .product-price {
   font-weight: 700;
-  color: #7c3aed;
+  color: #6a5ae0;
   font-size: 18px;
 }
 
@@ -167,7 +169,7 @@ function numberFormat(value) {
 }
 
 .total-line span:first-child {
-  color: #4f46e5;
+  color: #4a90e2;
 }
 
 .total-line span:last-child {
@@ -178,11 +180,12 @@ function numberFormat(value) {
 .total-final {
   font-size: 20px;
   font-weight: 800;
-  color: #9333ea;
-  padding-top: 16px;
-  border-top: 1px solid #b8d8ff;
-  margin-top: 8px;
-  background: linear-gradient(90deg, #ede9fe 0%, #f9fafb 100%);
+  color: #00c9a7;
+  padding: 16px 20px;
+  border-top: 1px solid #e5e7eb;
+  margin: 8px -1.5rem -1.5rem -1.5rem;
+  background: linear-gradient(90deg, #f0fdfa 0%, #f3f4fa 100%);
+  border-radius: 0 0 1rem 1rem;
 }
 
 .total-final span:first-child {
@@ -190,7 +193,25 @@ function numberFormat(value) {
 }
 
 .total-final span:last-child {
-  color: #7c3aed;
+  color: #00c9a7;
+}
+
+.btn-apply-coupon {
+  background: linear-gradient(90deg, #4a90e2, #6a5ae0); /* Gradiente azul-roxo */
+  color: #ffffff; /* Texto branco */
+  border: none;
+  border-radius: 1rem;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  font-weight: 700;
+  transition: background 0.2s, box-shadow 0.2s;
+  margin-top: 1rem;
+  width: 100%;
+}
+
+.btn-apply-coupon:hover {
+  background: linear-gradient(90deg, #6a5ae0, #4a90e2); /* Gradiente invertido */
+  box-shadow: 0 4px 16px rgba(106, 90, 224, 0.2); /* Sombra ao passar o mouse */
 }
 
 @media (max-width: 768px) {

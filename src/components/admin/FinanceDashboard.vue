@@ -79,7 +79,7 @@
           <select v-model="filtroTipo" class="form-select">
         <option value="">Todos</option>
         <option v-for="tipo in tiposPagamentoDisponiveis" :key="tipo" :value="tipo">
-            {{ tipo === 'card' ? 'Cartão' : tipo === 'boleto' ? 'Boleto' : tipo }}
+            {{ paymentMethodLabel(tipo) }}
         </option>
         </select>
         </div>
@@ -87,8 +87,8 @@
           <label class="form-label text-light">Status</label>
           <select v-model="filtroStatus" class="form-select">
             <option value="">Todos</option>
-            <option v-for="status in statusDisponiveis" :key="status.value" :value="status.value">
-                {{ status.label }}
+            <option v-for="status in statusDisponiveis" :key="status" :value="status">
+                {{ statusLabel(status) }}
             </option>
             </select>
         </div>
@@ -130,6 +130,8 @@
                 <th>ID</th>
                 <th>Cliente</th>
                 <th>Email</th>
+                <th>CPF</th>
+                <th>Telefone</th>
                 <th>Valor Total</th>
                 <th>Tipo</th>
                 <th>Status</th>
@@ -144,8 +146,10 @@
                 <td>#{{ p.id }}</td>
                 <td>{{ p.customer_name || '-' }}</td>
                 <td>{{ p.customer_email || '-' }}</td>
+                <td>{{ p.customer_cpf || '-' }}</td>
+                <td>{{ p.customer_phone || '-' }}</td>
                 <td>R$ {{ p.amount ? (p.amount / 100).toLocaleString('pt-BR', {minimumFractionDigits:2}) : '-' }}</td>
-                <td>{{ p.payment_method || '-' }}</td>
+                <td>{{ paymentMethodLabel(p.payment_method) }}</td>
                 <td>
                   <span :class="['badge', statusBadgeClass(p.status)]">{{ statusLabel(p.status) }}</span>
                 </td>
@@ -159,7 +163,7 @@
                 </td>
               </tr>
               <tr v-if="!pagamentosFiltrados.length">
-                <td colspan="10" class="text-center text-muted py-4">Nenhum pagamento encontrado para os filtros selecionados.</td>
+                <td colspan="12" class="text-center text-muted py-4">Nenhum pagamento encontrado para os filtros selecionados.</td>
               </tr>
             </tbody>
           </table>
@@ -180,11 +184,13 @@
                   <h6 class="mb-2">Cliente</h6>
                   <div><strong>Nome:</strong> {{ modalPagamento.customer_name || '-' }}</div>
                   <div><strong>Email:</strong> {{ modalPagamento.customer_email || '-' }}</div>
+                  <div><strong>CPF:</strong> {{ modalPagamento.customer_cpf || '-' }}</div>
+                  <div><strong>Telefone:</strong> {{ modalPagamento.customer_phone || '-' }}</div>
                   <div><strong>ID Stripe:</strong> {{ modalPagamento.stripe_customer_id || '-' }}</div>
                 </div>
                 <div class="col-md-6">
                   <h6 class="mb-2">Pagamento</h6>
-                  <div><strong>Método:</strong> {{ modalPagamento.payment_method || '-' }}</div>
+                  <div><strong>Método:</strong> {{ paymentMethodLabel(modalPagamento.payment_method) }}</div>
                   <div><strong>Status:</strong> {{ statusLabel(modalPagamento.status) }}</div>
                   <div><strong>Valor:</strong> R$ {{ modalPagamento.amount ? (modalPagamento.amount / 100).toLocaleString('pt-BR', {minimumFractionDigits:2}) : '-' }}</div>
                   <div><strong>Taxa Stripe:</strong> R$ {{ modalPagamento.fee ? (modalPagamento.fee / 100).toLocaleString('pt-BR', {minimumFractionDigits:2}) : '-' }}</div>
@@ -306,8 +312,12 @@ const receitaMes = computed(() => {
   if (!filtroMes.value) return pagamentosFiltrados.value.reduce((sum, p) => p.amount ? sum + p.amount : sum, 0) / 100
   return pagamentosFiltrados.value.reduce((sum, p) => p.amount ? sum + p.amount : sum, 0) / 100
 })
-const totalConfirmados = computed(() => pagamentosFiltrados.value.filter(p => p.status === 'paid' || p.status === 'succeeded').length)
-const totalPendentes = computed(() => pagamentosFiltrados.value.filter(p => p.status === 'pending').length)
+const totalConfirmados = computed(() => pagamentosFiltrados.value.filter(p => 
+  p.status === 'paid' || p.status === 'succeeded' || p.status === 'orderstatus.completed'
+).length)
+const totalPendentes = computed(() => pagamentosFiltrados.value.filter(p => 
+  p.status === 'pending' || p.status === 'orderstatus.pending'
+).length)
 const totalTaxas = computed(() => pagamentosFiltrados.value.reduce((sum, p) => p.fee ? sum + p.fee : sum, 0) / 100)
 
 // Gráficos
@@ -390,11 +400,17 @@ function statusBadgeClass(status) {
   switch (String(status).toLowerCase()) {
     case 'paid':
     case 'succeeded':
+    case 'orderstatus.completed':
       return 'bg-success'
     case 'pending':
+    case 'orderstatus.pending':
       return 'bg-warning text-dark'
+    case 'processing':
+    case 'orderstatus.processing':
+      return 'bg-info'
     case 'failed':
     case 'canceled':
+    case 'orderstatus.cancelled':
       return 'bg-danger'
     case 'refunded':
       return 'bg-info'
@@ -407,10 +423,26 @@ function statusLabel(status) {
     case 'paid': return 'Pago'
     case 'succeeded': return 'Pago'
     case 'pending': return 'Pendente'
+    case 'processing': return 'Processando'
     case 'failed': return 'Falhou'
     case 'canceled': return 'Cancelado'
     case 'refunded': return 'Reembolsado'
+    case 'orderstatus.pending': return 'Pendente'
+    case 'orderstatus.processing': return 'Processando'
+    case 'orderstatus.completed': return 'Concluído'
+    case 'orderstatus.cancelled': return 'Cancelado'
     default: return status
+  }
+}
+
+function paymentMethodLabel(method) {
+  switch (String(method).toLowerCase()) {
+    case 'card': return 'Cartão'
+    case 'boleto': return 'Boleto'
+    case 'pix': return 'PIX'
+    case 'credit_card': return 'Cartão de Crédito'
+    case 'bank_transfer': return 'Transferência Bancária'
+    default: return method || 'Desconhecido'
   }
 }
 
@@ -418,14 +450,16 @@ function statusLabel(status) {
 function exportarCSV() {
   if (!pagamentosFiltrados.value.length) return
   const header = [
-    'ID', 'Cliente', 'Email', 'Valor Total', 'Tipo', 'Status', 'Data', 'Taxa', 'Líquido'
+    'ID', 'Cliente', 'Email', 'CPF', 'Telefone', 'Valor Total', 'Tipo', 'Status', 'Data', 'Taxa', 'Líquido'
   ]
   const rows = pagamentosFiltrados.value.map(p => [
     p.id,
     p.customer_name || '',
     p.customer_email || '',
+    p.customer_cpf || '',
+    p.customer_phone || '',
     p.amount ? (p.amount / 100).toFixed(2) : '',
-    p.payment_method || '',
+    paymentMethodLabel(p.payment_method),
     statusLabel(p.status),
     formatDate(p.created_at),
     p.fee ? (p.fee / 100).toFixed(2) : '',

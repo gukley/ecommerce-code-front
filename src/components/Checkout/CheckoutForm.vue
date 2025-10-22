@@ -328,14 +328,15 @@ function getSelectedAddressInfo() {
   margin: 0 auto;
   background: #fff;
   border-radius: 1.5rem;
-  box-shadow: 0 8px 32px #7c3aed10;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
   padding: 2.2rem 2rem 2rem 2rem;
   border: 1.5px solid #e5e7eb;
-  transition: box-shadow 0.2s;
+  transition: box-shadow 0.2s, transform 0.2s;
 }
 .checkout-form-modern:focus-within, .checkout-form-modern:hover {
-  box-shadow: 0 12px 40px #7c3aed30;
-  border-color: #7c3aed;
+  box-shadow: 0 12px 40px rgba(106, 90, 224, 0.15);
+  border-color: #6a5ae0;
+  transform: translateY(-2px);
 }
 .steps-indicator {
   display: flex;
@@ -392,19 +393,21 @@ function getSelectedAddressInfo() {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #b8d8ff;
-  background: linear-gradient(90deg, #ede9fe 0%, #f9fafb 100%);
+  padding: 1.2rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: linear-gradient(90deg, #f8fafc 0%, #f3f4fa 100%);
+  border-radius: 1rem 1rem 0 0;
+  margin: -1.2rem -1.5rem 1.5rem -1.5rem;
 }
 
 .section-header i {
   font-size: 1.5rem;
-  color: #7c3aed;
+  color: #6a5ae0;
 }
 
 .section-header h4 {
   margin: 0;
-  color: #4f46e5;
+  color: #4a90e2;
   font-weight: 700;
   font-size: 1.25rem;
   letter-spacing: 0.01em;
@@ -415,7 +418,7 @@ function getSelectedAddressInfo() {
   border-radius: 1.2rem;
   padding: 1.2rem 1rem;
   margin-bottom: 1.5rem;
-  box-shadow: 0 2px 12px #7c3aed10;
+  box-shadow: 0 2px 12px rgba(106, 90, 224, 0.1);
   border: 1.5px solid #e5e7eb;
 }
 
@@ -454,9 +457,9 @@ function getSelectedAddressInfo() {
 }
 
 .address-radio:checked + .address-label {
-  border-color: #7c3aed;
+  border-color: #6a5ae0;
   background: linear-gradient(135deg, #f3f4fa 0%, #ede9fe 100%);
-  box-shadow: 0 4px 20px #7c3aed20;
+  box-shadow: 0 4px 20px rgba(106, 90, 224, 0.2);
 }
 
 .address-info {
@@ -472,29 +475,34 @@ function getSelectedAddressInfo() {
 
 .address-details, .address-country {
   font-size: 0.97rem;
-  color: #7c3aed;
+  color: #6a5ae0;
 }
 
 .btn-secondary {
   background: #fff;
-  color: #7c3aed;
-  border: 2px solid #7c3aed;
+  color: #6a5ae0;
+  border: 2px solid #6a5ae0;
   border-radius: 0.9rem;
   padding: 0.85rem 1.5rem;
   font-size: 1rem;
   font-weight: 700;
   transition: all 0.2s;
   margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 .btn-secondary:hover {
-  background: #7c3aed;
+  background: linear-gradient(90deg, #4a90e2, #6a5ae0);
   color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(106, 90, 224, 0.3);
 }
 .address-form {
   background: #f9fafb;
   border-radius: 1.2rem;
   padding: 1.2rem 1rem;
-  box-shadow: 0 2px 12px #7c3aed10;
+  box-shadow: 0 2px 12px rgba(106, 90, 224, 0.1);
   border: 1.5px solid #e5e7eb;
   margin-bottom: 1.5rem;
 }
@@ -507,7 +515,7 @@ function getSelectedAddressInfo() {
   gap: 0.3rem;
 }
 .form-label {
-  color: #4f46e5;
+  color: #4a90e2;
   font-weight: 600;
   font-size: 15px;
   margin-bottom: 7px;
@@ -527,9 +535,9 @@ function getSelectedAddressInfo() {
 }
 .form-input:focus {
   outline: none;
-  border-color: #7c3aed;
+  border-color: #6a5ae0;
   background: #f9fafb;
-  box-shadow: 0 0 0 2px #7c3aed30;
+  box-shadow: 0 0 0 2px rgba(106, 90, 224, 0.3);
 }
 .form-input::placeholder {
   color: #b8d8ff;
@@ -553,28 +561,28 @@ function getSelectedAddressInfo() {
   gap: 8px;
 }
 .btn-primary {
-  background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+  background: linear-gradient(90deg, #4a90e2 0%, #6a5ae0 100%);
   color: #fff;
   border: none;
   border-radius: 0.9rem;
   padding: 0.85rem 1.5rem;
   font-size: 1rem;
   font-weight: 700;
-  box-shadow: 0 2px 12px #9333ea22;
+  box-shadow: 0 2px 12px rgba(106, 90, 224, 0.22);
   transition: background 0.22s, box-shadow 0.18s, transform 0.18s;
 }
 .btn-primary:hover {
-  background: linear-gradient(90deg, #7c3aed 0%, #4f46e5 100%);
+  background: linear-gradient(90deg, #6a5ae0 0%, #4a90e2 100%);
   color: #fff;
   transform: translateY(-2px) scale(1.04);
-  box-shadow: 0 4px 18px #9333ea30;
+  box-shadow: 0 4px 18px rgba(106, 90, 224, 0.3);
 }
 .selected-address-info {
   background: #f9fafb;
   border-radius: 1.2rem;
   padding: 1rem 1rem 0.5rem 1rem;
   margin-bottom: 1rem;
-  box-shadow: 0 2px 12px #7c3aed10;
+  box-shadow: 0 2px 12px rgba(106, 90, 224, 0.1);
   border: 1.5px solid #e5e7eb;
 }
 .selected-address {
@@ -590,7 +598,7 @@ function getSelectedAddressInfo() {
 }
 .selected-address i {
   font-size: 24px;
-  color: #7c3aed;
+  color: #6a5ae0;
 }
 
 /* Responsividade */

@@ -94,34 +94,38 @@ const totalPedidosFiltrados = computed(() => {
 });
 </script>
 <style scoped>
-/* ...estilos de filtro, copie da view original... */
 .filters-section {
-  background: var(--admin-bg-secondary);
+  background: rgba(27, 27, 38, 0.8);
   padding: 1.5rem;
-  border-radius: 0.5rem;
+  border-radius: 12px;
   margin-bottom: 2rem;
+  box-shadow: 0 2px 12px rgba(27, 27, 38, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
 }
-.card-filters {
-  box-shadow: 0 2px 12px #00000022;
-  border: 1px solid #374151;
+
+.filter-select,
+.filter-input {
+  background: #1e1e2d;
+  color: #e6e6e9;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 0.6rem 1rem;
+  font-size: 1rem;
 }
-.filter-select, .filter-input {
-  background: var(--admin-bg-tertiary);
-  color: var(--admin-text-primary);
-  border: 1px solid #374151;
-  border-radius: 0.5rem;
+
+.filter-select:focus,
+.filter-input:focus {
+  border-color: #7b61ff;
+  box-shadow: 0 0 0 0.2rem rgba(123, 97, 255, 0.3);
 }
-.filter-select:focus, .filter-input:focus {
-  background: var(--admin-bg-tertiary);
-  border-color: #64b5f6;
-  color: var(--admin-text-primary);
-  box-shadow: 0 0 0 0.2rem rgba(100, 181, 246, 0.25);
-}
+
 .btn-outline-secondary {
-  color: var(--admin-text-primary);
-  border-color: #374151;
+  color: #e6e6e9;
+  border-color: rgba(255, 255, 255, 0.1);
 }
+
 .btn-outline-secondary:hover {
-  background: #23233a;
+  background: #1b1b26;
 }
 </style>

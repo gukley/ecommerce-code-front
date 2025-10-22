@@ -87,7 +87,9 @@
 import { ref, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
-import axios from 'axios'; // Adicione esta importação
+import axios from 'axios';
+import { getAddressByCep } from '@/services/apiService'
+
 
 import CheckoutSteps from '@/components/Checkout/CheckoutSteps.vue';
 import CheckoutForm from '@/components/Checkout/CheckoutForm.vue';
@@ -124,33 +126,31 @@ const freteErro = ref('');
 
 // Função para buscar o CEP e calcular o frete
 async function calcularFretePorCep(cepInput) {
-  freteCalculando.value = true;
-  freteErro.value = '';
-  frete.value = 0;
+  freteCalculando.value = true
+  freteErro.value = ''
+  frete.value = 0
+
   try {
-    // Consulta o ViaCEP para validar o CEP
-    const response = await axios.get(`https://viacep.com.br/ws/${cepInput.replace(/\D/g, '')}/json/`);
-    if (response.data.erro) {
-      freteErro.value = 'CEP inválido!';
-      frete.value = 0;
-      return;
-    }
-    // Exemplo de cálculo: frete grátis para Sudeste, R$ 25 para Norte/Nordeste, R$ 15 para Sul/Centro-Oeste
-    const uf = response.data.uf;
+    const data = await getAddressByCep(cepInput.replace(/\D/g, ''))
+
+    // Exemplo simples de cálculo de frete baseado na UF
+    const uf = data.uf
     if (['SP', 'RJ', 'MG', 'ES'].includes(uf)) {
-      frete.value = 0;
+      frete.value = 0
     } else if (['AM', 'PA', 'MA', 'PI', 'CE', 'RN', 'PB', 'PE', 'AL', 'SE', 'BA', 'AP', 'RR', 'RO', 'TO'].includes(uf)) {
-      frete.value = 25;
+      frete.value = 25
     } else {
-      frete.value = 15;
+      frete.value = 15
     }
-  } catch (err) {
-    freteErro.value = 'Erro ao consultar CEP.';
-    frete.value = 0;
+
+  } catch (error) {
+    freteErro.value = 'CEP inválido ou não encontrado.'
+    console.error('Erro ao buscar CEP:', error)
   } finally {
-    freteCalculando.value = false;
+    freteCalculando.value = false
   }
 }
+
 
 const appliedCoupon = ref(null);
 
@@ -303,7 +303,7 @@ function alterarQuantidade({ productId, delta }) {
 
 <style scoped>
 .checkout-ggtech {
-  background: linear-gradient(120deg, #f8fafc 60%, #e9f1ff 100%) !important;
+  background: linear-gradient(135deg, #f8fafc 0%, #e9f1ff 50%, #f3f4fa 100%) !important;
   min-height: 100vh;
   color: #23233a !important;
   font-family: 'Inter', 'Poppins', Arial, sans-serif;
@@ -314,17 +314,18 @@ function alterarQuantidade({ productId, delta }) {
 .side-panel {
   background: #fff !important;
   border-radius: 1.5rem;
-  box-shadow: 0 8px 32px 0 #b8d8ff30;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
   border: 1.5px solid #e5e7eb;
   padding: 2.2rem 2rem 2rem 2rem;
   margin-bottom: 2rem;
-  transition: box-shadow 0.2s, border 0.2s;
+  transition: box-shadow 0.2s, border 0.2s, transform 0.2s;
 }
 
 .glass-card:focus-within, .glass-card:hover,
 .side-panel:focus-within, .side-panel:hover {
-  box-shadow: 0 12px 40px #7c3aed30;
-  border-color: #7c3aed;
+  box-shadow: 0 12px 40px rgba(106, 90, 224, 0.15);
+  border-color: #6a5ae0;
+  transform: translateY(-2px);
 }
 
 .main-card {
@@ -348,7 +349,7 @@ function alterarQuantidade({ productId, delta }) {
   gap: 1.5rem;
   background: #fff;
   border-radius: 1.5rem;
-  box-shadow: 0 8px 32px 0 #b8d8ff30;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
   border: 1.5px solid #e5e7eb;
   padding: 2rem 1.5rem;
 }
@@ -378,19 +379,19 @@ function alterarQuantidade({ productId, delta }) {
   padding: 0.6rem 1.3rem;
   font-size: 1rem;
   background: #fff !important;
-  color: #7c3aed !important;
-  border: 2px solid #7c3aed !important;
+  color: #6a5ae0 !important;
+  border: 2px solid #6a5ae0 !important;
   transition: all 0.2s;
-  box-shadow: 0 2px 8px #7c3aed10;
+  box-shadow: 0 2px 8px rgba(106, 90, 224, 0.1);
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 .btn-back:hover {
-  background: #7c3aed !important;
+  background: linear-gradient(90deg, #4a90e2, #6a5ae0) !important;
   color: #fff !important;
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px #7c3aed30;
+  box-shadow: 0 4px 15px rgba(106, 90, 224, 0.3);
 }
 
 /* CEP e frete */
@@ -398,12 +399,12 @@ function alterarQuantidade({ productId, delta }) {
   background: #f9fafb;
   border-radius: 1.1rem;
   padding: 1.2rem 1rem 1rem 1rem;
-  box-shadow: 0 2px 12px #7c3aed10;
+  box-shadow: 0 2px 12px rgba(106, 90, 224, 0.1);
   border: 1.5px solid #e5e7eb;
   margin-bottom: 1.5rem;
 }
 .cep-frete-box label {
-  color: #7c3aed;
+  color: #6a5ae0;
   font-weight: 700;
   font-size: 1.08rem;
   margin-bottom: 0.5rem;
@@ -419,75 +420,87 @@ function alterarQuantidade({ productId, delta }) {
   transition: border 0.2s, background 0.2s;
 }
 .input-group .form-control:focus {
-  border-color: #7c3aed;
+  border-color: #6a5ae0;
   background: #f9fafb;
   outline: none;
 }
 .input-group .btn {
   border-radius: 0 1.5rem 1.5rem 0;
-  background: linear-gradient(90deg, #4f46e5 0%, #9333ea 100%);
+  background: linear-gradient(90deg, #4a90e2 0%, #6a5ae0 100%);
   color: #fff;
   font-weight: 700;
   border: none;
   transition: background 0.18s, box-shadow 0.18s, transform 0.18s;
   padding: 0.5em 1.2em;
-  box-shadow: 0 2px 8px #9333ea10;
+  box-shadow: 0 2px 8px rgba(106, 90, 224, 0.1);
 }
 .input-group .btn:hover {
-  background: linear-gradient(90deg, #9333ea 0%, #4f46e5 100%);
+  background: linear-gradient(90deg, #6a5ae0 0%, #4a90e2 100%);
   transform: translateY(-2px) scale(1.04);
-  box-shadow: 0 4px 18px #9333ea30;
+  box-shadow: 0 4px 18px rgba(106, 90, 224, 0.3);
 }
 
 /* Resumo do pedido */
 .cart-summary-box {
-  background: #f9fafb;
-  border-radius: 1.3rem;
-  box-shadow: 0 2px 16px #4f46e510;
-  border: 1.5px solid #e5e7eb;
-  color: #232e47;
-  position: relative;
-  overflow: visible;
-}
-.cart-summary-title {
-  color: #4f46e5;
-  font-weight: 700;
-  font-size: 1.2rem;
-  letter-spacing: 0.5px;
-  position: relative;
-  padding-left: 1.1rem;
+  background: #ffffff; /* Fundo branco */
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06); /* Sombra leve */
+  border: 1.5px solid #e5e7eb; /* Borda cinza clara */
+  padding: 1.5rem;
   margin-bottom: 1.5rem;
 }
-.cart-summary-title::before {
-  content: '';
-  display: block;
-  position: absolute;
-  left: 0;
-  top: 0.2rem;
-  width: 6px;
-  height: 1.6em;
-  border-radius: 6px;
-  background: linear-gradient(180deg, #4f46e5 0%, #9333ea 100%);
-}
-.cart-summary-label {
-  font-weight: 600;
-  color: #232e47;
-}
-.cart-summary-value {
+.cart-summary-title {
+  font-size: 1.4rem;
   font-weight: 700;
-  color: #4f46e5;
+  color: #4a90e2; /* Azul principal */
+  margin-bottom: 1rem;
 }
-.cart-summary-divider {
-  border: none;
-  border-top: 2px solid #e5e7eb;
-  margin: 1.2rem 0;
+.cart-summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e5e7eb; /* Linha divisória */
+  font-size: 1rem;
+  color: #232e47; /* Texto escuro */
+}
+.cart-summary-item:last-child {
+  border-bottom: none;
+}
+.cart-summary-item .label {
+  font-weight: 600;
+}
+.cart-summary-item .value {
+  font-weight: 700;
 }
 .cart-summary-total {
-  color: #9333ea;
   font-size: 1.3rem;
   font-weight: 800;
-  letter-spacing: 0.5px;
-  text-shadow: 0 2px 12px #9333ea10;
+  color: #00c9a7; /* Verde-água */
+  margin-top: 1rem;
+  text-align: right;
+}
+.cart-summary-total .label {
+  font-size: 1.2rem;
+}
+.cart-summary-total .value {
+  font-size: 1.4rem;
+}
+.btn-apply-coupon {
+  background: linear-gradient(90deg, #4a90e2, #6a5ae0); /* Gradiente azul-roxo */
+  color: #ffffff; /* Texto branco */
+  border: none;
+  border-radius: 1rem;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  font-weight: 700;
+  transition: background 0.2s, box-shadow 0.2s;
+  margin-top: 1rem;
+  width: 100%;
+}
+.btn-apply-coupon:hover {
+  background: linear-gradient(90deg, #6a5ae0, #4a90e2); /* Gradiente invertido */
+  box-shadow: 0 4px 16px rgba(106, 90, 224, 0.2); /* Sombra ao passar o mouse */
 }
 
 /* Inputs cupom e CEP */

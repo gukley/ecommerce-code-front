@@ -69,7 +69,7 @@ const progressWidth = computed(() => {
 }
 .progress-bar-fg-modern {
   height: 100%;
-  background: linear-gradient(90deg, #4f46e5 0%, #9333ea 100%);
+  background: linear-gradient(90deg, #4a90e2 0%, #6a5ae0 100%);
   border-radius: 4px;
   transition: width 0.4s cubic-bezier(.4,2,.3,1);
 }
@@ -87,7 +87,7 @@ const progressWidth = computed(() => {
   min-width: 90px;
 }
 .step-modern.active, .step-modern.done {
-  color: #4f46e5;
+  color: #4a90e2;
   opacity: 1;
 }
 .step-label-modern {
@@ -109,20 +109,20 @@ const progressWidth = computed(() => {
   justify-content: center;
   font-size: 1.35rem;
   font-weight: 700;
-  color: #7c3aed;
+  color: #6a5ae0;
   margin-bottom: 0.1rem;
   transition: border 0.3s, background 0.3s;
-  box-shadow: 0 2px 12px #7c3aed10;
+  box-shadow: 0 2px 12px rgba(106, 90, 224, 0.1);
 }
 .step-modern.active .step-circle-modern,
 .step-modern.done .step-circle-modern {
-  border-color: #7c3aed;
-  background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
+  border-color: #6a5ae0;
+  background: linear-gradient(135deg, #4a90e2 0%, #6a5ae0 100%);
   color: #fff;
-  box-shadow: 0 4px 16px #7c3aed30;
+  box-shadow: 0 4px 16px rgba(106, 90, 224, 0.3);
 }
 .step-modern.done .step-circle-modern {
-  background: linear-gradient(135deg, #9333ea 0%, #4f46e5 100%);
+  background: linear-gradient(135deg, #6a5ae0 0%, #4a90e2 100%);
 }
 .step-circle-modern i {
   font-size: 1.5rem;

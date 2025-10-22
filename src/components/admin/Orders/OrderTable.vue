@@ -217,54 +217,71 @@ function formatAddress(address) {
 </script>
 
 <style scoped>
-/* ...copie os estilos da tabela da view OrderManagement.vue... */
 .table-responsive {
-  background: var(--admin-bg-secondary);
-  border-radius: 1rem;
+  background: #1b1b26;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.18);
-  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
-.order-table th, .order-table td {
+
+.order-table th,
+.order-table td {
   border: none;
 }
+
 .order-table th {
-  background: linear-gradient(90deg, #374151 0%, #64b5f6 100%);
-  color: #fff;
+  background: linear-gradient(90deg, #1b1b26 0%, #3bb4ff 100%);
+  color: #ffffff;
   font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  border-top: none;
-  padding: 1rem 0.7rem;
+  font-weight: 600;
+  padding: 1rem;
 }
+
 .order-table td {
   background: transparent;
-  color: #e8eaed;
+  color: #e6e6e9;
   font-size: 0.97rem;
-  padding: 1rem 0.7rem;
-  border-bottom: 1px solid #232e47;
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
-.order-table tbody tr {
-  transition: background 0.18s;
-}
+
 .order-table tbody tr:hover {
-  background: linear-gradient(90deg, #23233a 0%, #374151 100%);
-  box-shadow: 0 2px 12px #00ffe122;
+  background: rgba(27, 27, 38, 0.8);
+  box-shadow: 0 2px 12px rgba(123, 97, 255, 0.2);
 }
+
 .badge {
   font-size: 0.92rem;
   font-weight: 600;
   padding: 0.35rem 1rem;
   border-radius: 12px;
-  letter-spacing: 0.04em;
-  box-shadow: 0 1px 4px #00000018;
-  border: none;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
-.bg-success { background: linear-gradient(90deg,#43e97b 0%,#38f9d7 100%) !important; color: #fff !important; }
-.bg-danger { background: linear-gradient(90deg,#ff6b6b 0%,#f44336 100%) !important; color: #fff !important; }
-.bg-warning { background: linear-gradient(90deg,#f9d423 0%,#ff4e50 100%) !important; color: #222 !important; }
-.bg-info { background: linear-gradient(90deg,#64b5f6 0%,#42a5f5 100%) !important; color: #fff !important; }
-.bg-primary { background: linear-gradient(90deg,#667eea 0%,#764ba2 100%) !important; color: #fff !important; }
+
+.bg-success {
+  background: #5ce4b8;
+  color: #0e0e12;
+}
+
+.bg-danger {
+  background: #ff5c8a;
+  color: #ffffff;
+}
+
+.bg-warning {
+  background: #ffcc70;
+  color: #0e0e12;
+}
+
+.bg-info {
+  background: #3bb4ff;
+  color: #ffffff;
+}
+
+.bg-primary {
+  background: #7b61ff;
+  color: #ffffff;
+}
 .order-products-list {
   display: flex;
   flex-wrap: wrap;

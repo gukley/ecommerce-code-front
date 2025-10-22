@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { authGuard } from '@/router/guard.js'
 import CartView from '@/views/cart/CartView.vue'
 import Home from '@/views/home/HomePage.vue' // ajuste conforme o nome/caminho real do seu arquivo Home
-import FinanceDashboard from '@/views/FinanceDashboard.vue'
+import FinanceDashboard from '@/components/Admin/FinanceDashboard.vue'
 
 const routes = [
   {

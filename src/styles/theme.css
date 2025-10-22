@@ -268,3 +268,113 @@ body {
 .theme-glow {
   animation: glow 2s ease-in-out infinite;
 }
+
+/* Theme tokens e reset básico */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+
+:root{
+  --font-sans: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  --bg-page: #F8FAFC;             /* fundo geral */
+  --surface: #FFFFFF;             /* cards */
+  --primary-100: #EAF6FF;
+  --primary-200: #D7EDFF;
+  --primary: linear-gradient(135deg,#4A90E2,#6A5AE0); /* gradiente principal */
+  --primary-solid: #007BFF;       /* azul vibrante */
+  --accent: #6A5AE0;              /* roxo secundário */
+  --muted: #6C757D;               /* texto secundário */
+  --text: #0F1724;                /* texto principal */
+  --card-border: #E0E7FF;         /* borda leve */
+  --shadow-1: 0 6px 20px rgba(2,6,23,0.06);
+  --shadow-2: 0 4px 14px rgba(24,34,42,0.06);
+  --radius-lg: 14px;
+  --radius-md: 10px;
+  --radius-sm: 8px;
+  --gap: 20px;
+  --transition: 200ms ease;
+}
+
+/* Page base */
+html,body,#app{
+  height:100%;
+  background: var(--bg-page);
+  font-family: var(--font-sans);
+  color: var(--text);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  margin:0;
+}
+
+/* Utility */
+.small { font-size: .95rem; color: var(--muted); }
+.btn {
+  border: none;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: transform var(--transition), box-shadow var(--transition), filter var(--transition);
+}
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-1);
+  border: 1px solid var(--card-border);
+}
+
+/* Status chips */
+.chip {
+  display:inline-flex;
+  align-items:center;
+  gap:.5rem;
+  padding: .28rem .8rem;
+  border-radius: 999px;
+  font-weight:700;
+  color:#fff;
+  font-size:.88rem;
+  box-shadow: 0 4px 12px rgba(2,6,23,0.06);
+}
+.chip--pending { background: linear-gradient(90deg,#f9d423 0%,#ffb347 100%); color:#1f1f1f; }
+.chip--processing { background: linear-gradient(90deg,#64b5f6 0%,#42a5f5 100%); }
+.chip--shipped { background: linear-gradient(90deg,#667eea 0%,#764ba2 100%); }
+.chip--delivered { background: linear-gradient(90deg,#43e97b 0%,#38f9d7 100%); color:#082000; }
+.chip--cancelled { background: linear-gradient(90deg,#ff6b6b 0%,#f44336 100%); }
+
+/* Hover effects common */
+.card, .list-item {
+  transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+}
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 40px rgba(2,6,23,0.08);
+}
+.card:active, .btn:active { transform: scale(0.98); }
+
+/* Buttons examples */
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+  padding: 10px 16px;
+  font-weight: 700;
+  box-shadow: 0 8px 24px rgba(106,90,224,0.12);
+  border-radius: 12px;
+}
+.btn-primary:hover { filter: brightness(1.06); }
+
+/* Add-address floating button */
+.fab-add {
+  width:48px; height:48px; border-radius:50%;
+  display:inline-flex; align-items:center; justify-content:center;
+  background: linear-gradient(90deg,#00C853,#B2FF59);
+  color:#07210a; font-weight:800; box-shadow: 0 8px 28px rgba(0,200,83,0.12);
+  border: 2px solid rgba(0,0,0,0.03);
+}
+.fab-add:hover{ transform: translateY(-4px); filter: brightness(1.03); }
+
+/* Small helpers used in components */
+.row-gap { display:flex; gap:var(--gap); flex-wrap:wrap; }
+.col { flex:1 1 0; min-width:220px; }
+.section-title { font-size:1.15rem; font-weight:700; color:var(--text); margin-bottom:8px; }
+.kv { display:flex; gap:12px; align-items:center; }
+
+/* responsive tweaks */
+@media (max-width: 900px){
+  :root { --gap: 12px; }
+}

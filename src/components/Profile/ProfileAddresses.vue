@@ -30,53 +30,44 @@
 const props = defineProps({ addresses: Array })
 </script>
 <style scoped>
-.addresses-card.modern-addresses-card {
-  border-radius: 18px;
-  background: #f8f9fa;
-  box-shadow: 0 8px 32px 0 #b8d8ff30;
-  border: 1.5px solid #e5e7eb;
-}
-.bg-address {
-  background: #f3f4f8 !important;
-}
-.modern-address-text {
-  font-size: 1.08rem;
-  letter-spacing: 0.2px;
-  color: #232e47;
-  font-weight: 500;
-}
-.btn-green.modern-btn {
-  background: linear-gradient(90deg,#24e29b 60%, #4be3b0 100%);
-  color: #181e2a;
-  font-weight: 700;
+.addresses-card {
   border-radius: 12px;
-  border: none;
-  box-shadow: 0 2px 8px #24e29b30;
-  transition: background 0.2s, box-shadow 0.2s;
+  background: #ffffff; /* Fundo branco */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Sombra leve */
+  border: 1.5px solid #e0e7ff; /* Borda azul clara */
+  padding: 1.5rem;
 }
-.btn-green.modern-btn:hover { background: linear-gradient(90deg,#4be3b0 60%, #24e29b 100%); box-shadow: 0 4px 16px #24e29b60;}
-.btn-purple.modern-btn {
-  background: linear-gradient(90deg,#a470ff 60%, #ff6ad5 100%);
+
+.list-group-item {
+  background: #f8fafc; /* Fundo claro */
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Sombra leve */
+  padding: 1rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.list-group-item:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1); /* Sombra mais forte */
+  transform: translateY(-4px);
+}
+
+.btn-green {
+  background: linear-gradient(90deg, #00c853, #b2ff59); /* Gradiente verde */
   color: #fff;
-  border-radius: 12px;
-  font-weight: 700;
-  border: none;
-  box-shadow: 0 2px 8px #a470ff30;
-  transition: background 0.2s, box-shadow 0.2s;
-  padding: 7px 14px !important;
 }
-.btn-purple.modern-btn:hover { background: linear-gradient(90deg,#ff6ad5 60%, #a470ff 100%); color:#232e47; box-shadow: 0 4px 16px #a470ff60;}
-.btn-danger.modern-btn {
-  background: linear-gradient(90deg,#ff6a6a 60%, #ffb36a 100%);
+
+.btn-green:hover {
+  filter: brightness(1.1);
+}
+
+.btn-purple {
+  background: linear-gradient(90deg, #6a5ae0, #ff6b6b); /* Gradiente roxo → laranja */
   color: #fff;
-  border-radius: 12px;
-  font-weight: 700;
-  border: none;
-  box-shadow: 0 2px 8px #ff6a6a30;
-  transition: background 0.2s, box-shadow 0.2s;
-  padding: 7px 14px !important;
 }
-.btn-danger.modern-btn:hover { background: linear-gradient(90deg,#ffb36a 60%, #ff6a6a 100%); color:#232e47; box-shadow: 0 4px 16px #ff6a6a60;}
+
+.btn-purple:hover {
+  filter: brightness(1.1);
+}
 .text-blue { color: #399bff;}
 .modern-list-item {
   transition: box-shadow 0.2s, background 0.2s;

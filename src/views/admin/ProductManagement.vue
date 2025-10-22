@@ -237,7 +237,15 @@ const confirmDelete = async (productId) => {
       toast.success('Produto excluído com sucesso!');
       await fetchProducts();
     } catch (error) {
-      toast.error('Erro ao excluir produto: ' + (error.response?.data?.message || error.message));
+      console.error('Erro detalhado ao excluir produto:', error);
+      
+      // Tratamento específico para erro de relacionamento com tags
+      if (error.response?.data?.message?.includes('tag_products') || 
+          error.message?.includes('tag_products')) {
+        toast.error('Erro: Este produto possui tags associadas. Remova as tags antes de excluir o produto.');
+      } else {
+        toast.error('Erro ao excluir produto: ' + (error.response?.data?.message || error.message));
+      }
     }
   }
 };

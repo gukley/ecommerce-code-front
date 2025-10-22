@@ -151,6 +151,11 @@ export const clearCart = () => api.delete('/cart/clear')
 // ===== Endereços =====
 export const getAllAddresses = () => api.get('/addresses/').then(res => res.data)
 
+export async function getAddressByCep(cep) {
+  const response = await api.get(`/addresses/cep/${cep}`)
+  return response.data
+}
+
 export const createAddress = (addressData) => {
     const requiredFields = ['street', 'number', 'zip', 'bairro', 'city', 'state', 'country']
     for (const field of requiredFields) {

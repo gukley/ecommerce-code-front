@@ -152,103 +152,83 @@ function downloadOrderPDF(order) {
 </script>
 
 <style scoped>
-.orders-card.modern-orders-card {
-  border-radius: 18px;
-  background: #f8f9fa;
-  box-shadow: 0 8px 32px 0 #b8d8ff30;
-  border: 1.5px solid #e5e7eb;
+.orders-card {
+  border-radius: 12px;
+  background: #ffffff; /* Fundo branco */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Sombra leve */
+  border: 1.5px solid #e0e7ff; /* Borda azul clara */
+  padding: 1.5rem;
 }
-.bg-orders {
-  background: #f3f4f8 !important;
+
+.orders-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
-.text-orders {
-  color: #232e47 !important;
+
+.list-group-item {
+  background: #f8fafc; /* Fundo claro */
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Sombra leve */
+  padding: 1rem;
+  transition: all 0.2s ease-in-out;
 }
-.modern-badge {
-  font-size: 0.92rem;
-  border-radius: 8px;
-  letter-spacing: 0.5px;
-  box-shadow: 0 1px 6px #b8d8ff20;
-  border: none;
-  font-weight: 600;
-  padding: 0.32em 1em;
-  color: #fff !important;
+
+.list-group-item:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1); /* Sombra mais forte */
+  transform: translateY(-4px);
 }
-.bg-status-pending {
-  background: linear-gradient(90deg,#f9d423 0%,#ff4e50 100%) !important;
-}
-.bg-status-processing, .bg-status-confirmed {
-  background: linear-gradient(90deg,#64b5f6 0%,#42a5f5 100%) !important;
-}
-.bg-status-shipped {
-  background: linear-gradient(90deg,#667eea 0%,#764ba2 100%) !important;
-}
-.bg-status-delivered {
-  background: linear-gradient(90deg,#43e97b 0%,#38f9d7 100%) !important;
-}
-.bg-status-canceled, .bg-status-cancelled {
-  background: linear-gradient(90deg,#ff6b6b 0%,#f44336 100%) !important;
-}
-.modern-list-item {
-  transition: box-shadow 0.2s, background 0.2s;
-  border-radius: 14px !important;
-  background: #f3f4f8 !important;
-}
-.modern-list-item:hover {
-  box-shadow: 0 4px 16px #399bff30;
-  background: #eaf6ff !important;
-}
-.order-products-list {
-  border-left: 2px solid #b8d8ff30;
-  margin-left: 2px;
-  padding-left: 12px;
-}
-.order-product-item {
-  min-height: 54px;
-  background: #eaf6ff;
-  border-radius: 8px;
-  padding: 7px 0;
-}
+
 .order-product-img {
-  width: 48px;
-  height: 48px;
-  object-fit: cover;
+  width: 60px; /* Largura fixa */
+  height: 60px; /* Altura fixa */
+  object-fit: cover; /* Mantém a proporção */
+  border-radius: 8px; /* Bordas arredondadas */
+  background: #ffffff; /* Fundo branco */
+  border: 1.5px solid #e0e7ff; /* Borda azul clara */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Sombra leve */
+}
+
+.badge {
+  font-size: 0.9rem;
+  font-weight: 600;
   border-radius: 8px;
-  background: #fff;
-  border: 1.5px solid #b8d8ff;
-  box-shadow: 0 2px 8px #b8d8ff20;
+  padding: 0.3rem 0.8rem;
 }
-.btn-cancel-order {
-  font-size: 0.98rem;
-  border-radius: 10px;
-  padding: 7px 18px;
-  font-weight: 600;
-  border-width: 2px;
-  background: #fff;
-  color: #ff4e50;
-  border-color: #ff4e50;
-  transition: background 0.18s, color 0.18s, border 0.18s;
-}
-.btn-cancel-order:hover {
-  background: #ff4e50;
+
+.bg-status-pending {
+  background: linear-gradient(90deg, #f9d423, #ff4e50); /* Gradiente laranja → amarelo */
   color: #fff;
-  border-color: #ff4e50;
 }
-.btn-download-pdf {
-  font-size: 0.98rem;
-  border-radius: 10px;
-  padding: 7px 18px;
-  font-weight: 600;
-  border-width: 2px;
-  border-color: #399bff;
-  color: #399bff;
-  background: #fff;
-  transition: background 0.18s, color 0.18s, border 0.18s;
-}
-.btn-download-pdf:hover {
-  background: #399bff;
+
+.bg-status-canceled {
+  background: linear-gradient(90deg, #ff6b6b, #f44336); /* Gradiente cinza → vermelho */
   color: #fff;
-  border-color: #399bff;
+}
+
+.bg-status-delivered {
+  background: linear-gradient(90deg, #43e97b, #38f9d7); /* Gradiente verde suave */
+  color: #fff;
+}
+
+.btn-outline-info {
+  border-color: #007bff;
+  color: #007bff;
+}
+
+.btn-outline-info:hover {
+  background: #007bff;
+  color: #fff;
+}
+
+.btn-outline-danger {
+  border-color: #dc3545;
+  color: #dc3545;
+}
+
+.btn-outline-danger:hover {
+  background: #dc3545;
+  color: #fff;
 }
 @keyframes fadein {
   from { opacity: 0; transform: translateY(12px);}

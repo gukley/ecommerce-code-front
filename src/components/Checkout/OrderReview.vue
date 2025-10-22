@@ -146,12 +146,12 @@ const metodoPagamentoLabel = computed(() => {
 
 <style scoped>
 .order-review {
-  background: #1e1e2d;
-  border-radius: 16px;
+  background: #fff;
+  border-radius: 1.5rem;
   padding: 2.5rem;
-  color: #fff;
-  border: 1.5px solid rgba(0,255,225,0.09);
-  box-shadow: 0 12px 40px rgba(0,255,225,0.08);
+  color: #232e47;
+  border: 1.5px solid #e5e7eb;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
   font-family: 'Inter', sans-serif;
   max-width: 490px;
   margin: 0 auto;
@@ -163,66 +163,66 @@ const metodoPagamentoLabel = computed(() => {
   align-items: center;
   gap: 14px;
   margin-bottom: 22px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid rgba(0,255,225,0.07);
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  background: linear-gradient(90deg, #f8fafc 0%, #f3f4fa 100%);
+  border-radius: 1rem 1rem 0 0;
+  margin: -2.5rem -2.5rem 22px -2.5rem;
 }
 .review-header i {
   font-size: 29px;
-  color: #00ffe1;
+  color: #6a5ae0;
 }
 .review-header h4 {
   margin: 0;
-  color: #fff;
+  color: #4a90e2;
   font-size: 21px;
   font-weight: 700;
-  background: linear-gradient(120deg, #15fbe3 0%, #8f5fe8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-fill-color: transparent;
   letter-spacing: 0.03em;
 }
 .order-address-summary {
-  background: rgba(0,255,225,0.06);
+  background: #f0fdfa;
   border-radius: 10px;
   padding: 12px 16px;
   margin-bottom: 12px;
-  color: #00ffe1;
+  color: #059669;
   font-size: 1rem;
+  border: 1px solid #a7f3d0;
 }
 .address-title {
   font-weight: 700;
   font-size: 1rem;
   margin-bottom: 2px;
-  color: #00ffe1;
+  color: #059669;
   display: flex;
   align-items: center;
   gap: 6px;
 }
 .address-content {
-  color: #fff;
+  color: #232e47;
   font-size: 0.98rem;
   margin-left: 2px;
 }
 .order-payment-summary {
-  background: rgba(143,95,232,0.08);
+  background: #f0f9ff;
   border-radius: 10px;
   padding: 10px 16px;
   margin-bottom: 12px;
-  color: #8f5fe8;
+  color: #0369a1;
   font-size: 1rem;
+  border: 1px solid #bae6fd;
 }
 .payment-title {
   font-weight: 700;
   font-size: 1rem;
   margin-bottom: 2px;
-  color: #8f5fe8;
+  color: #0369a1;
   display: flex;
   align-items: center;
   gap: 6px;
 }
 .payment-content {
-  color: #fff;
+  color: #232e47;
   font-size: 0.98rem;
   margin-left: 2px;
 }
@@ -233,10 +233,13 @@ const metodoPagamentoLabel = computed(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding: 15px 20px;
+  border-bottom: 1px solid #e5e7eb;
   gap: 10px;
   transition: background 0.2s;
+  background: #f9fafb;
+  border-radius: 0.7rem;
+  margin-bottom: 8px;
 }
 .product-item:last-child {
   border-bottom: none;
@@ -251,35 +254,34 @@ const metodoPagamentoLabel = computed(() => {
   height: 44px;
   object-fit: cover;
   border-radius: 10px;
-  background: #23233a;
-  border: 1.5px solid #8f5fe8;
-  box-shadow: 0 1px 5px rgba(0,255,225,0.06);
+  background: #f3f4fa;
+  border: 1.5px solid #e5e7eb;
+  box-shadow: 0 1px 5px rgba(106, 90, 224, 0.1);
 }
 .product-name {
   font-weight: 600;
   font-size: 16px;
-  color: #fff;
+  color: #232e47;
   margin-bottom: 2px;
   letter-spacing: 0.01em;
 }
 .product-quantity {
   font-size: 13px;
-  color: #8fd6fb;
+  color: #6a5ae0;
   font-weight: 500;
   margin-top: 1px;
 }
 .product-price {
-  color: #00ffe1;
+  color: #6a5ae0;
   font-weight: 700;
   font-size: 18px;
   letter-spacing: 0.02em;
 }
 .divider {
-  height: 1.5px;
-  background: linear-gradient(90deg, #23233a 0%, #8f5fe8 100%);
+  height: 1px;
+  background: #e5e7eb;
   margin: 24px 0;
   border-radius: 2px;
-  opacity: 0.6;
 }
 .totals {
   display: flex;
@@ -291,42 +293,44 @@ const metodoPagamentoLabel = computed(() => {
   display: flex;
   justify-content: space-between;
   font-size: 16px;
-  color: #fff;
+  color: #232e47;
   font-weight: 500;
 }
 .total-line span:first-child {
-  color: #8fd6fb;
+  color: #4a90e2;
   font-weight: 600;
 }
 .total-line span:last-child {
   font-weight: 700;
+  color: #232e47;
 }
 .total-final {
   font-size: 21px;
   font-weight: 800;
-  color: #fff;
-  border-top: 1.5px solid #8f5fe8;
-  padding-top: 18px;
-  margin-top: 10px;
+  color: #00c9a7;
+  border-top: 1px solid #e5e7eb;
+  padding: 16px 20px;
+  margin: 10px -2.5rem -2.5rem -2.5rem;
+  background: linear-gradient(90deg, #f0fdfa 0%, #f3f4fa 100%);
+  border-radius: 0 0 1rem 1rem;
 }
 .total-final span:first-child {
-  color: #00ffe1;
+  color: #232e47;
 }
 .total-final span:last-child {
-  color: #00ffe1;
-  text-shadow: 0 2px 10px #00ffe1;
+  color: #00c9a7;
 }
 .btn-confirm {
   width: 100%;
-  background: linear-gradient(145deg, #00ffe1 0%, #8f5fe8 100%);
+  background: linear-gradient(90deg, #4a90e2 0%, #6a5ae0 100%);
   border: none;
-  border-radius: 50px;
+  border-radius: 1rem;
   padding: 16px 0;
   font-size: 18px;
   font-weight: 700;
-  color: #181828;
+  color: #fff;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(0,255,225,0.13);
+  box-shadow: 0 4px 16px rgba(106, 90, 224, 0.3);
   margin-top: 18px;
   display: flex;
   align-items: center;
@@ -340,17 +344,17 @@ const metodoPagamentoLabel = computed(() => {
   filter: grayscale(0.5);
 }
 .btn-confirm:hover {
-  background: linear-gradient(145deg, #8f5fe8 0%, #00ffe1 100%);
+  background: linear-gradient(90deg, #6a5ae0 0%, #4a90e2 100%);
   transform: translateY(-1px) scale(1.04);
-  box-shadow: 0 6px 22px rgba(0,255,225,0.19);
+  box-shadow: 0 6px 22px rgba(106, 90, 224, 0.4);
 }
 
 .pedido-criado-success {
   text-align: center;
   padding: 2rem 1rem;
-  background: rgba(0,255,225,0.05);
+  background: #f0fdfa;
   border-radius: 12px;
-  border: 1px solid rgba(0,255,225,0.2);
+  border: 1px solid #a7f3d0;
 }
 
 .success-icon {
@@ -359,19 +363,19 @@ const metodoPagamentoLabel = computed(() => {
 
 .success-icon i {
   font-size: 3rem;
-  color: #00ffe1;
-  filter: drop-shadow(0 0 10px #00ffe1);
+  color: #00c9a7;
+  filter: drop-shadow(0 0 10px rgba(0, 201, 167, 0.3));
 }
 
 .pedido-criado-success h4 {
-  color: #00ffe1;
+  color: #00c9a7;
   font-size: 1.5rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
 }
 
 .pedido-criado-success p {
-  color: #8fd6fb;
+  color: #232e47;
   font-size: 1rem;
   margin-bottom: 1.5rem;
 }

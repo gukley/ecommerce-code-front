@@ -1,5 +1,5 @@
 <template>
-  <div class="coupon-input-modern mb-3">
+  <div class="coupon-input mb-3">
     <label class="form-label" for="coupon-code">Cupom de desconto</label>
     <div class="input-group">
       <input
@@ -12,7 +12,7 @@
         @keyup.enter="applyCoupon"
       />
       <button
-        class="btn btn-coupon-modern"
+        class="btn btn-coupon"
         :disabled="loading || !couponCode"
         @click="applyCoupon"
       >
@@ -78,56 +78,62 @@ async function applyCoupon() {
 </script>
 
 <style scoped>
-.coupon-input-modern {
-  background: #fff;
-  border-radius: 1.1rem;
-  padding: 1.2rem 1rem;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 2px 12px #7c3aed10;
+.coupon-input {
+  background: #ffffff;
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
   border: 1.5px solid #e5e7eb;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
 }
+
 .form-label {
-  color: #7c3aed;
+  color: #6a5ae0;
   font-weight: 700;
   margin-bottom: 0.5rem;
 }
+
 .input-group {
   display: flex;
   gap: 0.5rem;
 }
+
 .coupon-input-box {
   border-radius: 1.5rem 0 0 1.5rem;
   border: 1.5px solid #e5e7eb;
-  background: #fff;
-  color: #23233a;
+  background: #f9fafb;
+  color: #232e47;
   font-size: 1rem;
-  padding: 0.7rem 1.1rem;
-  box-shadow: 0 2px 8px #7c3aed10;
+  padding: 0.75rem 1rem;
   transition: border 0.2s, background 0.2s;
 }
+
 .coupon-input-box:focus {
-  border-color: #7c3aed;
-  background: #f9fafb;
-  outline: none;
+  border-color: #6a5ae0;
+  background: #ffffff;
+  box-shadow: 0 0 0 2px rgba(106, 90, 224, 0.3);
 }
-.btn-coupon-modern {
+
+.btn-coupon {
   border-radius: 0 1.5rem 1.5rem 0;
-  background: linear-gradient(90deg, #4f46e5 0%, #9333ea 100%);
-  color: #fff;
-  font-weight: 700;
+  background: linear-gradient(90deg, #4a90e2, #6a5ae0);
+  color: #ffffff;
   border: none;
-  transition: background 0.18s, box-shadow 0.18s, transform 0.18s;
-  padding: 0.5em 1.2em;
-  box-shadow: 0 2px 8px #9333ea10;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  transition: background 0.2s, box-shadow 0.2s;
 }
-.btn-coupon-modern:hover {
-  background: linear-gradient(90deg, #9333ea 0%, #4f46e5 100%);
-  transform: translateY(-2px) scale(1.04);
-  box-shadow: 0 4px 18px #9333ea30;
+
+.btn-coupon:hover {
+  background: linear-gradient(90deg, #6a5ae0, #4a90e2);
+  box-shadow: 0 4px 16px rgba(106, 90, 224, 0.2);
 }
+
 .text-danger {
   color: #ff6b6b;
 }
+
 .text-success {
   color: #43e97b;
 }

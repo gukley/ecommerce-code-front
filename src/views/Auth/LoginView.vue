@@ -181,7 +181,7 @@ const handleLogin = async () => {
   border-radius: 1.5rem;
   box-shadow: 0 4px 32px 0 rgba(79, 140, 255, 0.08), 0 1.5px 8px 0 rgba(163, 98, 255, 0.07);
   padding: 2.5rem 2rem 2rem 2rem;
-  max-width: 400px;
+  max-width: 430px;
   width: 100%;
   border: none;
   display: flex;

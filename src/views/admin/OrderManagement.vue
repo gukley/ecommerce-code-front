@@ -253,39 +253,20 @@ async function changeOrderStatus(orderId, statusData) {
 </script>
 
 <style scoped>
-:root {
-  --admin-bg-primary: #0f0f23;
-  --admin-bg-secondary: #181828;
-  --admin-bg-tertiary: #202038;
-  --admin-accent-primary: #00ffe1;
-  --admin-accent-secondary: #8f5fe8;
-  --admin-text-primary: #ffffff;
-  --admin-text-secondary: rgba(255, 255, 255, 0.8);
-  --admin-text-muted: rgba(255, 255, 255, 0.6);
-  --admin-border-light: rgba(255, 255, 255, 0.1);
-  --admin-shadow-light: rgba(0, 0, 0, 0.4);
-  --admin-danger: #ff6b6b;
-  --admin-border-medium: rgba(255, 255, 255, 0.2);
-}
-
 .order-management {
-  background: linear-gradient(120deg, #10141a 0%, #181e2a 80%, #232e47 100%);
+  background: linear-gradient(135deg, #0e0e12 0%, #12121a 100%);
   min-height: 100vh;
-  color: var(--admin-text-primary);
+  color: #e6e6e9;
   padding: 2rem 1rem;
-  max-width: 1280px;
-  margin: 0 auto;
-  font-family: 'Inter', 'Rajdhani', Arial, sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 .text-primary-ggtech {
-  background: linear-gradient(90deg, #64b5f6 0%, #42a5f5 100%);
+  background: linear-gradient(90deg, #7b61ff 0%, #3bb4ff 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-clip: text;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 2.2rem;
-  letter-spacing: 0.02em;
 }
 
 .admin-header {
@@ -294,254 +275,150 @@ async function changeOrderStatus(orderId, statusData) {
   gap: 1.2rem;
   margin-bottom: 2rem;
 }
+
 .admin-icon {
-  background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%);
+  background: linear-gradient(135deg, #7b61ff 0%, #3bb4ff 100%);
   border-radius: 50%;
   padding: 0.7rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 12px #64b5f633;
+  box-shadow: 0 2px 12px rgba(123, 97, 255, 0.3);
 }
+
 .admin-subtitle {
   color: #b0b7c3;
   font-size: 1.08rem;
-  margin-top: 2px;
   font-weight: 500;
 }
 
 /* Filtros */
 .filters-section {
-  background: rgba(24,30,42,0.92);
+  background: rgba(27, 27, 38, 0.8);
   padding: 1.5rem;
-  border-radius: 0.7rem;
+  border-radius: 12px;
   margin-bottom: 2rem;
-  box-shadow: 0 2px 12px #232e4720;
-  border: 1.5px solid #232e47;
+  box-shadow: 0 2px 12px rgba(27, 27, 38, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
 }
-.card-filters {
-  box-shadow: 0 2px 12px #00000022;
-  border: 1px solid #374151;
+
+.filter-select,
+.filter-input {
+  background: #1e1e2d;
+  color: #e6e6e9;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 0.6rem 1rem;
+  font-size: 1rem;
 }
-.filter-select, .filter-input {
-  background: #181e2a;
-  color: #e8eaed;
-  border: 1px solid #374151;
-  border-radius: 0.5rem;
+
+.filter-select:focus,
+.filter-input:focus {
+  border-color: #7b61ff;
+  box-shadow: 0 0 0 0.2rem rgba(123, 97, 255, 0.3);
 }
-.filter-select:focus, .filter-input:focus {
-  background: #181e2a;
-  border-color: #64b5f6;
-  color: #e8eaed;
-  box-shadow: 0 0 0 0.2rem rgba(100, 181, 246, 0.25);
-}
+
 .btn-outline-secondary {
-  color: #e8eaed;
-  border-color: #374151;
+  color: #e6e6e9;
+  border-color: rgba(255, 255, 255, 0.1);
 }
+
 .btn-outline-secondary:hover {
-  background: #23233a;
+  background: #1b1b26;
 }
 
 /* Tabela de pedidos */
 .table-responsive.order-table-container {
   background: none;
-  border-radius: 1.2rem;
-  overflow: visible;
+  border-radius: 12px;
+  overflow: hidden;
   box-shadow: none;
   border: none;
   margin-bottom: 2rem;
-  padding: 0.5rem 0.5rem 0.5rem 0.5rem;
 }
+
 .glass-table {
-  background: rgba(24,30,42,0.97);
-  border-radius: 1.2rem;
-  box-shadow: 0 8px 32px 0 #232e4780;
-  border: 1.5px solid #232e47;
+  background: rgba(27, 27, 38, 0.9);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(27, 27, 38, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(8px);
-  margin-bottom: 2rem;
-  transition: box-shadow 0.2s;
-  padding: 0.5rem;
+  padding: 1rem;
 }
-.order-table th, .order-table td {
+
+.order-table th,
+.order-table td {
   border: none;
 }
+
 .order-table th {
-  background: linear-gradient(90deg, #374151 0%, #64b5f6 100%);
-  color: #fff;
+  background: linear-gradient(90deg, #1b1b26 0%, #3bb4ff 100%);
+  color: #ffffff;
   font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  border-top: none;
+  font-weight: 600;
+  padding: 1rem;
 }
+
 .order-table td {
   background: transparent;
-  color: #e8eaed;
+  color: #e6e6e9;
   font-size: 0.97rem;
-  border-bottom: 1px solid #232e47;
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
-.order-table tbody tr {
-  transition: background 0.2s;
-}
+
 .order-table tbody tr:hover {
-  background: linear-gradient(90deg, #23233a 0%, #374151 100%);
+  background: rgba(27, 27, 38, 0.8);
+  box-shadow: 0 2px 12px rgba(123, 97, 255, 0.2);
 }
+
 .badge {
   font-size: 0.92rem;
   font-weight: 600;
   padding: 0.35rem 1rem;
-  border-radius: 8px;
-  letter-spacing: 0.04em;
-  box-shadow: 0 1px 4px #00000018;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
+
 .bg-success {
-  background: linear-gradient(90deg,#43e97b 0%,#38f9d7 100%) !important;
-  color: #fff !important;
+  background: #5ce4b8;
+  color: #0e0e12;
 }
+
 .bg-danger {
-  background: linear-gradient(90deg,#ff6b6b 0%,#f44336 100%) !important;
-  color: #fff !important;
+  background: #ff5c8a;
+  color: #ffffff;
 }
+
 .bg-warning {
-  background: linear-gradient(90deg,#f9d423 0%,#ff4e50 100%) !important;
-  color: #222 !important;
+  background: #ffcc70;
+  color: #0e0e12;
 }
+
 .bg-info {
-  background: linear-gradient(90deg,#64b5f6 0%,#42a5f5 100%) !important;
-  color: #fff !important;
+  background: #3bb4ff;
+  color: #ffffff;
 }
+
 .bg-primary {
-  background: linear-gradient(90deg,#667eea 0%,#764ba2 100%) !important;
-  color: #fff !important;
-}
-.order-products-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-.order-product-item {
-  background: #23233a;
-  border-radius: 0.5rem;
-  padding: 0.5rem 0.7rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  box-shadow: 0 2px 8px #00000010;
-  min-width: 160px;
-}
-.order-product-img {
-  width: 48px;
-  height: 48px;
-  object-fit: cover;
-  border-radius: 0.5rem;
-  border: 1.5px solid #374151;
-  background: #181828;
-}
-.order-product-info {
-  flex: 1;
-}
-.order-product-name {
-  font-weight: 600;
-  color: #8fd6fb;
-  font-size: 0.98rem;
-}
-.order-product-qty-price {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  color: #e8eaed;
-  font-size: 0.93rem;
-}
-
-/* Modal de detalhes */
-.order-detail-modal {
-  background: #23233a;
-  color: #e8eaed;
-  border-radius: 1.2rem;
-  box-shadow: 0 8px 32px #00000040;
-  border: 1px solid #374151;
-}
-.modal-header {
-  border-bottom: 1px solid #374151;
-  background: linear-gradient(90deg, #374151 0%, #64b5f6 100%);
-}
-.modal-title {
-  font-size: 1.25rem;
-  color: #64b5f6;
-  font-weight: 700;
-}
-.modal-body {
-  padding: 1.5rem;
-}
-.modal-footer {
-  border-top: 1px solid #374151;
-  padding: 1rem;
-}
-.btn-close {
-  background: transparent;
-  border: none;
-  color: #e8eaed;
-  font-size: 1.5rem;
-  filter: invert(1);
-}
-.btn-close:hover {
-  color: #64b5f6;
-}
-
-/* Paginação */
-.pagination-controls {
-  margin-top: 1.5rem;
-}
-.btn-pagination {
-  background: linear-gradient(90deg,#64b5f6 0%,#42a5f5 100%);
-  color: #fff;
-  border: none;
-  font-weight: 600;
-  border-radius: 0.5rem;
-  padding: 0.5rem 1.2rem;
-  margin: 0 0.2rem;
-  transition: background 0.2s;
-}
-.btn-pagination:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-.page-info {
-  color: #90caf9;
-  font-weight: 600;
-  font-size: 1.05rem;
-  margin: 0 0.7rem;
+  background: #7b61ff;
+  color: #ffffff;
 }
 
 /* Responsivo */
 @media (max-width: 900px) {
   .order-management {
     padding: 1.2rem 0.5rem;
-    min-width: unset;
-    max-width: 99vw;
   }
+
   .admin-header {
     flex-direction: column;
     gap: 0.7rem;
-    margin-bottom: 1.2rem;
   }
-  .table th, .table td {
-    padding: 0.7rem;
-    font-size: 0.95rem;
-  }
-  .order-product-item {
-    min-width: 120px;
-    padding: 0.3rem 0.5rem;
-  }
+
   .glass-table {
-    padding: 0.2rem 0.2rem 0.2rem 0.2rem;
-    border-radius: 0.7rem;
-  }
-}
-@media (max-width: 600px) {
-  .glass-table {
-    padding: 0.1rem 0.1rem 0.1rem 0.1rem;
-    border-radius: 0.4rem;
+    padding: 0.5rem;
   }
 }
 </style>

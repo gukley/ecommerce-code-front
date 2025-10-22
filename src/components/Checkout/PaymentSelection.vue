@@ -236,31 +236,33 @@ async function confirmarPagamento() {
 
 <style scoped>
 .payment-section {
-  background: #f9fafb;
-  border-radius: 1.2rem;
-  padding: 1.2rem 1rem;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 2px 12px #7c3aed10;
+  background: #ffffff;
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
   border: 1.5px solid #e5e7eb;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .section-header {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #b8d8ff;
-  background: linear-gradient(90deg, #ede9fe 0%, #f9fafb 100%);
+  padding: 1.2rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: linear-gradient(90deg, #f8fafc 0%, #f3f4fa 100%);
+  border-radius: 1rem 1rem 0 0;
+  margin: -1.5rem -1.5rem 1.5rem -1.5rem;
 }
 
 .section-header i {
   font-size: 1.5rem;
-  color: #7c3aed;
+  color: #6a5ae0;
 }
 
 .section-header h4 {
   margin: 0;
-  color: #4f46e5;
+  color: #4a90e2;
   font-weight: 700;
   font-size: 1.25rem;
   letter-spacing: 0.01em;
@@ -299,7 +301,7 @@ async function confirmarPagamento() {
 
 .payment-label i {
   font-size: 1.5rem;
-  color: #7c3aed;
+  color: #6a5ae0;
 }
 
 .payment-label span {
@@ -308,14 +310,14 @@ async function confirmarPagamento() {
 }
 
 .payment-radio:checked + .payment-label {
-  border-color: #7c3aed;
+  border-color: #6a5ae0;
   background: linear-gradient(135deg, #ede9fe 0%, #f9fafb 100%);
-  box-shadow: 0 4px 20px #7c3aed20;
-  color: #7c3aed;
+  box-shadow: 0 4px 20px rgba(106, 90, 224, 0.2);
+  color: #6a5ae0;
 }
 
 .payment-radio:checked + .payment-label i {
-  color: #4f46e5;
+  color: #4a90e2;
 }
 
 .pix-section, .card-section, .boleto-section {
@@ -327,11 +329,11 @@ async function confirmarPagamento() {
   align-items: center;
   gap: 0.5rem;
   padding: 1rem;
-  background: #ede9fe;
-  border: 1.5px solid #b8d8ff;
+  background: #f0fdfa;
+  border: 1.5px solid #a7f3d0;
   border-radius: 0.5rem;
   margin-bottom: 1rem;
-  color: #7c3aed;
+  color: #059669;
 }
 
 .pix-info i {
@@ -348,10 +350,10 @@ async function confirmarPagamento() {
   padding: 1rem;
   background: #fff;
   border-radius: 0.75rem;
-  border: 2px solid #7c3aed;
+  border: 2px solid #6a5ae0;
   color: #232e47;
   font-size: 1.15rem;
-  box-shadow: 0 2px 12px #7c3aed22;
+  box-shadow: 0 2px 12px rgba(106, 90, 224, 0.22);
   min-height: 56px;
 }
 
@@ -370,7 +372,7 @@ async function confirmarPagamento() {
 }
 
 .btn-primary {
-  background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+  background: linear-gradient(90deg, #4a90e2 0%, #6a5ae0 100%);
   color: white;
   border: none;
   padding: 0.875rem 1.5rem;
@@ -379,14 +381,14 @@ async function confirmarPagamento() {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px #7c3aed30;
+  box-shadow: 0 4px 15px rgba(106, 90, 224, 0.3);
   width: 100%;
 }
 
 .btn-primary:hover {
-  background: linear-gradient(90deg, #7c3aed 0%, #4f46e5 100%);
+  background: linear-gradient(90deg, #6a5ae0 0%, #4a90e2 100%);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px #7c3aed40;
+  box-shadow: 0 6px 20px rgba(106, 90, 224, 0.4);
 }
 
 .btn-primary:disabled {
@@ -397,11 +399,11 @@ async function confirmarPagamento() {
 
 .boleto-section {
   margin-top: 1rem;
-  background: #ede9fe;
+  background: #f0fdfa;
   border-radius: 0.7rem;
   padding: 1.2rem 1rem;
-  border: 1.5px solid #b8d8ff;
-  box-shadow: 0 1px 6px #7c3aed10;
+  border: 1.5px solid #a7f3d0;
+  box-shadow: 0 1px 6px rgba(106, 90, 224, 0.1);
 }
 
 .boleto-info {
@@ -409,7 +411,7 @@ async function confirmarPagamento() {
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 1rem;
-  color: #7c3aed;
+  color: #059669;
 }
 
 .form-group {
@@ -417,7 +419,7 @@ async function confirmarPagamento() {
 }
 
 .form-group label {
-  color: #4f46e5;
+  color: #4a90e2;
   font-weight: 600;
   font-size: 15px;
   margin-bottom: 7px;
@@ -439,9 +441,51 @@ async function confirmarPagamento() {
 
 .form-input:focus {
   outline: none;
-  border-color: #7c3aed;
+  border-color: #6a5ae0;
   background: #f9fafb;
-  box-shadow: 0 0 0 2px #7c3aed30;
+  box-shadow: 0 0 0 2px rgba(106, 90, 224, 0.3);
+}
+
+.payment-method {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 1rem;
+  background: #f9fafb;
+  transition: border 0.2s, background 0.2s;
+  cursor: pointer;
+}
+
+.payment-method:hover {
+  border-color: #6a5ae0;
+  background: #f3f4fa;
+}
+
+.payment-method.active {
+  border-color: #4a90e2;
+  background: linear-gradient(135deg, #4a90e2, #6a5ae0);
+  color: #ffffff;
+}
+
+.payment-method i {
+  font-size: 1.5rem;
+  color: #6a5ae0;
+}
+
+.payment-method.active i {
+  color: #ffffff;
+}
+
+.payment-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #232e47;
+}
+
+.payment-label.active {
+  color: #ffffff;
 }
 
 @media (max-width: 768px) {
