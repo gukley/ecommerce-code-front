@@ -246,6 +246,10 @@ export const getFinance = async () => {
   return data;
 };
 
+export const deleteModerator = (id) => {
+  return api.delete(`/users/moderators/${id}`)
+}
+
 
 // ===== Demais exports =====
 export default {

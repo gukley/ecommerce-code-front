@@ -22,7 +22,7 @@
           </div>
           <div class="footer-payment mt-4">
             <!-- <img src="/cartoes.png" alt="Formas de pagamento" class="payment-img"> -->
-            <span class="footer-payment-text">Aceitamos cartões, Pix e boleto</span>
+            <span class="footer-payment-text">Aceitamos cartões de crédito</span>
           </div>
         </div>
         <!-- LINKS RÁPIDOS -->
@@ -53,7 +53,7 @@
           <ul class="list-unstyled footer-links">
             <li>
               <a href="mailto:contato@ggtech.com" class="text-decoration-none">
-                <i class="fas fa-envelope me-2"></i>contato@ggtech.com
+                <i class="fas fa-envelope me-2"></i>ggtech10adm@gmail.com
               </a>
             </li>
             <li>

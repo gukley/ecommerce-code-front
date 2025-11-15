@@ -61,6 +61,17 @@
             <input id="city" type="text" class="form-input" v-model="form.city" required />
           </div>
 
+         <div class="form-group">
+          <label class="form-label" for="bairro">Bairro</label>
+          <input
+            id="bairro"
+            type="text"
+            class="form-input"
+            v-model="form.bairro"
+            required
+          />
+        </div>
+
           <div class="form-group">
             <label class="form-label" for="state">Estado</label>
             <input id="state" type="text" class="form-input" v-model="form.state" required />
@@ -153,7 +164,8 @@ const form = reactive({
   city: '',
   state: '',
   country: '',
-  zip: ''
+  zip: '',
+  bairro: ''
 })
 
 const enderecos = ref([])
@@ -196,6 +208,7 @@ watch(() => form.zip, async (novoCep) => {
 
       form.street = data.logradouro || ''
       form.city = data.localidade || ''
+      form.bairro = data.bairro || ''
       form.state = data.uf || ''
       form.country = 'Brasil'
 
@@ -245,9 +258,13 @@ async function avancarEtapaEndereco() {
         number: form.number,
         city: form.city,
         state: form.state,
-        zip: form.zip
-      }
-      if (!addressPayload.street || !addressPayload.number || !addressPayload.city || !addressPayload.state || !addressPayload.zip) {
+        zip: form.zip,
+        bairro: form.bairro,
+        country: form.country
+
+     }
+      if (!addressPayload.street || !addressPayload.number || !addressPayload.city || 
+      !addressPayload.state || !addressPayload.zip || !addressPayload.bairro)  {
         toast.error('Por favor, preencha todos os campos do endereço.')
         return
       }

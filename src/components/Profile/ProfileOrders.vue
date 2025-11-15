@@ -66,7 +66,7 @@ function downloadOrderPDF(order) {
   doc.setFontSize(12)
   doc.text('Data: ' + new Date(order.order_date).toLocaleDateString('pt-BR'), 15, 30)
   doc.text('Status: ' + translateStatus(order.status), 15, 38)
-  doc.text('Total: ' + formatPrice(order.total_amount ?? order.total ?? getOrderTotal(order)), 15, 46)
+  doc.text('Total: ' + formatPrice(order.total_amount), 15, 46)
   doc.text('Produtos:', 15, 56)
 
   let y = 64
@@ -151,8 +151,8 @@ function closeOrderDetails() {
 
           <div class="d-flex justify-content-between align-items-center gap-3 mt-2">
             <span class="fw-bold text-orders fs-5">
-              Total: {{ formatPrice(order.total_amount ?? order.total ?? getOrderTotal(order)) }}
-            </span>
+              Total: {{ formatPrice(order.total_amount) }}
+           </span>
             <div class="d-flex gap-2">
               <button
                 class="btn btn-outline-info"
@@ -205,7 +205,8 @@ function closeOrderDetails() {
                 >
                   {{ product.name }} - Qtd: {{ product.quantity ?? 1 }} -
                   Unitário: {{ formatPrice(product.unit_price ?? product.price) }} -
-                  Subtotal: {{ formatPrice((product.unit_price ?? product.price) * (product.quantity ?? 1)) }}
+                  SubTotal: {{ formatPrice(selectedOrder.total_amount) }}
+
                 </li>
               </ul>
             </div>

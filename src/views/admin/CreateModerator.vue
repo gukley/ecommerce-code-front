@@ -346,7 +346,7 @@ async function excluirModerador() {
   loadingExcluir.value = true
   try {
     // Corrija aqui: use deleteUser(excluirId.value) para deletar moderador pelo ID
-    await apiService.deleteUser(excluirId.value)
+    await apiService.deleteModerator(excluirId.value)
     showToast('Moderador excluído!', 'success')
     await buscarModeradores()
     showModalExcluir.value = false

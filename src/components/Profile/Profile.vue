@@ -112,7 +112,6 @@
                 </div>
 
                 <div class="form-group horizontal">
-                  <label><i class="bi bi-calendar"></i> Membro desde</label>
                   <span class="horizontal-value">{{ formatDate(user?.created_at) }}</span>
                 </div>
               </div>
@@ -254,7 +253,7 @@ async function saveUserData() {
 }
 
 function formatDate(dateString) {
-  if (!dateString) return 'Não informado';
+  if (!dateString) return '';
   return new Date(dateString).toLocaleDateString('pt-BR');
 }
 
