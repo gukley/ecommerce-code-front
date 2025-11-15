@@ -7,7 +7,7 @@
       />
     </div>
     <div class="profile-main-area">
-      <nav class="profile-breadcrumb mb-2 theme-text-secondary">
+      <nav class="profile-breadcrumb mb-1 theme-text-secondary">
         <span><i class="bi bi-house"></i></span>
         <span class="mx-2">&gt;</span>
         <span>Minha Conta</span>
@@ -303,7 +303,7 @@ function onAddressSaved(addressData) {
   align-items: flex-start;
   min-height: 90vh;
   background: #f8fafc; /* Fundo claro */
-  padding: 0 0 32px 0; /* Remove padding superior */
+  padding: 16px 0 32px 0; /* Padding superior reduzido */
   font-family: 'Inter', sans-serif;
 }
 
@@ -321,11 +321,11 @@ function onAddressSaved(addressData) {
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   background: linear-gradient(135deg, #4a90e2, #6a5ae0); /* Gradiente azul */
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Sombra leve */
-  padding: 1.5rem;
+  padding: 1.2rem 1.5rem;
   color: #fff;
   margin-top: 0; /* Remove qualquer margem superior */
 }
@@ -350,7 +350,8 @@ function onAddressSaved(addressData) {
 .profile-cards-row {
   display: flex;
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
+  margin-top: 0;
 }
 
 .profile-card {
@@ -396,10 +397,6 @@ function onAddressSaved(addressData) {
   gap: 24px;
 }
 
-.profile-user-fields-form {
-  /* Estilos existentes... */
-}
-
 .form-actions-section.horizontal {
   display: flex;
   gap: 1rem;
@@ -443,5 +440,90 @@ function onAddressSaved(addressData) {
   background: #d6e4ff; /* Fundo azul mais claro */
   box-shadow: 0 4px 16px rgba(224, 231, 255, 0.4); /* Sombra mais forte */
   transform: translateY(-2px);
+}
+
+/* Ajustes para dispositivos menores */
+@media (max-width: 991px) {
+  .profile-layout {
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .profile-sidebar-area {
+    min-width: 100%;
+    max-width: 100%;
+  }
+
+  .profile-main-area {
+    padding-right: 0;
+  }
+
+  .profile-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1rem;
+  }
+
+  .profile-header-icon {
+    font-size: 2.5rem;
+  }
+
+  .profile-title {
+    font-size: 1.5rem;
+  }
+
+  .profile-desc {
+    font-size: 0.9rem;
+  }
+
+  .profile-cards-row {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .profile-card {
+    flex: 1 1 calc(50% - 12px);
+    max-width: calc(50% - 12px);
+  }
+}
+
+@media (max-width: 600px) {
+  .profile-header {
+    padding: 0.8rem;
+  }
+
+  .profile-header-icon {
+    font-size: 2rem;
+  }
+
+  .profile-title {
+    font-size: 1.2rem;
+  }
+
+  .profile-desc {
+    font-size: 0.8rem;
+  }
+
+  .profile-cards-row {
+    gap: 8px;
+  }
+
+  .profile-card {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+
+  .form-actions-section.horizontal {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: stretch;
+  }
+
+  .btn-profile-save.horizontal,
+  .btn-profile-cancel.horizontal {
+    width: 100%;
+  }
 }
 </style>

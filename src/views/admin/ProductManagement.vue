@@ -170,15 +170,13 @@ const fetchProducts = async () => {
   isLoading.value = true;
   try {
     const response = await getAllProducts();
-    products.value = response
-      .filter(p => p.category?.user_id === authStore.user.id)
-      .map(p => ({
-        ...p,
-        image_url: p.image_path
-          ? `${baseUrl}${p.image_path.startsWith('/') ? '' : '/'}${p.image_path}`
-          : null,
-        discount: p.discount // <-- Garante que o desconto está presente
-      }));
+    products.value = response.map(p => ({
+      ...p,
+      image_url: p.image_path
+        ? `${baseUrl}${p.image_path.startsWith('/') ? '' : '/'}${p.image_path}`
+        : null,
+      discount: p.discount // Garante que o desconto está presente
+    }));
   } catch (error) {
     toast.error('Erro ao carregar produtos: ' + (error.response?.data?.message || error.message));
   } finally {
@@ -189,7 +187,13 @@ const fetchProducts = async () => {
 const fetchCategories = async () => {
   try {
     const response = await getCategories();
-    categories.value = response.filter(cat => cat.user_id === authStore.user.id);
+    // Moderadores veem todas as categorias, admins veem apenas as suas
+    const userRole = authStore.user?.role?.toUpperCase();
+    if (userRole === 'MODERATOR') {
+      categories.value = response;
+    } else {
+      categories.value = response.filter(cat => cat.user_id === authStore.user.id);
+    }
   } catch (error) {
     toast.error('Erro ao carregar categorias: ' + (error.response?.data?.message || error.message));
   }

@@ -14,8 +14,11 @@ export const authGuard = (to, from, next) => {
     try {
       const user = JSON.parse(userString);
       userRole = user?.role || null;
+      // Normaliza o role para maiúsculas para garantir comparação correta
+      if (userRole) {
+        userRole = userRole.toUpperCase();
+      }
     } catch (e) {
-      console.error('Erro ao fazer parse do usuario do localStorage:', e);
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       isAuthenticated = false;
@@ -24,16 +27,24 @@ export const authGuard = (to, from, next) => {
 
   const requiredRoles = to.meta?.roles;
   const requiresAuth = to.meta?.requiresAuth;
+  const requiresAdmin = to.meta?.requiresAdmin;
 
   if (requiresAuth) {
     if (!isAuthenticated) {
-      console.log(`Guard: Não autenticado. Redirecionando para login. (${to.path})`);
       return next({ name: 'Login', query: { redirect: to.fullPath } });
     }
 
+    // Verifica se a rota requer apenas ADMIN
+    if (requiresAdmin) {
+      if (!userRole || userRole !== 'ADMIN') {
+        return next({ name: 'Unauthorized' });
+      }
+    }
+
+    // Verifica roles permitidos (normaliza para maiúsculas)
     if (requiredRoles && requiredRoles.length > 0) {
-      if (!userRole || !requiredRoles.includes(userRole)) {
-        console.log(`Guard: Papel inválido. Redirecionando para não autorizado. (${to.path})`);
+      const normalizedRoles = requiredRoles.map(role => role.toUpperCase());
+      if (!userRole || !normalizedRoles.includes(userRole)) {
         return next({ name: 'Unauthorized' });
       }
     }

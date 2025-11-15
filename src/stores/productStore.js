@@ -49,10 +49,17 @@ export const useProductStore = defineStore('product', () => {
     return !lastFetchTime.value || (Date.now() - lastFetchTime.value) > 5 * 60 * 1000; // 5 minutos
   };
 
-  // Produtos do usuário (admin)
+  // Produtos do usuário (admin) ou todos os produtos (moderador)
   const productsByUser = computed(() => {
-    if (!userId.value || !products.value.length) return [];
+    if (!products.value.length) return [];
     
+    // Se não tem userId ou é moderador, retorna todos os produtos
+    const userRole = authStore.user?.role?.toUpperCase();
+    if (!userId.value || userRole === 'MODERATOR') {
+      return products.value;
+    }
+    
+    // Para admins, filtra apenas produtos com categorias do usuário
     return products.value.filter(p => {
       // Verifica se o produto tem categoria e se a categoria pertence ao usuário
       return p.category && p.category.user_id === userId.value;

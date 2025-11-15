@@ -24,8 +24,8 @@
 
     <div class="products-list">
       <div class="product-item" v-for="item in cart" :key="item.id || item.product_id">
-        <div class="product-info">
-          <img v-if="item.product?.image" :src="item.product.image" class="product-thumb" alt="Imagem produto" />
+          <div class="product-info">
+            <img :src="getProductImage(item)" class="product-thumb" alt="Imagem produto" />
           <div>
             <div class="product-name">{{ item.product?.name || 'Produto desconhecido' }}</div>
             <div class="product-quantity">Qtd: {{ item.quantity }}</div>
@@ -46,7 +46,7 @@
       </div>
       <div class="total-line">
         <span>Frete:</span>
-        <span>{{ formatPrice(frete) }}</span>
+        <span>{{ formatPrice(Number(frete) || 0) }}</span>
       </div>
       <div v-if="appliedCoupon" class="d-flex justify-content-between align-items-center mb-2">
         <span class="fw-bold text-success">
@@ -56,22 +56,11 @@
       </div>
       <div class="total-line total-final">
         <span>Total:</span>
-        <span>{{ formatPrice(total) }}</span>
+        <span>{{ formatPrice(total || 0) }}</span>
       </div>
     </div>
 
-    <button
-      v-if="!pedidoCriado"
-      class="btn-confirm"
-      @click="$emit('confirmarPedido')"
-      :disabled="!endereco || !endereco.id"
-      :title="!endereco || !endereco.id ? 'Selecione um endereço antes de confirmar' : ''"
-    >
-      <i class="bi bi-cart-check"></i>
-      Confirmar Pedido
-    </button>
-    
-    <div v-else class="pedido-criado-success">
+    <div v-if="pedidoCriado" class="pedido-criado-success">
       <div class="success-icon">
         <i class="bi bi-check-circle-fill"></i>
       </div>
@@ -134,13 +123,23 @@ function formatPrice(value) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 }
 
-const metodoPagamentoLabel = computed(() => {
-  switch (props.metodoPagamento) {
-    case 'card': return 'Cartão de Crédito';
-    case 'boleto': return 'Boleto Bancário';
-    case 'pix': return 'PIX';
-    default: return props.metodoPagamento || '-';
+function getProductImage(item) {
+  const p = item.product || {};
+  const img = p.image || p.image_path || p.image_url || p.imageUrl;
+  if (img) {
+    if (img.startsWith('http')) return img;
+    const BASE_URL = import.meta.env.VITE_API_URL || '';
+    if (img.startsWith('/')) {
+      return BASE_URL + img;
+    }
+    return BASE_URL + '/' + img;
   }
+  return '/placeholder-product.png';
+}
+
+const metodoPagamentoLabel = computed(() => {
+  // Sempre retorna Cartão de Crédito, independente do valor recebido
+  return 'Cartão de Crédito';
 });
 </script>
 
@@ -272,7 +271,7 @@ const metodoPagamentoLabel = computed(() => {
   margin-top: 1px;
 }
 .product-price {
-  color: #6a5ae0;
+  color: #4a90e2;
   font-weight: 700;
   font-size: 18px;
   letter-spacing: 0.02em;

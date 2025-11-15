@@ -5,16 +5,6 @@
       <SideBar @categoria-selecionada="categoriaSelecionada = $event" />
       <div class="flex-grow-1 d-flex justify-content-center align-items-start p-4">
         <div class="products-container w-100">
-          <!-- Exemplo: clique test -->
-          <div
-            @click="console.log('teste clique')"
-            style="background:#8f5fe8; color:#fff; padding:12px; border-radius:8px; margin-bottom:16px; cursor:pointer; text-align:center;"
-            role="button"
-            tabindex="0"
-            @keyup.enter="console.log('teste clique via teclado')"
-          >
-            Clique aqui para testar o clique
-          </div>
 
           <!-- Barra de busca + filtro aprimorados -->
           <div class="search-filter-bar d-flex align-items-center gap-3 mb-3" style="width:100%;">

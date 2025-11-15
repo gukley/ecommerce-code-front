@@ -18,6 +18,18 @@ export const useCouponStore = defineStore('coupon', () => {
 
   const toast = useToast();
 
+  // Cupom aplicado atualmente (para checkout)
+  // Tenta carregar de localStorage para persistir entre páginas
+  const appliedCoupon = ref(null);
+  try {
+    if (typeof localStorage !== 'undefined') {
+      const raw = localStorage.getItem('appliedCoupon');
+      appliedCoupon.value = raw ? JSON.parse(raw) : null;
+    }
+  } catch (e) {
+    console.warn('Não foi possível carregar appliedCoupon do localStorage', e);
+  }
+
   // Verificar se precisa recarregar os dados
   const shouldRefetch = () => {
     return !lastFetchTime.value || (Date.now() - lastFetchTime.value) > 5 * 60 * 1000; // 5 minutos
@@ -267,6 +279,21 @@ export const useCouponStore = defineStore('coupon', () => {
     lastFetchTime.value = null;
   };
 
+  // Definir/limpar cupom aplicado (usado pelo checkout)
+  const setAppliedCoupon = (coupon) => {
+    appliedCoupon.value = coupon || null;
+    try {
+      if (typeof localStorage !== 'undefined') {
+        if (coupon) localStorage.setItem('appliedCoupon', JSON.stringify(coupon));
+        else localStorage.removeItem('appliedCoupon');
+      }
+    } catch (e) {
+      console.warn('Não foi possível salvar appliedCoupon no localStorage', e);
+    }
+  };
+
+  const clearAppliedCoupon = () => setAppliedCoupon(null);
+
   return {
     // State
     coupons,
@@ -290,5 +317,10 @@ export const useCouponStore = defineStore('coupon', () => {
     activeCoupons,
     expiredCoupons,
     validCoupons
+    ,
+    // Applied coupon
+    appliedCoupon,
+    setAppliedCoupon,
+    clearAppliedCoupon
   };
 });

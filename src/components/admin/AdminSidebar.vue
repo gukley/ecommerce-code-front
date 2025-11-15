@@ -36,7 +36,7 @@
           <i class="bi bi-ticket-perforated me-2"></i> Cupons
         </router-link>
         </li>
-        <li class="nav-item mb-2">
+        <li v-if="isAdmin" class="nav-item mb-2">
           <router-link :to="{ name: 'CreateModerator' }" class="nav-link-custom">
             <i class="bi bi-person-plus me-2"></i> Criar Moderador
           </router-link>
@@ -59,9 +59,28 @@
   <script setup>
   import { useRouter } from 'vue-router';
   import { useToast } from 'vue-toastification';
+  import { computed } from 'vue';
+  import { useAuthStore } from '@/stores/authStore';
   
   const router = useRouter();
   const toast = useToast();
+  const authStore = useAuthStore();
+  
+  // Obtém o role do usuário
+  const userRole = computed(() => {
+    const userString = localStorage.getItem('user');
+    if (userString) {
+      try {
+        const user = JSON.parse(userString);
+        return user?.role?.toUpperCase() || null;
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  });
+  
+  const isAdmin = computed(() => userRole.value === 'ADMIN');
   
   const logout = () => {
     localStorage.removeItem('token');

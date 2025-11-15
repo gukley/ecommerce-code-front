@@ -8,6 +8,26 @@
       </button>
     </div>
 
+    <!-- Barra de busca -->
+    <div class="d-flex flex-wrap gap-3 align-items-center mb-4">
+      <div class="input-group search-bar">
+        <input
+          type="text"
+          class="form-control search-input"
+          placeholder="Buscar categoria por nome..."
+          v-model="searchTerm"
+          autocomplete="off"
+        />
+        <span class="input-group-text search-icon"><i class="bi bi-search"></i></span>
+      </div>
+      <div class="category-stats ms-auto">
+        <span class="stats-badge">
+          <i class="bi bi-grid me-2"></i>
+          Total: <strong>{{ filteredCategories.length }}</strong>
+        </span>
+      </div>
+    </div>
+
     <div v-if="isLoading" class="d-flex justify-content-center my-5">
       <div class="spinner-border text-primary-ggtech" role="status">
         <span class="visually-hidden">Carregando...</span>
@@ -15,20 +35,23 @@
     </div>
     
     <Transition name="fade" mode="out-in">
-      <div v-if="!isLoading" :key="categories.length">
-        <div class="category-table-responsive">
+      <div v-if="!isLoading" :key="filteredCategories.length">
+        <div v-if="filteredCategories.length === 0" class="alert alert-info text-center">
+          <i class="bi bi-info-circle me-2"></i>
+          Nenhuma categoria encontrada.
+        </div>
+        <div v-else class="category-table-responsive">
           <table class="table table-dark rounded-table align-middle text-white category-table">
             <thead>
               <tr>
                 <th class="text-primary-ggtech">Nome</th>
                 <th class="text-primary-ggtech text-center">Produtos</th>
-                <th class="text-primary-ggtech text-center">Status</th>
                 <th class="text-primary-ggtech text-center">Imagem</th>
                 <th class="text-primary-ggtech text-center">Ações</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="cat in categories" :key="cat.id" class="category-row">
+              <tr v-for="cat in filteredCategories" :key="cat.id" class="category-row">
                 <td :class="['fw-bold fs-6 category-name-cell', !cat.is_active ? 'inactive-cat' : '']">
                   {{ cat.name }}
                 </td>
@@ -37,30 +60,6 @@
                     <i class="bi bi-box-seam me-1"></i>
                     {{ cat.product_count || 0 }} produto{{ (cat.product_count || 0) === 1 ? '' : 's' }}
                   </span>
-                </td>
-                <td class="text-center">
-                  <div class="form-check form-switch d-inline-flex align-items-center justify-content-center">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      :id="'switch-' + cat.id"
-                      :checked="!!cat.is_active"
-                      :disabled="switchLoadingId === cat.id"
-                      @change="toggleActive(cat)"
-                      :aria-checked="!!cat.is_active"
-                      :title="'Clique para ativar/desativar categoria'"
-                      style="cursor:pointer"
-                    >
-                    <label
-                      class="form-check-label ms-2"
-                      :for="'switch-' + cat.id"
-                      :class="cat.is_active ? 'text-success' : 'text-muted'"
-                      style="user-select:none"
-                    >
-                      <i :class="cat.is_active ? 'bi bi-check-circle-fill' : 'bi bi-x-circle-fill'"></i>
-                      {{ cat.is_active ? 'Ativa' : 'Inativa' }}
-                    </label>
-                  </div>
                 </td>
                 <td class="text-center">
                   <img
@@ -112,9 +111,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import {
   getCategoriesByUser,
+  getCategories,
   updateCategory,
   deleteCategory as apiDeleteCategory,
   updateCategoryImage,
@@ -130,25 +130,21 @@ const editingCategory = ref(null);
 const isLoading = ref(false);
 const toast = useToast();
 const baseUrl = import.meta.env.VITE_API_URL;
-const switchLoadingId = ref(null);
+const searchTerm = ref('');
 
 const loadCategories = async () => {
-  if (!auth.user || !auth.user.id) return;
   isLoading.value = true;
   try {
-    // Tenta buscar já com product_count e is_active
-    const res = await getCategoriesByUser(auth.user.id);
+    const res = await getCategories(); // Carrega todas as categorias
     categories.value = res.map(cat => ({
       ...cat,
       image_url: cat.image_path
         ? `${baseUrl}${cat.image_path.startsWith('/') ? '' : '/'}${cat.image_path}`
         : null,
-      // Simula product_count se não vier do backend
-      product_count: typeof cat.product_count === 'number' ? cat.product_count : (cat.products?.length ?? Math.floor(Math.random() * 20)),
+      product_count: typeof cat.product_count === 'number' ? cat.product_count : (cat.products?.length ?? 0),
       is_active: typeof cat.is_active === 'boolean' ? cat.is_active : true
     }));
   } catch (error) {
-    console.error("Erro ao carregar categorias:", error);
     toast.error("Erro ao carregar categorias.");
   } finally {
     isLoading.value = false;
@@ -194,18 +190,13 @@ const uploadImage = async (id, file) => {
   }
 };
 
-const toggleActive = async (cat) => {
-  switchLoadingId.value = cat.id;
-  try {
-    await updateCategory(cat.id, { is_active: !cat.is_active });
-    cat.is_active = !cat.is_active;
-    toast.success(`Categoria ${cat.is_active ? 'ativada' : 'desativada'} com sucesso!`);
-  } catch (error) {
-    toast.error('Erro ao atualizar status da categoria.');
-  } finally {
-    switchLoadingId.value = null;
-  }
-};
+const filteredCategories = computed(() => {
+  if (!searchTerm.value.trim()) return categories.value;
+  const term = searchTerm.value.toLowerCase();
+  return categories.value.filter(cat => 
+    cat.name?.toLowerCase().includes(term)
+  );
+});
 
 onMounted(loadCategories);
 </script>
@@ -259,13 +250,115 @@ onMounted(loadCategories);
   font-weight: 500;
 }
 
+.search-bar {
+  max-width: 400px;
+}
+
+.search-input {
+  border-right: none;
+  background-color: #1a2332;
+  border: 1px solid #374151;
+  color: #e8eaed;
+  border-radius: 0.5rem 0 0 0.5rem;
+}
+
+.search-input:focus {
+  background-color: #1a2332;
+  border-color: #64b5f6;
+  color: #e8eaed;
+  box-shadow: 0 0 0 0.2rem rgba(100, 181, 246, 0.25);
+  outline: none;
+}
+
+.search-icon {
+  background-color: #1a2332;
+  border: 1px solid #374151;
+  border-left: none;
+  color: #64b5f6;
+  border-radius: 0 0.5rem 0.5rem 0;
+}
+
+.stats-badge {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+  box-shadow: 0 2px 12px #667eea30;
+  display: inline-flex;
+  align-items: center;
+}
+
+.alert-info {
+  background: linear-gradient(135deg, #181e2a 0%, #23233a 100%);
+  border: 1px solid #374151;
+  border-radius: 1rem;
+  color: #b0b7c3;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
 .category-table-responsive {
-  background: var(--admin-bg-secondary);
+  /* fundo opaco e sem blur para máximo contraste */
+  background: #0b1220;
   border-radius: 1.5rem;
-  box-shadow: 0 2px 16px var(--admin-shadow-light);
+  box-shadow: 0 6px 30px rgba(0,0,0,0.65);
   padding: 2rem 1.5rem;
   overflow-x: auto;
   margin-bottom: 2rem;
+  border: 1px solid rgba(255,255,255,0.04);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Cabeçalho totalmente opaco, alto contraste e fixo no topo do container */
+.category-table thead th {
+  background-color: #0f1724 !important;
+  color: #ffffff !important;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 1rem 0.9rem !important;
+  text-align: center;
+  text-shadow: none !important;
+  filter: none !important;
+  opacity: 1 !important;
+  border-bottom: 2px solid rgba(255,255,255,0.03);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+/* Remove gradientes/clip que podem "borrar" o texto do th */
+.category-table th,
+.category-table thead th,
+.category-table th .text-primary-ggtech {
+  background-image: none !important;
+  -webkit-background-clip: initial !important;
+  -webkit-text-fill-color: initial !important;
+}
+
+/* Células com alto contraste e sem sombras que atrapalham leitura */
+.category-table td {
+  color: #e6eef8 !important;
+  font-size: 1rem;
+  padding: 0.95rem 0.9rem !important;
+  text-shadow: none !important;
+}
+
+/* Garante que a coluna "Nome" fique alinhada e legível */
+.category-name-cell {
+  color: #ffffff !important;
+  text-align: left;
+  padding-left: 1.2rem;
+}
+
+/* Responsividade: mantém contraste em telas menores */
+@media (max-width: 991.98px) {
+  .category-table-responsive { padding: 1.2rem 0.8rem; }
+  .category-table thead th, .category-table td { padding: 0.75rem 0.6rem; font-size: 0.95rem; }
+  .category-name-cell { padding-left: 0.8rem; }
 }
 
 .category-table th, .category-table td {
@@ -274,24 +367,23 @@ onMounted(loadCategories);
 
 .category-table th {
   background: linear-gradient(90deg, #1b2233 0%, #2c3e68 100%); /* Gradiente mais escuro */
-  color: #ffffff; /* Branco puro e visível */
-  font-size: 1.08rem;
-  font-weight: 800;
+  color: #ffffff; /* Change text color to white for better visibility */
+  font-size: 1.1rem; /* Aumentei o tamanho da fonte */
+  font-weight: 800; /* Negrito para maior destaque */
   letter-spacing: 0.04em;
-  border-top: none;
   padding: 1rem 0.7rem;
   text-align: center;
-  text-shadow: 0 0 4px rgba(0, 0, 0, 0.6); /* Dá destaque ao texto */
-  opacity: 1 !important;
-  filter: none !important;
-  backdrop-filter: none !important;
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.6); /* Sombra para destacar o texto */
+  border-top: none;
+  opacity: 1 !important; /* Remove qualquer opacidade */
+  filter: none !important; /* Remove o blur */
+  backdrop-filter: none !important; /* Remove o efeito de desfoque */
 }
-
 
 .category-table td {
   background: transparent;
   color: #e8eaed; /* Texto claro */
-  font-size: 0.97rem;
+  font-size: 1rem; /* Ajustei o tamanho da fonte */
   padding: 1rem 0.7rem;
   border-bottom: 1px solid #232e47;
   text-align: center;
@@ -310,7 +402,7 @@ onMounted(loadCategories);
 .category-name-cell {
   font-weight: 600;
   font-size: 1.1rem;
-  color: #fff;
+  color: #ffffff; /* Texto branco puro */
   letter-spacing: 0.2px;
   text-align: left;
 }
@@ -322,7 +414,7 @@ onMounted(loadCategories);
 
 .badge-products {
   background: linear-gradient(90deg, #232e47 0%, #64b5f6 100%);
-  color: #fff;
+  color: #ffffff; /* Texto branco puro */
   font-weight: 600;
   font-size: 0.97rem;
   border-radius: 1.2rem;
@@ -337,32 +429,6 @@ onMounted(loadCategories);
   background: #23233a;
   color: #b0b7c3;
   opacity: 0.7;
-}
-
-.form-switch .form-check-input {
-  width: 2.5em;
-  height: 1.3em;
-  background-color: #232e47;
-  border: 1.5px solid #64b5f6;
-  transition: background 0.2s, border 0.2s;
-  cursor: pointer;
-}
-
-.form-switch .form-check-input:checked {
-  background-color: #43e97b;
-  border-color: #43e97b;
-}
-
-.form-switch .form-check-input:focus {
-  box-shadow: 0 0 0 0.2rem #64b5f633;
-}
-
-.form-switch .form-check-label {
-  font-weight: 600;
-  font-size: 0.97rem;
-  margin-left: 0.5em;
-  cursor: pointer;
-  user-select: none;
 }
 
 .category-thumb {
@@ -380,8 +446,8 @@ onMounted(loadCategories);
 }
 
 .no-image-text {
-  font-size: 0.85rem;
-  color: #b0b7c3;
+  font-size: 0.9rem; /* Aumentei o tamanho da fonte */
+  color: #b0b7c3; /* Texto cinza claro */
   font-style: italic;
 }
 
@@ -467,7 +533,7 @@ onMounted(loadCategories);
   .category-table-responsive {
     padding: 1.5rem 0.7rem;
   }
-  .category-table th, .category-table td {
+  .category-table thead th, .category-table td {
     padding: 0.8rem;
     font-size: 0.95rem;
   }

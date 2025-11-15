@@ -162,32 +162,6 @@
           </div>
         </div>
       </div>
-
-      <!-- NOVA SEÇÃO DE GRÁFICOS -->
-      <div class="row g-4 mt-4">
-        <div class="col-12 col-md-6">
-          <div class="card p-4 shadow-sm h-100 dashboard-table-card dashboard-table-dark chart-card">
-            <h4 class="fw-bold text-primary-ggtech mb-3">Evolução das Vendas (Últimos 6 meses)</h4>
-            <apexchart
-              type="line"
-              height="320"
-              :options="lineChartOptions"
-              :series="lineChartSeries"
-            />
-          </div>
-        </div>
-        <div class="col-12 col-md-6">
-          <div class="card p-4 shadow-sm h-100 dashboard-table-card dashboard-table-dark chart-card">
-            <h4 class="fw-bold text-primary-ggtech mb-3">Pedidos por Status</h4>
-            <apexchart
-              type="bar"
-              height="320"
-              :options="barChartOptions"
-              :series="barChartSeries"
-            />
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 </template>
@@ -235,13 +209,128 @@ const fetchDashboardData = async () => {
       await productStore.fetchProducts();
     }
     if (orderStore.shouldRefetch && orderStore.shouldRefetch()) {
-      await orderStore.fetchOrdersByAdmin(authStore.user.id);
+      // Para moderadores, carrega todos os pedidos. Para admins, carrega por adminId
+      const userRole = authStore.user?.role?.toUpperCase();
+      if (userRole === 'MODERATOR') {
+        await orderStore.fetchAllOrders();
+      } else {
+        await orderStore.fetchOrdersByAdmin(authStore.user.id);
+      }
     }
     if (couponStore.shouldRefetch && couponStore.shouldRefetch()) {
       await couponStore.fetchAllCoupons();
     }
+    // Busca o total de clientes (após carregar pedidos para contar usuários únicos)
+    await fetchTotalClientes();
   } catch (error) {
     console.error("Erro ao carregar dados do dashboard:", error);
+  }
+};
+
+// Watch para atualizar total de clientes quando os pedidos mudarem
+watch(orders, () => {
+  if (dashboardInitialized.value && orders.value && orders.value.length > 0) {
+    fetchTotalClientes();
+  }
+}, { deep: true });
+
+// Função para buscar o total de clientes
+const fetchTotalClientes = async () => {
+  try {
+    // Método principal: conta usuários únicos a partir dos pedidos
+    // Isso é mais confiável já que os pedidos sempre têm informações de usuários
+    if (orders.value && orders.value.length > 0) {
+      const uniqueUserIds = new Set();
+      orders.value.forEach(order => {
+        // Tenta diferentes campos onde o user_id pode estar
+        if (order.user_id) {
+          uniqueUserIds.add(order.user_id);
+        }
+        if (order.user?.id) {
+          uniqueUserIds.add(order.user.id);
+        }
+        if (order.customer_id) {
+          uniqueUserIds.add(order.customer_id);
+        }
+      });
+      totalClientes.value = uniqueUserIds.size;
+      
+      // Se conseguiu contar pelos pedidos, retorna
+      if (totalClientes.value > 0) {
+        return;
+      }
+    }
+    
+    // Alternativa 1: Tenta endpoint /admin/clients (caso seja implementado)
+    try {
+      const { getAdminClients } = await import('@/services/apiService');
+      const response = await getAdminClients();
+      
+      let clients = [];
+      if (Array.isArray(response)) {
+        clients = response;
+      } else if (Array.isArray(response?.data)) {
+        clients = response.data;
+      } else if (Array.isArray(response?.data?.data)) {
+        clients = response.data.data;
+      }
+      
+      if (clients.length > 0) {
+        totalClientes.value = clients.filter(client => {
+          const role = client.role?.toUpperCase() || '';
+          return role === 'CLIENT' || role === 'USER' || !role || role === '';
+        }).length;
+        return;
+      }
+    } catch (err) {
+      // Endpoint não disponível, continua para próxima alternativa
+    }
+    
+    // Alternativa 2: Tenta endpoint /users/ (se disponível)
+    try {
+      const api = (await import('@/services/api')).default;
+      const response = await api.get('/users/');
+      
+      let users = [];
+      if (Array.isArray(response?.data)) {
+        users = response.data;
+      } else if (Array.isArray(response?.data?.data)) {
+        users = response.data.data;
+      } else if (Array.isArray(response)) {
+        users = response;
+      }
+      
+      if (users.length > 0) {
+        totalClientes.value = users.filter(user => {
+          const role = user.role?.toUpperCase() || '';
+          return role === 'CLIENT' || role === 'USER' || !role || role === '';
+        }).length;
+        return;
+      }
+    } catch (err2) {
+      // Endpoint não disponível
+    }
+    
+    // Se nenhum método funcionou, mantém 0 ou usa um valor padrão
+    if (totalClientes.value === 0 && orders.value && orders.value.length > 0) {
+      // Se há pedidos mas não conseguiu contar usuários, mostra pelo menos 1
+      // (assumindo que há pelo menos um cliente que fez pedido)
+      totalClientes.value = 1;
+    }
+  } catch (error) {
+    console.error("Erro ao buscar total de clientes:", error);
+    // Em caso de erro, tenta contar pelos pedidos como fallback
+    if (orders.value && orders.value.length > 0) {
+      const uniqueUserIds = new Set();
+      orders.value.forEach(order => {
+        if (order.user_id) uniqueUserIds.add(order.user_id);
+        if (order.user?.id) uniqueUserIds.add(order.user.id);
+        if (order.customer_id) uniqueUserIds.add(order.customer_id);
+      });
+      totalClientes.value = uniqueUserIds.size || 0;
+    } else {
+      totalClientes.value = 0;
+    }
   }
 };
 
@@ -254,36 +343,107 @@ const isLoading = computed(() => {
 const totalVendas = computed(() => {
   if (!orders.value || orders.value.length === 0) return 0;
   return orders.value.reduce((sum, order) => {
-    if (order.total_amount !== undefined && order.total_amount !== null) {
-      return sum + Number(order.total_amount);
-    }
-    if (!order.items || !order.items.length) return sum;
-    return sum + order.items.reduce((s, item) => {
-      if (item.total_price !== undefined && item.total_price !== null) {
-        return s + Number(item.total_price);
-      }
-      const price = (item.unit_price !== undefined && item.unit_price !== null)
-        ? Number(item.unit_price)
-        : (item.price !== undefined && item.price !== null)
-          ? Number(item.price)
-          : (item.product && item.product.price !== undefined && item.product.price !== null)
-            ? Number(item.product.price)
-            : 0;
-      const qty = Number(item.quantity ?? 1) || 1;
-      return s + price * qty;
-    }, 0);
+    const total = order.total_amount ?? order.total ?? getOrderTotal(order);
+    return sum + (total ? Number(total) : 0);
   }, 0);
+});
+
+// Calcula o total do pedido caso não venha do backend
+function getOrderTotal(order) {
+  if (!order.items || order.items.length === 0) return 0;
+  return order.items.reduce((sum, item) => {
+    const price = item.unit_price ?? item.price ?? (item.product?.price ?? 0);
+    const quantity = item.quantity ?? 1;
+    return sum + (price * quantity);
+  }, 0);
+}
+
+// Formata a data corretamente (aceita string, número, objeto timestamp e já-formatado)
+const formatDate = (dateInput) => {
+  if (!dateInput) return 'N/A';
+
+  // Se já estiver em formato dd/mm/yyyy (ou similar), retorna como está
+  if (typeof dateInput === 'string') {
+    const alreadyFormatted = /^\d{2}\/\d{2}\/\d{4}/.test(dateInput);
+    if (alreadyFormatted) return dateInput;
+  }
+
+  let date;
+  // Número (timestamp em ms ou s)
+  if (typeof dateInput === 'number' || (/^\d+$/.test(String(dateInput)))) {
+    const n = Number(dateInput);
+    // Se parecer em segundos (10 dígitos), converte para ms
+    date = new Date(n < 1e12 ? n * 1000 : n);
+  } else if (typeof dateInput === 'object' && dateInput !== null) {
+    // Firebase timestamp (seconds) ou objeto com toDate
+    if (dateInput.seconds) {
+      date = new Date(dateInput.seconds * 1000);
+    } else if (typeof dateInput.toDate === 'function') {
+      date = dateInput.toDate();
+    } else {
+      date = new Date(dateInput);
+    }
+  } else {
+    date = new Date(dateInput);
+  }
+
+  if (isNaN(date.getTime())) return 'N/A';
+
+  return date.toLocaleString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+};
+
+// Tenta recuperar a data do pedido a partir de vários campos/fonte possíveis
+function getOrderDate(order) {
+  if (!order) return null;
+  const candidates = [
+    'created_at', 'createdAt', 'date', 'ordered_at', 'order_date',
+    'purchased_at', 'paid_at', 'timestamp', 'created', 'updated_at'
+  ];
+
+  for (const k of candidates) {
+    const v = order[k];
+    if (v) return v;
+  }
+
+  // Verifica campos aninhados comuns
+  const nested = order.attributes?.created_at ?? order.attributes?.createdAt ?? order.meta?.created_at ?? order.meta?.createdAt;
+  if (nested) return nested;
+
+  // Ex.: histórico/atividades do pedido
+  if (Array.isArray(order.history) && order.history.length) {
+    const h = order.history.find(x => x.created_at || x.date);
+    if (h) return h.created_at ?? h.date;
+  }
+
+  return null;
+}
+
+// Atualiza a exibição dos últimos pedidos: usa getOrderDate para ordenar e expor created_at cru
+const ultimosPedidos = computed(() => {
+  if (!orders.value || orders.value.length === 0) return [];
+  return orders.value.slice()
+    .sort((a, b) => {
+      const da = new Date(getOrderDate(a) ?? a.created_at ?? a.createdAt ?? 0).getTime();
+      const db = new Date(getOrderDate(b) ?? b.created_at ?? b.createdAt ?? 0).getTime();
+      return db - da;
+    })
+    .slice(0, 5)
+    .map(order => ({
+      ...order,
+      total: order.total_amount ?? order.total ?? getOrderTotal(order),
+      // manter criado cru para formatar no template com formatDate
+      created_at: getOrderDate(order) ?? order.created_at ?? order.createdAt ?? null,
+    }));
 });
 
 const totalPedidos = computed(() => {
   return orders.value?.length || 0;
-});
-
-const ultimosPedidos = computed(() => {
-  if (!orders.value || orders.value.length === 0) return [];
-  return orders.value.slice()
-    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-    .slice(0, 5);
 });
 
 const totalCupons = computed(() => {
@@ -293,26 +453,13 @@ const totalCupons = computed(() => {
   return coupons.value.filter(c => !c.end_date || new Date(c.end_date) >= now).length;
 });
 
-// Helpers para formatação
-const formatDate = (dateString) => {
-  if (!dateString) return 'N/A';
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return 'N/A';
-  return new Intl.DateTimeFormat('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(date);
-};
 
 const getOrderStatusClass = (status) => {
   switch (status?.toLowerCase()) {
     case 'pending': return 'bg-warning text-dark';
     case 'processing': return 'bg-info text-white';
     case 'completed': return 'bg-success text-white';
-    case 'canceled': return 'bg-danger text-white';
+    case 'cancelled': return 'bg-danger text-white';
     default: return 'bg-secondary text-white';
   }
 };
@@ -322,7 +469,7 @@ const formatStatus = (status) => {
     'pending': 'Pendente',
     'processing': 'Processando',
     'completed': 'Concluído',
-    'canceled': 'Cancelado',
+    'cancelled': 'Cancelado',
   };
   return statusMap[status?.toLowerCase()] || 'Desconhecido';
 };
@@ -370,171 +517,11 @@ const refreshDashboard = async () => {
   dashboardInitialized.value = true;
 };
 
-// Gera os últimos 6 meses dinamicamente
-function getLast6MonthsLabels() {
-  const labels = [];
-  const now = new Date();
-  for (let i = 5; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    labels.push(d.toLocaleString('pt-BR', { month: 'long' }).replace(/^./, m => m.toUpperCase()));
-  }
-  return labels;
-}
-
-// Calcula o total vendido por mês (dinâmico)
-const vendasPorMes = computed(() => {
-  if (!orders.value || !orders.value.length) return [];
-  const months = getLast6MonthsLabels();
-  const result = months.map((month, idx) => {
-    // Pega o mês e ano correspondente
-    const now = new Date();
-    const refDate = new Date(now.getFullYear(), now.getMonth() - (5 - idx), 1);
-    const refMonth = refDate.getMonth();
-    const refYear = refDate.getFullYear();
-    // Soma total_amount dos pedidos do mês
-    return orders.value
-      .filter(order => {
-        const d = new Date(order.order_date || order.created_at);
-        return d.getMonth() === refMonth && d.getFullYear() === refYear;
-      })
-      .reduce((sum, order) => {
-        if (order.total_amount !== undefined && order.total_amount !== null) {
-          return sum + Number(order.total_amount);
-        }
-        if (!order.items || !order.items.length) return sum;
-        return sum + order.items.reduce((s, item) => {
-          if (item.total_price !== undefined && item.total_price !== null) {
-            return s + Number(item.total_price);
-          }
-          const price = (item.unit_price !== undefined && item.unit_price !== null)
-            ? Number(item.unit_price)
-            : (item.price !== undefined && item.price !== null)
-              ? Number(item.price)
-              : (item.product && item.product.price !== undefined && item.product.price !== null)
-                ? Number(item.product.price)
-                : 0;
-          const qty = Number(item.quantity ?? 1) || 1;
-          return s + price * qty;
-        }, 0);
-      }, 0);
-  });
-  return result;
-});
-
-// Labels dos meses dinâmicos
-const meses = computed(() => getLast6MonthsLabels());
-
-// Gráfico de status dinâmico
-const statusLabels = ['Pendente', 'Processando', 'Concluído', 'Cancelado'];
-const statusMap = {
-  Pendente: ['PENDING'],
-  Processando: ['PROCESSING'],
-  Concluído: ['DELIVERED', 'COMPLETED', 'CONFIRMED'],
-  Cancelado: ['CANCELED']
-};
-const pedidosPorStatus = computed(() => {
-  if (!orders.value || !orders.value.length) return [0, 0, 0, 0];
-  return statusLabels.map(label => {
-    const statusList = statusMap[label];
-    return orders.value.filter(order =>
-      statusList.includes(String(order.status).toUpperCase())
-    ).length;
-  });
-});
-const statusColors = ['#f9d423', '#64b5f6', '#43e97b', '#ff6b6b'];
-
-// ApexCharts options para o gráfico de linhas
-const lineChartOptions = computed(() => ({
-  chart: {
-    type: 'line',
-    background: 'transparent',
-    toolbar: { show: false },
-    fontFamily: 'Inter, sans-serif'
-  },
-  theme: { mode: 'dark' },
-  grid: {
-    borderColor: '#232e47',
-    strokeDashArray: 4,
-    xaxis: { lines: { show: false } }
-  },
-  dataLabels: { enabled: false },
-  stroke: { curve: 'smooth', width: 3, colors: ['#64b5f6'] },
-  xaxis: {
-    categories: meses.value,
-    labels: { style: { colors: '#e8eaed', fontWeight: 600 } },
-    axisBorder: { color: '#374151' },
-    axisTicks: { color: '#374151' }
-  },
-  yaxis: {
-    labels: {
-      style: { colors: '#e8eaed', fontWeight: 600 },
-      formatter: val => `R$ ${val.toLocaleString('pt-BR')}`
-    }
-  },
-  tooltip: {
-    theme: 'dark',
-    y: { formatter: val => `R$ ${val.toLocaleString('pt-BR')}` }
-  },
-  legend: {
-    labels: { colors: '#e8eaed' }
-  }
-}));
-const lineChartSeries = computed(() => [
-  {
-    name: 'Vendas',
-    data: vendasPorMes.value
-  }
-]);
-
-// ApexCharts options para o gráfico de barras
-const barChartOptions = computed(() => ({
-  chart: {
-    type: 'bar',
-    background: 'transparent',
-    toolbar: { show: false },
-    fontFamily: 'Inter, sans-serif'
-  },
-  theme: { mode: 'dark' },
-  grid: {
-    borderColor: '#232e47',
-    strokeDashArray: 4,
-    xaxis: { lines: { show: false } }
-  },
-  plotOptions: {
-    bar: {
-      borderRadius: 6,
-      columnWidth: '45%',
-      distributed: true
-    }
-  },
-  dataLabels: { enabled: false },
-  xaxis: {
-    categories: statusLabels,
-    labels: { style: { colors: '#e8eaed', fontWeight: 600 } },
-    axisBorder: { color: '#374151' },
-    axisTicks: { color: '#374151' }
-  },
-  yaxis: {
-    labels: {
-      style: { colors: '#e8eaed', fontWeight: 600 }
-    }
-  },
-  colors: statusColors,
-  tooltip: {
-    theme: 'dark',
-    y: { formatter: val => `${val} pedidos` }
-  },
-  legend: {
-    show: true,
-    labels: { colors: '#e8eaed' },
-    markers: { fillColors: statusColors }
-  }
-}));
-const barChartSeries = computed(() => [
-  {
-    name: 'Pedidos',
-    data: pedidosPorStatus.value
-  }
+// Nova lista de atividades recentes
+const atividadesRecentes = ref([
+  { id: 1, date: new Date(), description: 'Novo pedido #1234 criado.', user: 'Cliente João' },
+  { id: 2, date: new Date(), description: 'Produto "Teclado Gamer" atualizado.', user: 'Admin Gustavo' },
+  { id: 3, date: new Date(), description: 'Novo cliente registrado: Maria.', user: 'Sistema' }
 ]);
 </script>
 

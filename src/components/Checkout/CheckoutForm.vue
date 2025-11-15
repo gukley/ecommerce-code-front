@@ -1,6 +1,7 @@
 <template>
   <div class="checkout-form-modern glass-card">
-    <CheckoutSteps :etapa="etapa" />
+    <CheckoutSteps v-if="showSteps" :etapa="etapa" />
+
     <!-- Etapa 1: Endereço -->
     <div v-if="etapa === 1" class="form-section">
       <div class="section-header">
@@ -39,33 +40,54 @@
       </div>
 
       <!-- Formulário para novo endereço -->
-      <form v-if="modoNovoEndereco || enderecos.length === 0" @submit.prevent="avancarEtapaEndereco" class="address-form">
+      <form
+        v-if="modoNovoEndereco || enderecos.length === 0"
+        @submit.prevent="avancarEtapaEndereco"
+        class="address-form"
+      >
         <div class="form-grid">
           <div class="form-group full-width">
             <label class="form-label" for="street">Rua</label>
             <input id="street" type="text" class="form-input" v-model="form.street" required />
           </div>
+
           <div class="form-group">
             <label class="form-label" for="number">Número</label>
             <input id="number" type="number" class="form-input" v-model.number="form.number" required />
           </div>
+
           <div class="form-group">
             <label class="form-label" for="city">Cidade</label>
             <input id="city" type="text" class="form-input" v-model="form.city" required />
           </div>
+
           <div class="form-group">
             <label class="form-label" for="state">Estado</label>
             <input id="state" type="text" class="form-input" v-model="form.state" required />
           </div>
+
           <div class="form-group">
             <label class="form-label" for="country">País</label>
             <input id="country" type="text" class="form-input" v-model="form.country" required />
           </div>
+
           <div class="form-group">
             <label class="form-label" for="zip">CEP</label>
-            <input id="zip" type="text" class="form-input" v-model="form.zip" required />
+            <input
+              id="zip"
+              type="text"
+              class="form-input"
+              v-model="form.zip"
+              maxlength="8"
+              placeholder="Digite o CEP"
+              required
+            />
+            <div v-if="frete.valor" class="frete-info mt-2 text-success">
+              <small>Frete: R$ {{ frete.valor.toFixed(2) }} — {{ frete.prazo }} dias úteis</small>
+            </div>
           </div>
         </div>
+
         <div class="form-actions">
           <button v-if="enderecos.length > 0" type="button" class="btn-secondary" @click="modoNovoEndereco = false">
             <i class="bi bi-arrow-left"></i>
@@ -78,7 +100,7 @@
         </div>
       </form>
 
-      <!-- Botão continuar quando endereço já existe -->
+      <!-- Endereço salvo -->
       <div
         v-if="!modoNovoEndereco && enderecos.length > 0 && enderecoSelecionadoId && getSelectedAddressInfo()"
         class="address-continue"
@@ -107,25 +129,23 @@
       @dadosColetados="handleDadosColetadosFromPayment"
       @pagamentoAprovado="handlePagamentoAprovado"
     />
-    <!-- Etapa 3: Confirmação (Sugestão para adicionar!) -->
-    <!-- <OrderSummary v-if="etapa === 3" ... /> -->
   </div>
 </template>
 
 <script setup>
-import { reactive, ref, onMounted, watch } from 'vue';
-import { createAddress, getAllAddresses, createOrder } from '@/services/apiService';
-import { useToast } from 'vue-toastification';
-import PaymentSelection from './PaymentSelection.vue';
-import CheckoutSteps from './CheckoutSteps.vue';
+import { reactive, ref, onMounted, watch } from 'vue'
+import { createAddress, getAllAddresses, createOrder } from '@/services/apiService'
+import { useToast } from 'vue-toastification'
+import PaymentSelection from './PaymentSelection.vue'
+import CheckoutSteps from './CheckoutSteps.vue'
 
 const props = defineProps({
-  etapa: Number
-});
+  etapa: Number,
+  showSteps: { type: Boolean, default: true }
+})
+const emit = defineEmits(['etapaChange', 'dadosColetados', 'pedidoCriado'])
 
-const emit = defineEmits(['etapaChange', 'dadosColetados', 'pedidoCriado']);
-
-const toast = useToast();
+const toast = useToast()
 
 const form = reactive({
   street: '',
@@ -133,33 +153,91 @@ const form = reactive({
   city: '',
   state: '',
   country: '',
-  zip: '',
-});
+  zip: ''
+})
 
-const enderecos = ref([]);
-const enderecoSelecionadoId = ref(null);
-const modoNovoEndereco = ref(false);
-const metodoPagamento = ref('pix');
+const enderecos = ref([])
+const enderecoSelecionadoId = ref(null)
+const modoNovoEndereco = ref(false)
+const metodoPagamento = ref('card')
+
+// Frete automático
+const frete = ref({
+  valor: 0,
+  prazo: 0
+})
 
 onMounted(async () => {
   try {
-    enderecos.value = await getAllAddresses();
+    enderecos.value = await getAllAddresses()
   } catch (e) {
-    console.error("Erro ao carregar endereços:", e);
+    console.error("Erro ao carregar endereços:", e)
   }
   if (enderecos.value.length > 0) {
-    enderecoSelecionadoId.value = enderecos.value[0].id;
-    modoNovoEndereco.value = false;
+    enderecoSelecionadoId.value = enderecos.value[0].id
+    modoNovoEndereco.value = false
   } else {
-    modoNovoEndereco.value = true;
+    modoNovoEndereco.value = true
+  }
+})
+
+// --- Preenche endereço e calcula frete ao digitar CEP ---
+watch(() => form.zip, async (novoCep) => {
+  const cepLimpo = novoCep.replace(/\D/g, '')
+  if (cepLimpo.length === 8) {
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`)
+      const data = await response.json()
+
+      if (data.erro) {
+        toast.error('CEP não encontrado.')
+        return
+      }
+
+      form.street = data.logradouro || ''
+      form.city = data.localidade || ''
+      form.state = data.uf || ''
+      form.country = 'Brasil'
+
+      // Simula frete com base no CEP (poderia vir da API futuramente)
+      frete.value.valor = 15.00
+      frete.value.prazo = 5
+
+      toast.info('Endereço preenchido e frete calculado!')
+    } catch (error) {
+      console.error('Erro ao buscar CEP:', error)
+      toast.error('Erro ao buscar o endereço pelo CEP.')
+    }
+  }
+})
+
+watch(enderecoSelecionadoId, async (id) => {
+  if (!id) return;
+
+  // Encontra o endereço selecionado
+  const end = enderecos.value.find(e => e.id === id);
+  if (!end) return;
+
+  const cepLimpo = end.zip?.replace(/\D/g, '');
+
+  if (cepLimpo?.length === 8) {
+    // Simule o frete igual ao do CEP manual
+    frete.value.valor = 15.00;
+    frete.value.prazo = 5;
+
+    // Envia para o CheckoutView.vue
+    emit('freteCalculado', {
+      valor: frete.value.valor,
+      prazo: frete.value.prazo
+    });
   }
 });
 
-watch(() => props.etapa, (newVal) => {
-});
 
+
+// --- Avançar etapa endereço ---
 async function avancarEtapaEndereco() {
-  let enderecoFinal = null;
+  let enderecoFinal = null
   try {
     if (modoNovoEndereco.value) {
       const addressPayload = {
@@ -168,91 +246,98 @@ async function avancarEtapaEndereco() {
         city: form.city,
         state: form.state,
         zip: form.zip
-      };
+      }
       if (!addressPayload.street || !addressPayload.number || !addressPayload.city || !addressPayload.state || !addressPayload.zip) {
-        toast.error('Por favor, preencha todos os campos do endereço.');
-        return;
+        toast.error('Por favor, preencha todos os campos do endereço.')
+        return
       }
 
-      enderecoFinal = await createAddress(addressPayload);
-
+      enderecoFinal = await createAddress(addressPayload)
       if (!enderecoFinal?.id) {
-        toast.error('Erro: O backend não retornou o ID do endereço.');
-        return;
+        toast.error('Erro: O backend não retornou o ID do endereço.')
+        return
       }
 
-      enderecoSelecionadoId.value = enderecoFinal.id;
-      modoNovoEndereco.value = false;
+      enderecoSelecionadoId.value = enderecoFinal.id
+      modoNovoEndereco.value = false
+      toast.success('Novo endereço cadastrado com sucesso!')
 
-      toast.success('Novo endereço cadastrado com sucesso!');
-
-      emit('dadosColetados', {
-        endereco: enderecoFinal,
-        metodoPagamento: metodoPagamento.value
-      });
-      emit('etapaChange', 2);
-      return;
+      // Sempre envia 'card' como método de pagamento
+      emit('dadosColetados', { 
+        endereco: enderecoFinal, 
+        metodoPagamento: 'card',
+        frete: frete.value
+      })
+      emit('etapaChange', 2)
+      return
     } else {
-      enderecoFinal = enderecos.value.find(
-        (end) => end.id === enderecoSelecionadoId.value
-      );
+      enderecoFinal = enderecos.value.find((end) => end.id === enderecoSelecionadoId.value)
       if (!enderecoFinal) {
-        toast.warning('Por favor, selecione um endereço válido.');
-        return;
+        toast.warning('Por favor, selecione um endereço válido.')
+        return
       }
     }
 
-    emit('dadosColetados', {
-      endereco: enderecoFinal,
-      metodoPagamento: metodoPagamento.value
-    });
-
-    emit('etapaChange', 2);
-
+    // Sempre envia 'card' como método de pagamento
+    emit('dadosColetados', { 
+      endereco: enderecoFinal, 
+      metodoPagamento: 'card',
+      frete: frete.value
+    })
+    emit('etapaChange', 2)
   } catch (error) {
-    console.error('Erro ao processar o endereço:', error);
-    toast.error('Ocorreu um erro ao processar o endereço. Tente novamente.');
+    console.error('Erro ao processar o endereço:', error)
+    toast.error('Ocorreu um erro ao processar o endereço. Tente novamente.')
   }
 }
 
 async function handlePagamentoAprovado({ paymentIntent, items, email, valorTotal }) {
   try {
-    console.log('Dados recebidos do pagamento:', { paymentIntent, items, email, valorTotal });
-    
-    // Validações antes de criar o pedido
     if (!enderecoSelecionadoId.value) {
-      toast.error('Endereço não selecionado');
-      return;
+      toast.error('Endereço não selecionado')
+      return
     }
-    
     if (!items || items.length === 0) {
-      toast.error('Nenhum item encontrado no carrinho');
-      return;
+      toast.error('Nenhum item encontrado no carrinho')
+      return
     }
-    
-    // Valida cada item
-    const validItems = items.filter(item => {
-      if (!item.product_id) {
-        console.error('Item sem product_id:', item);
-        return false;
-      }
-      if (!item.quantity || item.quantity <= 0) {
-        console.error('Item com quantidade inválida:', item);
-        return false;
-      }
-      if (!item.unit_price || item.unit_price <= 0) {
-        console.error('Item com preço inválido:', item);
-        return false;
-      }
-      return true;
-    });
-    
+
+    const validItems = items.filter(item => item.product_id && item.quantity > 0 && item.unit_price > 0)
     if (validItems.length === 0) {
-      toast.error('Nenhum item válido encontrado');
-      return;
+      toast.error('Nenhum item válido encontrado')
+      return
     }
+
+    // Valida estoque antes de criar o pedido
+    const { getProductById } = await import('@/services/apiService')
+    const produtosSemEstoque = []
     
-    // Monta o payload do pedido com dados corretos
+    for (const item of validItems) {
+      try {
+        const product = await getProductById(item.product_id)
+        const quantidadeSolicitada = item.quantity
+        const estoqueDisponivel = product.stock || 0
+        
+        if (quantidadeSolicitada > estoqueDisponivel) {
+          produtosSemEstoque.push({
+            nome: product.name || 'Produto',
+            solicitado: quantidadeSolicitada,
+            disponivel: estoqueDisponivel
+          })
+        }
+      } catch (err) {
+        console.error(`Erro ao verificar estoque do produto ${item.product_id}:`, err)
+      }
+    }
+
+    if (produtosSemEstoque.length > 0) {
+      const mensagem = produtosSemEstoque.map(p => 
+        `${p.nome}: solicitado ${p.solicitado}, disponível ${p.disponivel}`
+      ).join('; ')
+      toast.error(`Estoque insuficiente: ${mensagem}`)
+      return
+    }
+
     const orderData = {
       items: validItems.map(item => ({
         product_id: Number(item.product_id),
@@ -262,65 +347,57 @@ async function handlePagamentoAprovado({ paymentIntent, items, email, valorTotal
       address_id: Number(enderecoSelecionadoId.value),
       payment_method: 'card',
       total_amount: Number(valorTotal),
-      shipping_cost: 0,
+      shipping_cost: Number(frete.value.valor || 0),
       coupon_id: null
     }
-    
-    console.log('Payload do pedido validado:', JSON.stringify(orderData, null, 2));
-    
+
     const response = await createOrder(orderData)
     if (response) {
       toast.success('Pedido gerado com sucesso!')
       emit('pedidoCriado', true)
+      // Emite os dados coletados para o CheckoutView atualizar o estado
+      const enderecoFinal = enderecos.value.find(end => end.id === enderecoSelecionadoId.value)
+      emit('dadosColetados', {
+        endereco: enderecoFinal,
+        metodoPagamento: 'card',
+        frete: frete.value
+      })
       emit('etapaChange', 3)
     }
   } catch (err) {
-    console.error('Erro detalhado ao criar pedido:', err);
-    console.error('Response data:', err.response?.data);
-    console.error('Response status:', err.response?.status);
+    console.error('Erro detalhado ao criar pedido:', err)
     
-    let errorMessage = 'Erro ao criar pedido';
-    if (err.response?.data?.detail) {
-      if (Array.isArray(err.response.data.detail)) {
-        errorMessage = err.response.data.detail.map(e => e.msg || e).join(', ');
-      } else {
-        errorMessage = err.response.data.detail;
-      }
-    } else if (err.response?.data?.message) {
-      errorMessage = err.response.data.message;
-    } else if (err.message) {
-      errorMessage = err.message;
+    // Trata erros específicos de estoque
+    const errorMessage = err.response?.data?.detail || err.message || ''
+    if (errorMessage.includes('stock') || errorMessage.includes('estoque') || errorMessage.includes('Not enough stock')) {
+      toast.error('Estoque insuficiente para um ou mais produtos. Por favor, verifique o carrinho e tente novamente.')
+    } else {
+      toast.error('Erro ao criar pedido. Tente novamente.')
     }
-    
-    toast.error(errorMessage);
   }
 }
 
 function handleEtapaChangeFromPayment(newEtapa) {
-  emit('etapaChange', newEtapa);
+  emit('etapaChange', newEtapa)
 }
 
 function handleDadosColetadosFromPayment(dados) {
-  // Sempre enviar o endereço selecionado junto com o método de pagamento
-  const enderecoFinal = enderecos.value.find(
-    (end) => end.id === enderecoSelecionadoId.value
-  );
+  const enderecoFinal = enderecos.value.find(end => end.id === enderecoSelecionadoId.value)
   emit('dadosColetados', {
     endereco: enderecoFinal,
     metodoPagamento: dados.metodoPagamento || metodoPagamento.value
-  });
+  })
 }
 
 function getSelectedAddressInfo() {
-  const selectedAddress = enderecos.value.find(
-    (end) => end.id === enderecoSelecionadoId.value
-  );
+  const selectedAddress = enderecos.value.find(end => end.id === enderecoSelecionadoId.value)
   if (selectedAddress) {
-    return `${selectedAddress.street}, ${selectedAddress.number} - ${selectedAddress.city}/${selectedAddress.state} - CEP: ${selectedAddress.zip}`;
+    return `${selectedAddress.street}, ${selectedAddress.number} - ${selectedAddress.city}/${selectedAddress.state} - CEP: ${selectedAddress.zip}`
   }
-  return '';
+  return ''
 }
 </script>
+
 
 <style scoped>
 .checkout-form-modern {

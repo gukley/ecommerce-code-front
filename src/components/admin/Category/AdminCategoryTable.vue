@@ -75,7 +75,7 @@ table {
 
 thead th {
   background: var(--admin-bg-tertiary); 
-  color: var(--admin-accent-primary);
+  color: #ffffff; /* Change text color to white for better visibility */
   font-weight: 700;
   letter-spacing: 0.5px;
   font-size: 1.1rem;

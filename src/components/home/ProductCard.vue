@@ -1,5 +1,12 @@
 <template> 
   <div class="card product-card text-dark border-0 rounded-4 h-100 text-decoration-none" style="cursor: pointer">
+    <button
+      class="btn btn-fav"
+      @click.stop.prevent="toggleWishlist"
+      :aria-label="isFavorited ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
+    >
+      <i :class="isFavorited ? 'bi bi-heart-fill' : 'bi bi-heart'" class="fs-4"></i>
+    </button>
     <div class="position-relative"> 
       <router-link
         :to="`/produto/${produto.id}`"
@@ -13,14 +20,6 @@
           style="height: 200px; object-fit: cover"
         />
       </router-link>
-      <button
-        class="btn btn-fav position-absolute top-0 start-0 m-2"
-        @click.stop.prevent="toggleWishlist"
-        :aria-label="isFavorited ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
-        style="z-index: 3;"
-      >
-        <i :class="isFavorited ? 'bi bi-heart-fill' : 'bi bi-heart'" class="fs-4"></i>
-      </button>
 
       <span
         v-if="produto.status === 'novo'"
@@ -171,6 +170,7 @@ const adicionarAoCarrinho = () => {
   position: relative;
   min-height: 420px;
   transition: box-shadow 0.22s, border 0.22s, transform 0.22s;
+  overflow: visible;
 }
 .product-card:hover {
   box-shadow: 0 12px 36px rgba(57, 155, 255, 0.25); /* Sombra mais forte ao passar o mouse */
@@ -255,21 +255,31 @@ const adicionarAoCarrinho = () => {
 }
 .btn-fav {
   position: absolute;
-  top: 18px;
-  left: 18px;
-  z-index: 3;
-  background: #fff;
+  top: 12px;
+  left: 12px;
+  z-index: 10;
+  background: #ffffff;
   border-radius: 50%;
-  box-shadow: 0 2px 8px rgba(57, 155, 255, 0.2);
-  padding: 6px 8px;
-  border: 2px solid #d6d8db; /* Borda mais visível */
+  box-shadow: 0 2px 8px rgba(57, 155, 255, 0.25);
+  padding: 8px;
+  border: 2px solid #e0e7ff;
   color: #399bff;
-  transition: background 0.18s, color 0.18s, border 0.18s;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
 }
 .btn-fav:hover {
-  background: #399bff;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
   color: #fff;
-  border-color: #399bff;
+  border-color: #ff6b6b;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+.btn-fav i.bi-heart-fill {
+  color: #ff6b6b;
 }
 .category-thumb {
   border: 1.5px solid #399bff !important;

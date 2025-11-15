@@ -35,19 +35,7 @@
         </label>
       </div>
       
-      <div class="payment-option">
-        <input
-          type="radio"
-          id="boleto"
-          value="boleto"
-          v-model="selectedMethod"
-          class="payment-radio"
-        />
-        <label for="boleto" class="payment-label">
-          <i class="bi bi-receipt"></i>
-          <span>Boleto Bancário</span>
-        </label>
-      </div>
+        <!-- Boleto removed: not supported anymore -->
     </div>
 
     <!-- Card Payment -->
@@ -110,10 +98,9 @@ const stripe = ref(null);
 const elements = ref(null);
 const card = ref(null);
 const selectedMethod = ref(props.modelValue || 'card');
+const paymentIntentId = ref(null);
 
-// Campos para boleto e e-mail dinâmico
-const boletoNome = ref('');
-const boletoCpf = ref('');
+// Campos para e-mail dinâmico
 const checkoutEmail = ref('');
 
 // Stripe public key (coloque em .env se desejar)
@@ -143,6 +130,7 @@ async function criarPaymentIntent() {
       payload
     );
     clientSecret.value = data.clientSecret;
+    paymentIntentId.value = data.id || null; // <- salva id do PI se existir
 
     stripe.value = await loadStripe(STRIPE_PUBLIC_KEY);
     elements.value = stripe.value.elements();
@@ -163,13 +151,25 @@ async function confirmarPagamento() {
         card: card.value,
       }
     });
-    
+
     if (error) {
       toast.error('Erro no pagamento: ' + error.message);
       return;
     }
-    
-    if (paymentIntent.status === 'succeeded') {
+
+    if (paymentIntent && paymentIntent.status === 'succeeded') {
+      // chama backend para gravar payment_method e stripe_payment_intent
+      try {
+        await axios.post('http://localhost:8000/payments/confirm-payment', {
+          order_id: cartStore.orderId,
+          payment_intent_id: paymentIntent.id || paymentIntentId.value,
+          method: 'card'
+        });
+      } catch (err) {
+        console.warn('Falha ao confirmar pagamento no backend (manual):', err.response?.data || err.message);
+        // não impedi o fluxo do usuário - webhook ainda será fallback
+      }
+
       toast.success('Pagamento realizado com sucesso!');
       emit('pagamentoAprovado', {
         paymentIntent,
@@ -210,11 +210,6 @@ async function confirmarPagamento() {
 
   const payload = {
       items,
-      email: checkoutEmail.value,
-      payer: {
-        name: boletoNome.value,
-        tax_id: boletoCpf.value
-      },
       metadata: { order_id: cartStore.orderId },
       success_url: window.location.origin + '/sucesso',
       cancel_url: window.location.origin + '/cancelado'

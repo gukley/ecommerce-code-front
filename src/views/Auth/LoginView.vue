@@ -3,7 +3,9 @@
     <div class="login-left d-none d-md-flex flex-column justify-content-center align-items-center p-5">
       <div class="login-left-bg"></div>
       <div class="login-left-content z-index-1 w-100 d-flex flex-column justify-content-center align-items-center">
-        <h1 class="login-logo">GGTECH</h1>
+        <h1 class="ggtech-logo">
+          GG<span class="text-secondary-highlight">TECH</span>
+        </h1>
         <p class="login-slogan">
           Conecte-se à performance.<br />
           Equipe seu setup.<br />
@@ -66,6 +68,9 @@
           <router-link to="/forgot-password" class="login-link">Esqueceu a senha?</router-link>
           <router-link to="/register" class="login-link login-link-right">Cadastre-se</router-link>
         </div>
+        <div class="text-center mt-3">
+          <router-link to="/" class="login-link-home">Ir para a Home</router-link>
+        </div>
       </div>
     </div>
   </div>
@@ -108,7 +113,11 @@ const handleLogin = async () => {
     }
   } catch (error) {
     console.error('Login error:', error)
-    toast.error('Erro ao logar: ' + (error.response?.data?.message || error.message || 'Credenciais inválidas.'))
+    if (error.response?.status === 401) {
+      toast.error('Erro: Credenciais inválidas. Tente novamente.')
+    } else {
+      toast.error('Erro ao logar: ' + (error.response?.data?.message || error.message || 'Ocorreu um erro inesperado.'))
+    }
   } finally {
     isSubmitting.value = false
   }
@@ -147,15 +156,16 @@ const handleLogin = async () => {
   z-index: 1;
   text-align: center;
 }
-.login-logo {
-  font-size: 3.2rem;
-  font-weight: 700;
-  letter-spacing: 2px;
-  background: linear-gradient(90deg, #4f8cff 0%, #a362ff 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin-bottom: 1.2rem;
-  font-family: 'Poppins', 'Inter', sans-serif;
+.ggtech-logo {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 3rem; /* Aumentado de 2rem para 3rem */
+  color: #333333; /* Texto escuro */
+  letter-spacing: 1.5px; /* Aumentado para maior destaque */
+  display: inline-block;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
+}
+.text-secondary-highlight {
+  color: #399bff; /* Destaque azul */
 }
 .login-slogan {
   color: #3b3b4f;
@@ -325,6 +335,16 @@ const handleLogin = async () => {
 }
 .login-link-right {
   margin-left: auto;
+}
+.login-link-home {
+  color: #399bff;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.login-link-home:hover {
+  color: #6a5ae0;
+  text-decoration: underline;
 }
 
 @media (max-width: 991.98px) {

@@ -32,17 +32,9 @@ const isRouteProtected = () => {
 const initializeApp = async () => {
   isLoading.value = true;
   try {
-    // DEBUG: inspeciona o que existe antes de qualquer verificação
-    console.log('BOOT: localStorage token=', localStorage.getItem('token'));
-    console.log('BOOT: localStorage refreshToken=', localStorage.getItem('refreshToken') || localStorage.getItem('refresh_token'));
-    console.log('BOOT: authStore.token (ref) =', authStore.token);
-    console.log('BOOT: authStore.refreshTokenValue (ref) =', authStore.refreshTokenValue);
-
     const tokenFromStore = (authStore.token && authStore.token.value) || localStorage.getItem('token');
-    console.log('BOOT: tokenFromStore=', tokenFromStore);
 
     if (!tokenFromStore) {
-      console.log('BOOT: sem token. rota atual requiresAuth=', router.currentRoute.value?.meta?.requiresAuth);
       if (router.currentRoute.value?.meta?.requiresAuth) {
         authStore.logout();
         router.push('/login');
@@ -51,11 +43,8 @@ const initializeApp = async () => {
     }
 
     const isTokenValid = await authStore.verifyToken();
-    console.log('BOOT: verifyToken returned =', isTokenValid);
 
     if (!isTokenValid) {
-      // não jogar imediatamente — logamos e tratamos dependendo da rota
-      console.warn('BOOT: token inválido/expirado e verifyToken = false');
       if (router.currentRoute.value?.meta?.requiresAuth) {
         throw new Error('Invalid or expired token');
       } else {
@@ -67,7 +56,6 @@ const initializeApp = async () => {
     await authStore.getUserProfile();
     await cartStore.initCart();
   } catch (error) {
-    console.error('Erro ao inicializar app:', error);
     authStore.logout();
     router.push('/login');
   } finally {

@@ -6,6 +6,7 @@
           <h5 class="modal-title">Detalhes do Pedido #{{ order.id }}</h5>
           <button type="button" class="btn-close" @click="$emit('close')"></button>
         </div>
+
         <div class="modal-body">
           <div class="mb-3">
             <strong>Status:</strong>
@@ -13,35 +14,33 @@
             <select v-model="selectedStatus" class="form-select mt-2" style="max-width:180px;">
               <option value="PENDING">Pendente</option>
               <option value="PROCESSING">Processando</option>
-              <option value="CONFIRMED">Confirmado</option>
               <option value="SHIPPED">Enviado</option>
-              <option value="DELIVERED">Entregue</option>
-              <option value="CANCELED">Cancelado</option>
+              <option value="CANCELLED">Cancelado</option>
             </select>
             <button class="btn btn-sm btn-success mt-2 ms-2" @click="saveStatus" :disabled="selectedStatus === order.status">
               Salvar
             </button>
           </div>
+
           <div class="mb-3">
             <strong>Cliente:</strong>
-            <span>{{ order.user?.name || '-' }}</span>
+            <span>{{ getClientName(order) }}</span>
           </div>
+
           <div class="mb-3">
             <strong>Data do Pedido:</strong>
             <span>{{ formatDate(order.order_date) }}</span>
           </div>
+
           <div class="mb-3">
             <strong>Endereço:</strong>
             <span>{{ addresses[order.address_id] ? formatAddress(addresses[order.address_id]) : '-' }}</span>
           </div>
+
           <div class="mb-3">
             <strong>Produtos:</strong>
             <div class="order-products-list">
-              <div
-                v-for="item in order.items"
-                :key="item.id"
-                class="order-product-item"
-              >
+              <div v-for="item in order.items || []" :key="item.product?.id" class="order-product-item">
                 <img
                   :src="getProductImage(item)"
                   alt="Imagem do produto"
@@ -57,11 +56,13 @@
               </div>
             </div>
           </div>
+
           <div class="mb-3">
             <strong>Total:</strong>
-            <span class="fw-bold text-success">R$ {{ order.total }}</span>
+            <span class="fw-bold text-success">R$ {{ formattedTotal }}</span>
           </div>
         </div>
+
         <div class="modal-footer">
           <button class="btn btn-secondary" @click="$emit('close')">Fechar</button>
         </div>
@@ -69,71 +70,84 @@
     </div>
   </div>
 </template>
+
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
+
 const props = defineProps({
   order: Object,
-  addresses: Object
+  addresses: Object,
+  users: Object // opcional, caso você já tenha cache de usuários
 })
 const emit = defineEmits(['close', 'change-status'])
 
 const selectedStatus = ref(props.order?.status || 'PENDING')
-watch(() => props.order?.status, (val) => {
-  selectedStatus.value = val
-})
+watch(() => props.order?.status, val => selectedStatus.value = val)
 
 function saveStatus() {
   emit('change-status', props.order.id, { status: selectedStatus.value })
 }
 
 function formatDate(dateString) {
-  if (!dateString) return '-';
-  const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false };
-  const date = new Date(dateString);
-  return date.toLocaleString('pt-BR', options);
-}
-function getStatusClass(status) {
-  switch (status) {
-    case 'PENDING': return 'bg-warning text-dark';
-    case 'PROCESSING': return 'bg-info';
-    case 'CONFIRMED': return 'bg-info';
-    case 'SHIPPED': return 'bg-primary';
-    case 'DELIVERED': return 'bg-success';
-    case 'CANCELED': return 'bg-danger';
-    default: return '';
-  }
-}
-function getStatusLabel(status) {
-  switch (status) {
-    case 'PENDING': return 'Pendente';
-    case 'PROCESSING': return 'Processando';
-    case 'CONFIRMED': return 'Confirmado';
-    case 'SHIPPED': return 'Enviado';
-    case 'DELIVERED': return 'Entregue';
-    case 'CANCELED': return 'Cancelado';
-    default: return 'Desconhecido';
-  }
-}
-function formatAddress(address) {
-  if (!address) return '-';
-  return `${address.street}, ${address.number} - ${address.bairro}, ${address.city} - ${address.state}, ${address.zip_code}`;
+  if (!dateString) return '-'
+  const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }
+  return new Date(dateString).toLocaleString('pt-BR', options)
 }
 
-// Utilitário para imagem do produto
-function getProductImage(item) {
-  // Use VITE_API_URL para garantir compatibilidade com seu .env
-  if (item.product && item.product.image_path) {
-    let base = import.meta.env.VITE_API_URL?.replace(/\/$/, '') || '';
-    let path = item.product.image_path.startsWith('/') ? item.product.image_path : '/' + item.product.image_path;
-    return base + path;
+function getStatusClass(status) {
+  switch (status) {
+    case 'PENDING': return 'bg-warning text-dark'
+    case 'PROCESSING': return 'bg-info'
+    case 'CONFIRMED': return 'bg-primary'
+    case 'SHIPPED': return 'bg-primary'
+    case 'DELIVERED': return 'bg-success'
+    case 'CANCELLED': return 'bg-danger'
+    default: return ''
   }
-  if (item.product && item.product.image) return item.product.image;
-  if (item.product && item.product.image_url) return item.product.image_url;
-  if (item.image) return item.image;
-  if (item.image_url) return item.image_url;
-  return 'https://placehold.co/60x60?text=Produto';
+}
+
+function getStatusLabel(status) {
+  switch (status) {
+    case 'PENDING': return 'Pendente'
+    case 'PROCESSING': return 'Processando'
+    case 'CONFIRMED': return 'Confirmado'
+    case 'SHIPPED': return 'Enviado'
+    case 'DELIVERED': return 'Entregue'
+    case 'CANCELLED': return 'Cancelado'
+    default: return 'Desconhecido'
+  }
+}
+
+function formatAddress(address) {
+  if (!address) return '-'
+  return `${address.street}, ${address.number} - ${address.bairro}, ${address.city} - ${address.state}, ${address.zip_code}`
+}
+
+function getClientName(order) {
+  // Se tiver cache local de usuários (ex: props.users), busca por ID
+  if (props.users && props.users[order.user_id]) return props.users[order.user_id].name
+  // Se o back-end futuramente retornar o objeto user
+  if (order.user?.name) return order.user.name
+  // Caso contrário, mostra apenas o ID
+  return `Usuário #${order.user_id}`
+}
+
+const formattedTotal = computed(() => {
+  // Usa o campo correto da API
+  return (props.order?.total_amount ?? 0).toFixed(2)
+})
+
+// Imagem do produto
+function getProductImage(item) {
+  if (item.product && item.product.image_path) {
+    let base = import.meta.env.VITE_API_URL?.replace(/\/$/, '') || ''
+    let path = item.product.image_path.startsWith('/') ? item.product.image_path : '/' + item.product.image_path
+    return base + path
+  }
+  return 'https://placehold.co/60x60?text=Produto'
 }
 </script>
+
 
 <style scoped>
 /* ...estilos do modal, copie da view original... */

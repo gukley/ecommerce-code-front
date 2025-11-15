@@ -1,28 +1,42 @@
 <template>
-  <section class="card addresses-card border-0 shadow-sm modern-addresses-card">
-    <div class="card-body">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="h5 fw-bold text-blue mb-0">Meus Endereços</h2>
-        <button @click="$emit('add')" class="btn btn-green btn-sm modern-btn" title="Novo Endereço">
-          <i class="bi bi-plus-lg"></i>
-        </button>
-      </div>
-      <div v-if="addresses.length === 0" class="alert alert-dark py-2">Nenhum endereço cadastrado.</div>
-      <ul v-else class="list-group addresses-list">
-        <li v-for="addr in addresses" :key="addr.id" class="list-group-item d-flex justify-content-between align-items-center bg-address border-0 shadow-sm rounded-3 mb-3 px-3 py-3 animate-fade modern-list-item">
-          <span class="fw-medium modern-address-text">
-            {{ addr.street }}, {{ addr.number }} - {{ addr.city }}, {{ addr.state }} ({{ addr.zip }})
-          </span>
-          <div class="d-flex gap-2">
-            <button @click="$emit('edit', addr)" class="btn btn-purple btn-sm px-3 modern-btn" title="Editar">
-              <i class="bi bi-pencil"></i>
-            </button>
-            <button @click="$emit('delete', addr.id)" class="btn btn-danger btn-sm px-3 modern-btn" title="Excluir">
-              <i class="bi bi-trash"></i>
-            </button>
+  <section class="addresses-section">
+    <div class="addresses-header">
+      <h2 class="addresses-title">
+        <i class="bi bi-geo-alt-fill"></i>
+        Meus Endereços
+      </h2>
+      <button @click="$emit('add')" class="btn-add-address" title="Adicionar Novo Endereço">
+        <i class="bi bi-plus-circle"></i>
+        <span>Adicionar</span>
+      </button>
+    </div>
+    
+    <div v-if="addresses.length === 0" class="empty-state">
+      <i class="bi bi-inbox"></i>
+      <p>Nenhum endereço cadastrado.</p>
+    </div>
+    
+    <div v-else class="addresses-list">
+      <div v-for="addr in addresses" :key="addr.id" class="address-item">
+        <div class="address-content">
+          <div class="address-icon">
+            <i class="bi bi-geo-alt"></i>
           </div>
-        </li>
-      </ul>
+          <div class="address-info">
+            <span class="address-text">
+              {{ addr.street }}, {{ addr.number }} - {{ addr.city }}, {{ addr.state }} ({{ addr.zip }})
+            </span>
+          </div>
+        </div>
+        <div class="address-actions">
+          <button @click="$emit('edit', addr)" class="btn-action btn-edit" title="Editar Endereço">
+            <i class="bi bi-pencil"></i>
+          </button>
+          <button @click="$emit('delete', addr.id)" class="btn-action btn-delete" title="Excluir Endereço">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+      </div>
     </div>
   </section>
 </template>
@@ -30,57 +44,233 @@
 const props = defineProps({ addresses: Array })
 </script>
 <style scoped>
-.addresses-card {
+.addresses-section {
+  background: #ffffff;
   border-radius: 12px;
-  background: #ffffff; /* Fundo branco */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Sombra leve */
-  border: 1.5px solid #e0e7ff; /* Borda azul clara */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1.5px solid #e0e7ff;
   padding: 1.5rem;
+  font-family: 'Inter', sans-serif;
 }
 
-.list-group-item {
-  background: #f8fafc; /* Fundo claro */
+.addresses-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e0e7ff;
+}
+
+.addresses-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #4a90e2;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.addresses-title i {
+  font-size: 1.5rem;
+  color: #6a5ae0;
+}
+
+.btn-add-address {
+  background: linear-gradient(135deg, #4a90e2 0%, #6a5ae0 100%);
+  color: #ffffff;
+  border: none;
   border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Sombra leve */
-  padding: 1rem;
-  transition: all 0.2s ease-in-out;
+  padding: 0.6rem 1.2rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.2);
 }
 
-.list-group-item:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1); /* Sombra mais forte */
-  transform: translateY(-4px);
+.btn-add-address:hover {
+  background: linear-gradient(135deg, #6a5ae0 0%, #4a90e2 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(74, 144, 226, 0.3);
 }
 
-.btn-green {
-  background: linear-gradient(90deg, #00c853, #b2ff59); /* Gradiente verde */
-  color: #fff;
+.btn-add-address i {
+  font-size: 1.1rem;
 }
 
-.btn-green:hover {
-  filter: brightness(1.1);
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #6b7280;
 }
 
-.btn-purple {
-  background: linear-gradient(90deg, #6a5ae0, #ff6b6b); /* Gradiente roxo → laranja */
-  color: #fff;
+.empty-state i {
+  font-size: 3rem;
+  color: #d1d5db;
+  margin-bottom: 1rem;
+  display: block;
 }
 
-.btn-purple:hover {
-  filter: brightness(1.1);
+.empty-state p {
+  margin: 0;
+  font-size: 1rem;
+  color: #9ca3af;
 }
-.text-blue { color: #399bff;}
-.modern-list-item {
-  transition: box-shadow 0.2s, background 0.2s;
-  border-radius: 14px !important;
-  background: #f3f4f8 !important;
+
+.addresses-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
-.modern-list-item:hover {
-  box-shadow: 0 4px 16px #399bff30;
-  background: #eaf6ff !important;
+
+.address-item {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 1.2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1.5px solid #e0e7ff;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
 }
-@keyframes fadein {
-  from { opacity: 0; transform: translateY(10px);}
-  to { opacity: 1; transform: translateY(0);}
+
+.address-item:hover {
+  background: #f0f9ff;
+  border-color: #4a90e2;
+  box-shadow: 0 4px 16px rgba(74, 144, 226, 0.1);
+  transform: translateY(-2px);
 }
-.animate-fade { animation: fadein 0.2s; }
+
+.address-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.address-icon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #4a90e2 0%, #6a5ae0 100%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.2);
+}
+
+.address-info {
+  flex: 1;
+}
+
+.address-text {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #232e47;
+  line-height: 1.5;
+}
+
+.address-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.btn-action {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-edit {
+  background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%);
+  color: #ffffff;
+}
+
+.btn-edit:hover {
+  background: linear-gradient(135deg, #42a5f5 0%, #64b5f6 100%);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 4px 12px rgba(66, 165, 245, 0.3);
+}
+
+.btn-delete {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+  color: #ffffff;
+}
+
+.btn-delete:hover {
+  background: linear-gradient(135deg, #ee5a6f 0%, #ff6b6b 100%);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+/* Responsividade */
+@media (max-width: 991px) {
+  .addresses-section {
+    padding: 1.2rem;
+  }
+
+  .addresses-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .btn-add-address {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .address-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .address-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 600px) {
+  .addresses-section {
+    padding: 1rem;
+  }
+
+  .addresses-title {
+    font-size: 1.2rem;
+  }
+
+  .address-item {
+    padding: 1rem;
+  }
+
+  .address-text {
+    font-size: 0.9rem;
+  }
+
+  .btn-action {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+}
 </style>

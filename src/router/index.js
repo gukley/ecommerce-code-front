@@ -83,22 +83,22 @@ const routes = [
         meta: { roles: ['ADMIN', 'MODERATOR'] },
       },
       {
-        path: '/admin/create-moderator',
+        path: 'create-moderator',
         name: 'CreateModerator',
         component: () => import('@/views/admin/CreateModerator.vue'),
-        meta: { requiresAdmin: true }
+        meta: { requiresAuth: true, requiresAdmin: true }
       },
       {
-        path: '/admin/clientes',
+        path: 'clientes',
         name: 'admin-clients',
         component: () => import('@/views/admin/AdminClients.vue'),
         meta: { requiresAuth: true, requiresAdmin: true }
       },
       {
-        path: '/admin/financeiro',
+        path: 'financeiro',
         name: 'FinanceDashboard',
         component: FinanceDashboard,
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, roles: ['ADMIN', 'MODERATOR'] }
       }
   ],
   },

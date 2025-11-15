@@ -129,7 +129,6 @@ async function fetchClients() {
   error.value = ''
   try {
     const response = await apiService.getAdminClients()
-    console.log('Resposta getAdminClients:', response)
     // Ajuste para diferentes formatos de resposta
     if (Array.isArray(response.data)) {
       clients.value = response.data

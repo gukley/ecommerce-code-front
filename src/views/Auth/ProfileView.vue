@@ -58,7 +58,6 @@ async function handleAddAddress(addressData) {
     await fetchAddresses()
   } catch (e) {
     // Trate o erro, ex: toast.error('Erro ao adicionar endereço')
-    console.error('Erro ao adicionar endereço:', e)
   }
 }
 
@@ -68,7 +67,6 @@ async function handleEditAddress(addressData) {
     await fetchAddresses()
   } catch (e) {
     // Trate o erro, ex: toast.error('Erro ao editar endereço')
-    console.error('Erro ao editar endereço:', e)
   }
 }
 
@@ -77,11 +75,8 @@ async function handleDeleteAddress(id) {
     if (confirm('Tem certeza que deseja excluir este endereço?')) {
       await deleteAddress(id)
       await fetchAddresses()
-      // Mostrar mensagem de sucesso
-      console.log('Endereço excluído com sucesso!')
     }
   } catch (e) {
-    console.error('Erro ao excluir endereço:', e)
     alert('Erro ao excluir endereço. Tente novamente.')
   }
 }
@@ -91,10 +86,8 @@ async function handleCancelOrder(orderId) {
     if (confirm('Tem certeza que deseja cancelar este pedido?')) {
       await cancelOrder(orderId)
       await fetchUserOrders()
-      console.log('Pedido cancelado com sucesso!')
     }
   } catch (e) {
-    console.error('Erro ao cancelar pedido:', e)
     alert('Erro ao cancelar pedido. Tente novamente.')
   }
 }
@@ -331,32 +324,51 @@ onBeforeUnmount(() => {
   gap: 2rem;
 }
 @media (max-width: 991px) {
-  .profile-header-card {
-    padding: 18px 14px 12px 14px;
+  .profile-header {
+    padding: 1.5rem 1rem;
   }
+
+  .profile-title {
+    font-size: 1.8rem;
+    text-align: center;
+  }
+
+  .profile-main-section {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
   .profile-sidebar-custom {
-    max-width: 100vw;
-    min-width: 0;
-    padding: 24px 10px 18px 10px;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 1rem;
   }
+
   .profile-cards-grid {
     grid-template-columns: 1fr;
-    gap: 1.2rem;
+    gap: 1.5rem;
   }
 }
 @media (max-width: 600px) {
-  .profile-avatar-box {
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
-    overflow: hidden;
+  .profile-header {
+    padding: 1rem 0.5rem;
   }
-  .profile-avatar-img {
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
-    object-fit: cover;
-    background: #232e47;
+
+  .profile-title {
+    font-size: 1.5rem;
+  }
+
+  .profile-sidebar-custom {
+    padding: 0.8rem;
+  }
+
+  .profile-avatar-box {
+    width: 80px;
+    height: 80px;
+  }
+
+  .profile-cards-grid {
+    gap: 1rem;
   }
 }
 
@@ -370,8 +382,8 @@ onBeforeUnmount(() => {
 .profile-header {
   background: var(--bg-card);
   border-bottom: 1px solid var(--border-color);
-  padding: 2rem 0;
-  margin-bottom: 2rem;
+  padding: 1rem 0;
+  margin-bottom: 1rem;
   box-shadow: var(--shadow-sm);
 }
 

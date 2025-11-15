@@ -118,7 +118,7 @@
       'PROCESSING': 'Processando',
       'SHIPPED': 'Enviado',
       'DELIVERED': 'Entregue',
-      'CANCELED': 'Cancelado'
+      'CANCELLED': 'Cancelado'
     };
     return textos[status] || status;
   };
@@ -130,7 +130,7 @@
       'processing': 'status-badge status-processing',
       'shipped': 'status-badge status-shipped',
       'delivered': 'status-badge status-delivered',
-      'canceled': 'status-badge status-cancelled'
+      'cancelled': 'status-badge status-cancelled'
     };
     return statusClasses[status] || 'status-badge status-pending';
   };
@@ -175,7 +175,7 @@
   
   .status-pending {
     background-color: var(--admin-warning);
-    color: #0f0f23;
+    color: #fff;
   }
   
   .status-processing {

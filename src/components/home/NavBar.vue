@@ -3,6 +3,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore';
 import { useCartStore } from '@/stores/cartStore';
+import { useToast } from 'vue-toastification'; // Importação do toast
 // import CartDrawer from '@/components/Cart/CartDrawer.vue';
 import WishlistDrawer from '@/components/Cart/WishlistDrawer.vue';
 import { useWishlistStore } from '@/stores/wishlistStore';
@@ -15,7 +16,7 @@ const cart = useCartStore();
 const searchTerm = ref("");
 const showWishlistDrawer = ref(false);
 const wishlist = useWishlistStore();
-
+const toast = useToast(); // Inicialização do toast
 
 const handleUserClick = () => {
   showMenu.value = !showMenu.value;
@@ -38,6 +39,7 @@ const goToRegister = () => {
 
 const logout = () => {
   authStore.logout();
+  toast.success('Você foi desconectado com sucesso!'); // Notificação de sucesso
   router.push('/');
   showMenu.value = false;
 };
@@ -86,7 +88,8 @@ onBeforeUnmount(() => {
   <nav class="navbar navbar-expand-lg custom-navbar px-4 py-3">
     <div class="container-fluid d-flex align-items-center">
       <router-link class="navbar-brand fw-bold fs-3 me-5" :to="{ name: 'Home' }">
-        <span class="text-gradient">GGTECH</span>
+        <!-- Versão clara do logo: mantém GG em grafite e TECH em azul -->
+        <span class="logo-gg">GG</span><span class="logo-tech">TECH</span>
       </router-link>
 
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -98,30 +101,32 @@ onBeforeUnmount(() => {
           <router-link class="nav-link custom-nav-link" :to="{ name: 'Home' }" active-class="active">Home</router-link>
           <router-link class="nav-link custom-nav-link" :to="'/produtos'" active-class="active">Produtos</router-link>
           <router-link class="nav-link custom-nav-link" :to="'/categorias'" active-class="active">Categorias</router-link>
-
         </div>
 
         <div class="d-flex align-items-center gap-4 ms-lg-3 mt-2 mt-lg-0">
           <!-- Theme Toggle -->
           <ThemeToggle />
-          
-          <!-- Carrinho: agora redireciona para /cart -->
-          <div class="position-relative nav-icon-wrapper" @click="router.push('/cart')">
+
+          <!-- Carrinho -->
+          <div class="position-relative nav-icon-wrapper" @click="router.push('/cart')" role="button" aria-label="Abrir carrinho">
             <i class="bi bi-cart3 fs-3 nav-icon"></i>
-            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-gradient-purple cart-badge">
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill cart-badge">
               {{ cart.totalItems }}
               <span class="visually-hidden">itens no carrinho</span>
             </span>
           </div>
-          <div class="position-relative nav-icon-wrapper" @click="showWishlistDrawer = true">
+
+          <!-- Wishlist -->
+          <div class="position-relative nav-icon-wrapper" @click="showWishlistDrawer = true" role="button" aria-label="Abrir wishlist">
             <i class="bi bi-heart fs-3 nav-icon"></i>
-            <span v-if="wishlist.total > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-gradient-purple cart-badge">
+            <span v-if="wishlist.total > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill cart-badge">
               {{ wishlist.total }}
               <span class="visually-hidden">itens na wishlist</span>
             </span>
           </div>
 
-          <div class="nav-icon-wrapper position-relative" @click="handleUserClick">
+          <!-- User -->
+          <div class="nav-icon-wrapper position-relative" @click="handleUserClick" role="button" aria-haspopup="true" :aria-expanded="showMenu">
             <i class="bi bi-person fs-3 nav-icon"></i>
             <div v-if="showMenu" class="user-menu-popover">
               <template v-if="authStore.user && authStore.user.id">
@@ -135,11 +140,6 @@ onBeforeUnmount(() => {
             </div>
           </div>
 
-          <!-- <button class="btn-theme-toggle" @click="toggleTheme">
-            <i :class="theme === 'dark' ? 'bi bi-brightness-high' : 'bi bi-moon-stars'"></i>
-            {{ theme === 'dark' ? 'Light' : 'Dark' }}
-          </button> -->
-
           <router-link
             v-if="authStore.user && (authStore.user.role === 'ADMIN' || authStore.user.role === 'MODERATOR')"
             to="/admin"
@@ -150,7 +150,6 @@ onBeforeUnmount(() => {
         </div>
       </div>
     </div>
-    <!-- Remova: <CartDrawer :open="showCartDrawer" @close="closeCartDrawer" /> -->
     <WishlistDrawer :open="showWishlistDrawer" @close="() => showWishlistDrawer = false" />
   </nav>
 </template>
@@ -159,143 +158,165 @@ onBeforeUnmount(() => {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 
-* { 
-  font-family: 'Rajdhani', sans-serif; 
+* {
+  font-family: 'Rajdhani', sans-serif;
 }
 
-/* Estilos da Navbar Customizada */
+/* --- Navbar clara baseada na imagem enviada --- */
 .custom-navbar {
-  background-color: #1a1a2e; 
+  background: linear-gradient(180deg, #ffffff 0%, #fbfbfd 100%); /* muito sutil */
   padding: 0.7rem 2rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); 
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1); 
-  min-height: 56px;
+  box-shadow: 0 6px 20px rgba(20, 24, 40, 0.06); /* sombra leve para elevar */
+  border-bottom: 1px solid rgba(16, 24, 40, 0.04);
+  min-height: 64px;
   position: relative;
   z-index: 1000;
+  color: #111827;
 }
 
+/* Logo: GG grafite + TECH em azul */
 .navbar-brand {
   font-size: 2.1rem !important;
   font-weight: 700;
   letter-spacing: 1px;
   padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
+/* GG em grafite */
+.logo-gg {
+  color: #2b2b32;
+  filter: none;
+  font-family: 'Rajdhani', sans-serif;
+  letter-spacing: 1px;
+}
+
+/* TECH em azul (similar à imagem) */
+.logo-tech {
+  color: transparent;
+  background: linear-gradient(90deg, #4aa7ff 0%, #1e90ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+  text-shadow: 0 0 6px rgba(74,167,255,0.12);
+}
+
+/* Responsividade do logo */
 @media (max-width: 600px) {
   .navbar-brand {
     font-size: 1.3rem !important;
   }
 }
 
-.text-gradient {
-  background: linear-gradient(to right, #a362ff, #00ffe1); 
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  display: inline-block; 
-  filter: drop-shadow(0 0 5px rgba(163, 98, 255, 0.6)); 
-}
-
-/* Links de Navegação */
+/* Links de navegação — escuros para leitura em fundo claro */
 .custom-nav-link {
-  color: #e0e0e0 !important;
+  color: #334155 !important; /* cinza-escuro */
   font-size: 1.05rem;
-  font-weight: 500;
-  transition: color 0.3s ease, transform 0.2s ease;
+  font-weight: 600;
+  transition: color 0.22s ease, transform 0.18s ease;
   padding: 0.35rem 0.7rem;
-  position: relative; 
+  position: relative;
 }
 
+/* Hover: azul suave para combinar com logo */
 .custom-nav-link:hover {
-  color: #a362ff !important; 
-  transform: translateY(-2px); 
+  color: #1677ff !important;
+  transform: translateY(-1.5px);
 }
 
-.custom-nav-link::after { 
+/* Underline ativo/hover */
+.custom-nav-link::after {
   content: '';
   position: absolute;
   width: 0;
-  height: 2px;
-  bottom: 0;
+  height: 3px;
+  bottom: -8px;
   left: 50%;
   transform: translateX(-50%);
-  background: linear-gradient(to right, #a362ff, #00ffe1);
-  transition: width 0.3s ease;
+  background: linear-gradient(90deg, rgba(74,167,255,1), rgba(30,144,255,0.9));
+  border-radius: 4px;
+  transition: width 0.28s ease;
 }
 
 .custom-nav-link:hover::after,
 .custom-nav-link.active::after {
-  width: 100%;
+  width: 80%;
 }
 
 .custom-nav-link.active {
-  color: #00ffe1 !important;
-  font-weight: 600;
+  color: #0b5ed7 !important;
+  font-weight: 700;
 }
 
-/* Ícones */
+/* Ícones: escuros por padrão, azul no hover */
 .nav-icon-wrapper {
   position: relative;
   cursor: pointer;
-  padding: 3px; 
-  transition: transform 0.2s ease;
+  padding: 3px;
+  transition: transform 0.16s ease;
   z-index: 1001;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 40px;
   height: 40px;
+  background: transparent;
+  border-radius: 8px;
 }
 
 .nav-icon-wrapper:hover {
-  transform: scale(1.08); 
+  transform: scale(1.06);
+  background: rgba(6, 78, 203, 0.04);
 }
 
 .nav-icon {
-  color: #e0e0e0; 
+  color: #334155;
   font-size: 1.7rem !important;
-  transition: color 0.3s ease;
+  transition: color 0.2s ease;
   pointer-events: none;
 }
 
 .nav-icon-wrapper:hover .nav-icon {
-  color: #00ffe1; 
+  color: #1677ff;
 }
 
-.bg-gradient-purple { 
-  background: linear-gradient(45deg, #a362ff, #8f5fe8) !important;
-  font-size: 0.72rem; 
-  padding: 0.25em 0.5em;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  pointer-events: none;
+/* Badge do carrinho/wishlist — mais discreto em fundo claro */
+.cart-badge {
+  background: linear-gradient(90deg, #4aa7ff, #1e90ff);
+  color: #fff;
+  font-size: 0.72rem;
+  padding: 0.2em 0.45em;
+  border: 1px solid rgba(255,255,255,0.12);
+  transform: translate(6%, -10%);
 }
 
+/* Popover do usuário: versão clara porém contrastante */
 .user-menu-popover {
   position: absolute;
-  top: 48px;
+  top: 52px;
   right: 0;
-  background: #23233a;
-  border-radius: 1rem;
-  box-shadow: 0 8px 32px rgba(143, 95, 232, 0.25);
-  min-width: 160px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(16, 24, 40, 0.08);
+  min-width: 180px;
   z-index: 2147483647;
-  padding: 0.4rem 0;
-  border: 2px solid #8f5fe8;
-  animation: fadeInMenu 0.18s;
+  padding: 0.3rem 0;
+  border: 1px solid rgba(16,24,40,0.06);
+  animation: fadeInMenu 0.14s ease-out;
 }
 
-@keyframes fadeInMenu {
-  from { opacity: 0; transform: translateY(-10px);}
-  to { opacity: 1; transform: translateY(0);}
-}
-
+/* itens do menu: tom escuro para leitura */
 .user-menu-item {
   padding: 0.6rem 1.1rem;
-  color: #e0e0e0;
+  color: #0f172a;
   font-family: 'Rajdhani', Arial, sans-serif;
   font-size: 0.98rem;
   cursor: pointer;
-  transition: background 0.2s;
-  border-bottom: 1px solid #35354d;
+  transition: background 0.14s, color 0.14s;
+  border-bottom: 1px solid rgba(15,23,42,0.04);
 }
 
 .user-menu-item:last-child {
@@ -303,90 +324,63 @@ onBeforeUnmount(() => {
 }
 
 .user-menu-item:hover {
-  background: #8f5fe8;
-  color: #1a1a2e;
+  background: linear-gradient(90deg, rgba(74,167,255,0.08), rgba(30,144,255,0.06));
+  color: #0b5ed7;
 }
 
-/* Botão de Alternância de Tema */
-.btn-theme-toggle {
-  background: none;
-  border: none;
-  color: inherit;
-  font-size: 1.2rem;
-  margin-left: 1rem;
-  cursor: pointer;
-  transition: color 0.2s;
-}
-
-.btn-theme-toggle:hover {
-  color: #64b5f6;
-}
-
-/* Estilos do Botão Painel Admin */
+/* Botão painel admin: deixei contraste bom com fundo claro */
 .btn-admin-panel {
-  background: linear-gradient(90deg, #64b5f6 0%, #42a5f5 100%);
+  background: linear-gradient(90deg, #4aa7ff 0%, #1e90ff 100%);
   color: #fff !important;
   font-weight: 700;
   border: none;
-  border-radius: 14px;
-  padding: 8px 22px;
-  font-size: 1.08rem;
-  box-shadow: 0 2px 12px #64b5f630;
+  border-radius: 12px;
+  padding: 6px 16px;
+  font-size: 0.98rem;
+  box-shadow: 0 6px 18px rgba(30,144,255,0.14);
   text-decoration: none;
-  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
   display: inline-flex;
   align-items: center;
   gap: 8px;
 }
 
 .btn-admin-panel:hover {
-  background: linear-gradient(90deg, #42a5f5 0%, #64b5f6 100%);
-  color: #fff !important;
-  box-shadow: 0 4px 18px #64b5f660;
-  text-decoration: none;
+  box-shadow: 0 8px 26px rgba(30,144,255,0.18);
+  transform: translateY(-1px);
 }
 
 /* Responsividade */
-@media (max-width: 991.98px) { 
+@media (max-width: 991.98px) {
   .custom-navbar {
     padding: 0.6rem 1rem;
   }
-  
+
   .navbar-brand {
     font-size: 1.3rem !important;
   }
-  
+
   .navbar-nav {
-    flex-direction: column; 
-    align-items: flex-start !important; 
+    flex-direction: column;
+    align-items: flex-start !important;
     margin-left: 0 !important;
     margin-top: 1rem;
     gap: 0.3rem !important;
   }
-  
+
   .custom-nav-link {
-    width: 100%; 
+    width: 100%;
     padding: 0.5rem 0;
   }
-  
+
   .custom-nav-link::after {
     left: 0;
     transform: translateX(0);
   }
 }
 
-.nav-pcbuilder-link {
-  font-weight: 700;
-  color: #00ffe1 !important;
-  background: linear-gradient(90deg, #00ffe1 0%, #8f5fe8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  transition: color 0.18s;
-}
-.nav-pcbuilder-link:hover {
-  color: #8f5fe8 !important;
-  -webkit-text-fill-color: #8f5fe8;
-  text-shadow: 0 0 12px #00ffe1cc;
+/* pequena animação de entrada para o popover */
+@keyframes fadeInMenu {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>

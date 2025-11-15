@@ -1,26 +1,35 @@
 <template>
   <div class="checkout-ggtech py-5">
     <div class="container">
-      <!-- Botão de voltar no topo -->
+      <!-- Botão de voltar -->
       <div class="checkout-back-btn mb-3">
         <button class="btn btn-outline-primary btn-back" @click="voltarParaHome">
-          <i class="bi bi-arrow-left"></i>
-          Voltar
+          <i class="bi bi-arrow-left"></i> Voltar
         </button>
       </div>
+
       <div class="row g-4 justify-content-center">
-        <!-- Coluna esquerda: Etapas do checkout -->
+        <!-- Coluna esquerda: Etapas -->
         <div class="col-lg-7 col-12">
           <div class="main-card glass-card shadow-lg p-4 mb-4 rounded-4">
-            <CheckoutSteps :etapa="etapaAtual <= 3 ? etapaAtual : 3" />
+
+            <CheckoutSteps
+            :etapa="etapaAtual <= 3 ? etapaAtual : 3"
+           @alterar-etapa="etapaAtual = $event"
+            />
+            <!-- Formulário e Pagamento -->
             <CheckoutForm
               v-if="etapaAtual <= 2"
               :etapa="etapaAtual"
+              :show-steps="false"
               @etapaChange="etapaAtual = $event"
               @dadosColetados="handleDadosColetados"
               @pedidoCriado="pedidoCriado = $event"
+              @freteCalculado="handleFreteCalculado" 
               @finalizado="etapaAtual = 3"
             />
+
+            <!-- Revisão do Pedido -->
             <OrderReview
               v-if="etapaAtual === 3"
               :cart="cart"
@@ -33,38 +42,18 @@
               :desconto-cupom="descontoCupom"
               :pedido-criado="pedidoCriado"
             />
+
+            <!-- Sucesso -->
             <ConfirmationSuccess
               v-if="etapaAtual === 4"
               @voltar="voltarParaHome"
             />
           </div>
         </div>
-        <!-- Coluna direita: Resumo do carrinho e cupom -->
+
+        <!-- Coluna direita: Resumo do pedido -->
         <div class="col-lg-5 col-12 d-flex flex-column align-items-center">
-          <div class="side-panel glass-card shadow-lg">
-            <!-- Campo de CEP e botão de calcular frete -->
-            <div class="cep-frete-box mb-3">
-              <label for="cepInput" class="form-label fw-bold">Calcule o frete pelo CEP</label>
-              <div class="input-group">
-                <input
-                  id="cepInput"
-                  v-model="cep"
-                  type="text"
-                  class="form-control"
-                  placeholder="Digite seu CEP"
-                  maxlength="9"
-                  autocomplete="postal-code"
-                />
-                <button class="btn btn-outline-info" type="button" @click="calcularFretePorCep(cep)" :disabled="freteCalculando">
-                  <span v-if="freteCalculando" class="spinner-border spinner-border-sm"></span>
-                  <span v-else>Calcular</span>
-                </button>
-              </div>
-              <div v-if="freteErro" class="text-danger small mt-1">{{ freteErro }}</div>
-              <div v-if="freteCalculando" class="text-muted small mt-1">Calculando frete...</div>
-              <div v-else-if="frete > 0" class="text-success small mt-1">Frete: R$ {{ frete.toFixed(2) }}</div>
-              <div v-else-if="frete === 0 && cep" class="text-success small mt-1">Frete grátis para sua região!</div>
-            </div>
+          <div class="side-panel glass-card shadow-lg p-4">
             <CartSummary
               :cart="cart"
               :frete="frete"
@@ -73,8 +62,9 @@
               :applied-coupon="appliedCoupon"
               @alterarQuantidade="alterarQuantidade"
             />
+
             <div class="coupon-panel mt-4 w-100">
-              <CouponInput @cupom-aplicado="appliedCoupon = $event" />
+              <CouponInput @cupom-aplicado="onCouponApplied" />
             </div>
           </div>
         </div>
@@ -84,172 +74,145 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
-import { useRouter } from 'vue-router';
-import { useToast } from 'vue-toastification';
-import axios from 'axios';
-import { getAddressByCep } from '@/services/apiService'
+import { ref, computed, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { useToast } from 'vue-toastification'
+import CheckoutSteps from '@/components/Checkout/CheckoutSteps.vue'
+import CheckoutForm from '@/components/Checkout/CheckoutForm.vue'
+import OrderReview from '@/components/Checkout/OrderReview.vue'
+import ConfirmationSuccess from '@/components/Checkout/ConfirmationSuccess.vue'
+import CartSummary from '@/components/Checkout/CartSummary.vue'
+import CouponInput from '@/components/Checkout/CouponInput.vue'
+import { useCartStore } from '@/stores/cartStore'
+import { createOrder } from '@/services/apiService'
+import { useCouponStore } from '@/stores/couponStore'
 
+const etapaAtual = ref(1)
+const router = useRouter()
+const cartStore = useCartStore()
+const toast = useToast()
+const couponStore = useCouponStore()
 
-import CheckoutSteps from '@/components/Checkout/CheckoutSteps.vue';
-import CheckoutForm from '@/components/Checkout/CheckoutForm.vue';
-import OrderReview from '@/components/Checkout/OrderReview.vue';
-import ConfirmationSuccess from '@/components/Checkout/ConfirmationSuccess.vue';
-import CartSummary from '@/components/Checkout/CartSummary.vue';
-import CouponInput from '@/components/Checkout/CouponInput.vue';
+const cart = computed(() => cartStore.detailedItems)
 
-import { useCartStore } from '@/stores/cartStore';
-import { createOrder } from '@/services/apiService';
+// Redireciona se o carrinho estiver vazio
+watch(cart, (newVal) => {
+  if (!newVal || newVal.length === 0) router.push('/')
+}, { immediate: true })
 
-const etapaAtual = ref(1);
-const router = useRouter();
-const cartStore = useCartStore();
-const toast = useToast();
+const frete = ref(0)
+const appliedCoupon = ref(couponStore.appliedCoupon?.value ?? null)
 
-const cart = computed(() => cartStore.detailedItems);
+// Sincroniza cupom com store
+watch(() => couponStore.appliedCoupon?.value, (v) => {
+  appliedCoupon.value = v ?? null
+})
 
-// Redireciona se o carrinho estiver vazio ao montar ou durante o fluxo
-watch(
-  cart,
-  (newVal) => {
-    if (!newVal || newVal.length === 0) {
-      router.push('/');
-    }
-  },
-  { immediate: true }
-);
-
-const frete = ref(0); // Inicializa como zero
-const cep = ref('');
-const freteCalculando = ref(false);
-const freteErro = ref('');
-
-// Função para buscar o CEP e calcular o frete
-async function calcularFretePorCep(cepInput) {
-  freteCalculando.value = true
-  freteErro.value = ''
-  frete.value = 0
-
-  try {
-    const data = await getAddressByCep(cepInput.replace(/\D/g, ''))
-
-    // Exemplo simples de cálculo de frete baseado na UF
-    const uf = data.uf
-    if (['SP', 'RJ', 'MG', 'ES'].includes(uf)) {
-      frete.value = 0
-    } else if (['AM', 'PA', 'MA', 'PI', 'CE', 'RN', 'PB', 'PE', 'AL', 'SE', 'BA', 'AP', 'RR', 'RO', 'TO'].includes(uf)) {
-      frete.value = 25
-    } else {
-      frete.value = 15
-    }
-
-  } catch (error) {
-    freteErro.value = 'CEP inválido ou não encontrado.'
-    console.error('Erro ao buscar CEP:', error)
-  } finally {
-    freteCalculando.value = false
-  }
-}
-
-
-const appliedCoupon = ref(null);
-
-// Novo: calcula desconto do cupom
+// Desconto do cupom
 const descontoCupom = computed(() => {
-  if (!appliedCoupon.value || !appliedCoupon.value.discount_percentage) return 0;
-  // Aplica desconto sobre o subtotal dos produtos (sem frete)
-  const subtotal = cart.value.reduce((sum, item) => {
-    const price = item.product?.price || 0;
-    return sum + price * item.quantity;
-  }, 0);
-  return Math.round((subtotal * appliedCoupon.value.discount_percentage) / 100);
-});
+  if (!appliedCoupon.value?.discount_percentage) return 0
+  const subtotal = cart.value.reduce((sum, item) =>
+    sum + (item.product?.price || 0) * item.quantity, 0)
+  return Math.round((subtotal * appliedCoupon.value.discount_percentage) / 100)
+})
 
-const total = computed(() =>
-  cart.value.reduce((sum, item) => {
-    const price = item.product?.price || 0;
-    return sum + price * item.quantity;
-  }, 0) + frete.value - descontoCupom.value
-);
+// Total com frete e desconto
+const total = computed(() => {
+  const subtotal = cart.value.reduce((sum, item) =>
+    sum + (item.product?.price || 0) * item.quantity, 0)
+  const freteValor = Number(frete.value) || 0
+  const desconto = descontoCupom.value || 0
+  return subtotal + freteValor - desconto
+})
 
-const enderecoSelecionado = ref(null);
-const metodoPagamento = ref(null);
-const pedidoCriado = ref(false);
+const enderecoSelecionado = ref(null)
+const metodoPagamento = ref(null)
+const pedidoCriado = ref(false)
 
 function handleDadosColetados(dados) {
-  enderecoSelecionado.value = dados.endereco;
-  metodoPagamento.value = dados.metodoPagamento;
+  enderecoSelecionado.value = dados.endereco
+  // Sempre define como 'card' (Cartão de Crédito)
+  metodoPagamento.value = 'card'
+  if (dados?.frete?.valor) {
+    frete.value = Number(dados.frete.valor) || 0
+  }
 }
 
-// Garante que ao entrar na etapa 3, se não houver endereço, volta para etapa 1
+function handleFreteCalculado(freteData) {
+  if (freteData?.valor !== undefined && freteData?.valor !== null) {
+    frete.value = Number(freteData.valor) || 0
+  } else {
+    frete.value = 0
+  }
+}
+
+// Evita avançar sem endereço
 watch(etapaAtual, (val) => {
   if (val === 3 && (!enderecoSelecionado.value || !enderecoSelecionado.value.id)) {
-    etapaAtual.value = 1;
+    etapaAtual.value = 1
   }
-});
+})
 
-function verificarEnderecoSelecionado() {
-  // Verifica se o endereço está presente e tem ID
-  if (!enderecoSelecionado.value || !enderecoSelecionado.value.id) {
-    alert('Por favor, selecione um endereço antes de confirmar o pedido.');
-    etapaAtual.value = 1;
-    return false;
-  }
-  return true;
-}
-
+// Confirmar pedido
 async function confirmarPedido() {
   try {
-    // Se o pedido já foi criado (via pagamento com cartão), apenas avança para confirmação
     if (pedidoCriado.value) {
-      await cartStore.clearCart();
-      toast.success('Pedido realizado com sucesso! Você será redirecionado em instantes.');
-      etapaAtual.value = 4;
-      setTimeout(() => {
-        voltarParaHome();
-      }, 4000);
-      return;
+      await cartStore.clearCart()
+      toast.success('Pedido realizado com sucesso!')
+      etapaAtual.value = 4
+      setTimeout(() => voltarParaHome(), 4000)
+      return
     }
 
-    // Sempre obtenha os itens do carrinho diretamente do store no momento do clique
-    const carrinhoAtual = cartStore.detailedItems;
-    if (!carrinhoAtual || carrinhoAtual.length === 0) {
-      alert('Seu carrinho está vazio.');
-      router.push('/');
-      return;
+    const carrinhoAtual = cartStore.detailedItems
+    if (!carrinhoAtual?.length) {
+      toast.error('Seu carrinho está vazio.')
+      return router.push('/')
     }
 
-    if (!verificarEnderecoSelecionado()) {
-      return;
+    if (!enderecoSelecionado.value?.id) {
+      toast.error('Selecione um endereço válido.')
+      return (etapaAtual.value = 1)
     }
 
-    // Garante que todos os itens possuem product_id e quantity válidos
-    const items = carrinhoAtual
-      .map(item => {
-        const productId = item.product?.id ?? item.product_id;
-        const unitPrice = item.product?.price ?? item.unit_price;
-        if (productId && item.quantity) {
-          return {
-            product_id: productId,
-            quantity: item.quantity,
-            unit_price: Number(unitPrice)
-          };
+    // Valida estoque antes de criar o pedido
+    const { getProductById } = await import('@/services/apiService')
+    const produtosSemEstoque = []
+    
+    for (const item of carrinhoAtual) {
+      try {
+        const productId = item.product?.id ?? item.product_id
+        const product = await getProductById(productId)
+        const quantidadeSolicitada = item.quantity
+        const estoqueDisponivel = product.stock || 0
+        
+        if (quantidadeSolicitada > estoqueDisponivel) {
+          produtosSemEstoque.push({
+            nome: product.name || item.product?.name || 'Produto',
+            solicitado: quantidadeSolicitada,
+            disponivel: estoqueDisponivel
+          })
         }
-        // Log para depuração
-        console.warn('Item inválido no carrinho:', item);
-        return null;
-      })
-      .filter(Boolean);
-
-    // Log para depuração
-    console.log('Itens do carrinho enviados para o pedido:', items);
-
-    if (!items.length) {
-      alert('Seu carrinho está vazio ou contém itens inválidos.');
-      console.error('Carrinho detalhado:', carrinhoAtual);
-      router.push('/');
-      return;
+      } catch (err) {
+        console.error(`Erro ao verificar estoque do produto ${item.product?.id}:`, err)
+      }
     }
+
+    if (produtosSemEstoque.length > 0) {
+      const mensagem = produtosSemEstoque.map(p => 
+        `${p.nome}: solicitado ${p.solicitado}, disponível ${p.disponivel}`
+      ).join('; ')
+      toast.error(`Estoque insuficiente: ${mensagem}`)
+      // Recarrega o carrinho para atualizar os dados
+      await cartStore.initCart()
+      return
+    }
+
+    const items = carrinhoAtual.map(item => ({
+      product_id: item.product?.id ?? item.product_id,
+      quantity: item.quantity,
+      unit_price: Number(item.product?.price ?? item.unit_price)
+    }))
 
     const orderData = {
       items,
@@ -257,49 +220,48 @@ async function confirmarPedido() {
       payment_method: metodoPagamento.value,
       total_amount: Number(total.value),
       shipping_cost: Number(frete.value),
-      coupon_id: appliedCoupon.value?.id ?? null // envia o id do cupom se houver
-    };
+      coupon_id: appliedCoupon.value?.id ?? null
+    }
 
-    // Log do payload final para depuração
-    console.log('Payload enviado para createOrder:', JSON.stringify(orderData, null, 2));
-
-    const response = await createOrder(orderData);
-
+    const response = await createOrder(orderData)
     if (response) {
-      pedidoCriado.value = true;
-      // Só limpa o carrinho após o pedido ser criado com sucesso
-      await cartStore.clearCart();
-      toast.success('Pedido realizado com sucesso! Você será redirecionado em instantes.');
-      etapaAtual.value = 4;
-      // Redireciona automaticamente após 4 segundos
-      setTimeout(() => {
-        voltarParaHome();
-      }, 4000);
+      pedidoCriado.value = true
+      await cartStore.clearCart()
+      couponStore.clearAppliedCoupon?.()
+      toast.success('Pedido criado com sucesso!')
+      etapaAtual.value = 4
+      setTimeout(() => voltarParaHome(), 4000)
     }
-
   } catch (error) {
-    // Mostra o erro detalhado do backend
-    let backendMsg = '';
-    if (error?.response?.data) {
-      backendMsg = JSON.stringify(error.response.data, null, 2);
-    } else if (error?.message) {
-      backendMsg = error.message;
+    console.error('Erro ao criar pedido:', error)
+    
+    // Trata erros específicos de estoque
+    const errorMessage = error.response?.data?.detail || error.message || ''
+    if (errorMessage.includes('stock') || errorMessage.includes('estoque') || errorMessage.includes('Not enough stock')) {
+      const produtoId = errorMessage.match(/produto (\d+)/i)?.[1] || 'desconhecido'
+      toast.error(`Estoque insuficiente para o produto. Por favor, verifique o carrinho e tente novamente.`)
+      // Recarrega o carrinho para atualizar os dados
+      await cartStore.initCart()
     } else {
-      backendMsg = String(error);
+      toast.error('Erro ao finalizar o pedido. Tente novamente.')
     }
-    alert('Erro ao finalizar o pedido:\n' + backendMsg);
-    console.error('Erro ao criar pedido:', error, '\nResposta detalhada:', backendMsg);
   }
 }
 
 function voltarParaHome() {
-  router.push('/');
+  router.push('/')
 }
 
 function alterarQuantidade({ productId, delta }) {
-  cartStore.updateQuantity(productId, delta);
+  cartStore.updateQuantity(productId, delta)
+}
+
+function onCouponApplied(coupon) {
+  appliedCoupon.value = coupon
+  couponStore.setAppliedCoupon?.(coupon)
 }
 </script>
+
 
 <style scoped>
 .checkout-ggtech {

@@ -95,6 +95,46 @@ function formatDate(dateStr) {
 .text-blue {
   color: #00aaff !important;
 }
+
+/* Ajustes para dispositivos menores */
+@media (max-width: 991px) {
+  .profile-coupons-section {
+    padding: 1rem;
+  }
+
+  .cupom-card {
+    padding: 0.8rem;
+  }
+
+  .cupom-code {
+    font-size: 1rem;
+  }
+
+  .cupom-desc,
+  .cupom-validade {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .profile-coupons-section {
+    padding: 0.8rem;
+  }
+
+  .cupom-card {
+    padding: 0.6rem;
+  }
+
+  .cupom-code {
+    font-size: 0.9rem;
+  }
+
+  .cupom-desc,
+  .cupom-validade {
+    font-size: 0.8rem;
+  }
+}
+
 @media (max-width: 768px) {
   .profile-coupons-section {
     padding: 1.2rem 0.5rem;

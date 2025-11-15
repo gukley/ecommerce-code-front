@@ -37,7 +37,7 @@
       </div>
       <div class="total-line">
         <span>Frete</span>
-        <span>{{ formatPrice(frete) }}</span>
+        <span>{{ formatPrice(Number(frete) || 0) }}</span>
       </div>
       <div v-if="appliedCoupon" class="d-flex justify-content-between align-items-center mb-2">
         <span class="fw-bold text-success">
@@ -47,7 +47,7 @@
       </div>
       <div class="total-line total-final">
         <span>Total</span>
-        <span>{{ formatPrice(total) }}</span>
+        <span>{{ formatPrice(total || 0) }}</span>
       </div>
     </div>
   </div>
@@ -76,17 +76,18 @@ function formatPrice(value) {
 }
 function getProductImage(item) {
   // Tenta carregar a imagem do produto, senão mostra placeholder válido
-  if (item.product?.image) {
-    if (item.product.image.startsWith('http')) return item.product.image;
-    if (item.product.image.startsWith('/')) {
-      return import.meta.env.VITE_API_BASE_URL
-        ? import.meta.env.VITE_API_BASE_URL + item.product.image
-        : item.product.image;
+  const p = item.product || {};
+  const img = p.image || p.image_path || p.imageUrl || p.image_url;
+  if (img) {
+    if (img.startsWith('http')) return img;
+    const BASE_URL = import.meta.env.VITE_API_URL || '';
+    if (img.startsWith('/')) {
+      return BASE_URL + img;
     }
-    return item.product.image;
+    return BASE_URL + '/' + img;
   }
-  // Novo placeholder confiável:
-  return 'https://placehold.co/60x60?text=Produto';
+  // Placeholder confiável
+  return '/placeholder-product.png';
 }
 function onImgError(e) {
   e.target.src = 'https://placehold.co/60x60?text=Produto';
@@ -95,13 +96,12 @@ function onImgError(e) {
 
 <style scoped>
 .glassy-card {
-  background: rgba(24, 30, 42, 0.92);
-  border-radius: 1.5rem;
-  box-shadow: 0 8px 32px 0 #232e4780;
-  border: 1.5px solid #232e47;
-  backdrop-filter: blur(8px);
-  padding: 2.2rem 2rem 2rem 2rem;
-  color: #fff;
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 8px 24px rgba(16,24,40,0.06);
+  border: 1px solid #e6e9ef;
+  padding: 1.6rem;
+  color: #232e47;
   font-family: 'Inter', sans-serif;
   min-width: 260px;
   max-width: 430px;
@@ -109,14 +109,14 @@ function onImgError(e) {
   transition: box-shadow 0.2s;
 }
 .glassy-card:focus-within, .glassy-card:hover {
-  box-shadow: 0 12px 40px #399bff40;
-  border-color: #399bff;
+  box-shadow: 0 12px 40px rgba(106,90,224,0.07);
+  border-color: #e1d8fb;
 }
 .summary-title {
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   font-weight: 700;
-  color: #00ffe1;
-  margin-bottom: 1.5rem;
+  color: #4a90e2;
+  margin-bottom: 1rem;
   letter-spacing: 0.01em;
   text-align: left;
 }
@@ -132,13 +132,12 @@ function onImgError(e) {
   border-bottom: none;
 }
 .product-img {
-  width: 54px;
-  height: 54px;
+  width: 60px;
+  height: 60px;
   object-fit: cover;
   border-radius: 10px;
-  background: #23233a;
-  border: 1.5px solid #8f5fe8;
-  box-shadow: 0 1px 5px rgba(0,255,225,0.06);
+  background: #f5f7fb;
+  border: 1px solid #eef2ff;
 }
 .item-info {
   flex: 1;
@@ -149,7 +148,7 @@ function onImgError(e) {
 .product-name {
   font-weight: 600;
   font-size: 1rem;
-  color: #fff;
+  color: #232e47;
   margin-bottom: 2px;
   letter-spacing: 0.01em;
 }
@@ -160,8 +159,8 @@ function onImgError(e) {
   margin-top: 2px;
 }
 .qty-btn {
-  background: #232e47;
-  color: #00ffe1;
+  background: #f1f5fb;
+  color: #4a90e2;
   border: none;
   border-radius: 50%;
   width: 28px;
@@ -173,7 +172,7 @@ function onImgError(e) {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px #399bff10;
+  box-shadow: 0 2px 8px rgba(74,144,226,0.06);
   outline: none;
 }
 .qty-btn:disabled {
@@ -186,25 +185,24 @@ function onImgError(e) {
   box-shadow: 0 0 0 2px #00ffe1;
 }
 .qty {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 600;
-  color: #8fd6fb;
+  color: #4b5563;
   min-width: 22px;
   text-align: center;
 }
 .product-price {
   font-weight: 700;
-  font-size: 1.1rem;
-  color: #8f5fe8;
+  font-size: 1.05rem;
+  color: #111827;
   min-width: 80px;
   text-align: right;
 }
 .divider {
-  height: 1.5px;
-  background: linear-gradient(90deg, #23233a 0%, #8f5fe8 100%);
-  margin: 24px 0 18px 0;
+  height: 1px;
+  background: #e6e9ef;
+  margin: 18px 0 14px 0;
   border-radius: 2px;
-  opacity: 0.6;
 }
 .totals-modern {
   display: flex;
@@ -215,24 +213,24 @@ function onImgError(e) {
   display: flex;
   justify-content: space-between;
   font-size: 1rem;
-  color: #fff;
-  font-weight: 500;
+  color: #374151;
+  font-weight: 600;
 }
 .total-line span:first-child {
-  color: #8fd6fb;
+  color: #6b7280;
   font-weight: 600;
 }
 .total-line span:last-child {
   font-weight: 700;
+  color: #111827;
 }
 .total-final {
-  font-size: 1.18rem;
+  font-size: 1.14rem;
   font-weight: 800;
-  color: #00ffe1;
-  border-top: 1.5px solid #8f5fe8;
+  color: #0f172a;
+  border-top: 1px solid #eef2ff;
   padding-top: 12px;
-  margin-top: 6px;
-  text-shadow: 0 2px 10px #00ffe1;
+  margin-top: 8px;
   letter-spacing: 0.01em;
 }
 @media (max-width: 991px) {

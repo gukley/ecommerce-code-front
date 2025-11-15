@@ -68,12 +68,24 @@ async function applyCoupon() {
     }
     appliedCoupon.value = found;
     success.value = true;
+    // Persiste o cupom aplicado na store para outras telas (ex: carrinho/checkout)
+    try {
+      couponStore.setAppliedCoupon(found);
+    } catch (e) {
+      console.warn('Não foi possível persistir cupom na store', e);
+    }
     emit('cupom-aplicado', found);
   } catch (e) {
     error.value = 'Erro ao validar cupom.';
   } finally {
     loading.value = false;
   }
+}
+// Inicializa visualmente com o cupom já aplicado na store (se houver)
+if (couponStore.appliedCoupon && couponStore.appliedCoupon.value) {
+  appliedCoupon.value = couponStore.appliedCoupon.value;
+  couponCode.value = appliedCoupon.value.code || '';
+  success.value = true;
 }
 </script>
 

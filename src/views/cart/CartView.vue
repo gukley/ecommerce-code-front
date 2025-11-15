@@ -28,10 +28,10 @@
                 <tr v-for="item in items" :key="item.product?.id || item.product_id" class="cart-row">
                   <td>
                     <div class="d-flex align-items-center">
-                      <img :src="getImageUrl(item.product)" class="cart-item-img me-3" v-if="item.product"/>
+                      <img :src="getImageUrl(item.product)" class="cart-item-img me-3" v-if="item.product" />
                       <div>
                         <div class="fw-bold cart-product-name">{{ item.product?.name || 'Produto não encontrado' }}</div>
-                        <div class="text-muted small">SKU: {{ item.product?.sku || item.product_id }}</div>
+                        <div class="text-muted small">Categoria: {{ item.product?.category?.name || 'Não especificada' }}</div>
                       </div>
                     </div>
                   </td>
@@ -88,25 +88,16 @@
               <span>Total</span>
               <span class="cart-summary-total">R$ {{ totalWithDiscount }}</span>
             </div>
-            <div class="mb-3">
+            <!-- <div class="mb-3">
               <label class="form-label fw-bold">Cupom de desconto:</label>
               <div class="input-group">
                 <input v-model="couponCode" type="text" class="form-control cart-input" placeholder="Digite o cupom" />
                 <button class="btn btn-coupon" type="button" @click="applyCoupon">OK</button>
-              </div>
+              </div> -->
               <div v-if="couponError" class="text-danger small mt-1">{{ couponError }}</div>
               <div v-if="couponSuccess" class="text-success small mt-1">{{ couponSuccess }}</div>
             </div>
-            <div class="mb-3">
-              <label class="form-label fw-bold">Calcule o frete e prazo:</label>
-              <div class="input-group">
-                <input v-model="cep" type="text" class="form-control cart-input" placeholder="CEP" maxlength="9" />
-                <button class="btn btn-frete" type="button" @click="calcularFrete">CALCULAR</button>
-              </div>
-              <div v-if="cepError" class="text-danger small mt-1">{{ cepError }}</div>
-              <div v-if="prazoFrete" class="text-success small mt-1">Prazo estimado: {{ prazoFrete }}</div>
-              <div class="small text-muted mt-1"><a href="#">Não sei o meu CEP</a></div>
-            </div>
+            <!-- CEP moved to checkout: usuário preencherá CEP no checkout -->
             <button class="btn btn-main-action w-100 mb-2" @click="goToCheckout" :disabled="items.length === 0">
               <i class="bi bi-bag-check me-2"></i> Continuar
             </button>
@@ -117,7 +108,7 @@
         </div>
       </div>
     </div>
-  </div>
+  <!-- </div> -->
 </template>
 
 <script setup>
@@ -130,7 +121,7 @@ import NavBar from '@/components/home/NavBar.vue'
 const cart = useCartStore()
 const couponStore = useCouponStore()
 const router = useRouter()
-const { detailedItems, loading, totalPrice } = cart
+const { detailedItems, loading } = cart
 
 // Torna os itens do carrinho reativos sempre
 const items = ref([])
@@ -206,33 +197,37 @@ async function applyCoupon() {
   appliedCoupon.value = coupon
   couponDiscount.value = coupon.discount_percentage / 100
   couponSuccess.value = `Cupom "${coupon.code}" aplicado! Você ganhou ${coupon.discount_percentage}% de desconto.`
+  // Salva o cupom aplicado na store para que o checkout possa ler
+  try {
+    couponStore.setAppliedCoupon(coupon)
+  } catch (e) {
+    // Em caso de store antiga ou ausência do método, só ignore
+    console.warn('Não foi possível definir cupom aplicado na store', e)
+  }
 }
+
+// Update totalPrice and related computed properties reactively
+const totalPrice = computed(() =>
+  items.value.reduce((sum, item) => {
+    if (item.product) {
+      return sum + item.quantity * item.product.price;
+    }
+    return sum;
+  }, 0)
+);
 
 const couponDiscountValue = computed(() =>
-  couponDiscount.value > 0 ? '-' + (totalPrice * couponDiscount.value).toFixed(2) : '0,00'
-)
+  couponDiscount.value > 0 ? '-' + (totalPrice.value * couponDiscount.value).toFixed(2) : '0,00'
+);
+
 const totalWithDiscount = computed(() =>
   couponDiscount.value > 0
-    ? (totalPrice * (1 - couponDiscount.value)).toFixed(2)
-    : totalPrice.toFixed(2)
+    ? (totalPrice.value * (1 - couponDiscount.value)).toFixed(2)
+    : totalPrice.value.toFixed(2)
 )
 
-// Frete (simulação)
-const cep = ref('')
-const cepError = ref('')
+// Frete: o cálculo do CEP/prazo fica no Checkout. Aqui mantemos um valor padrão para exibição.
 const shippingValue = ref('0,00')
-const prazoFrete = ref('')
-function calcularFrete() {
-  cepError.value = ''
-  prazoFrete.value = ''
-  if (!cep.value.match(/^\d{5}-?\d{3}$/)) {
-    cepError.value = 'CEP inválido.'
-    return
-  }
-  // Simulação: frete grátis para todos
-  shippingValue.value = '0,00'
-  prazoFrete.value = '3-7 dias úteis'
-}
 </script>
 
 <style scoped>

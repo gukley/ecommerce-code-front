@@ -1,27 +1,21 @@
 <template>
   <div class="checkout-steps-modern">
     <div class="steps-indicator-modern">
-      <div class="step-modern" :class="{ active: etapa >= 1, done: etapa > 1 }">
+      <div
+        v-for="(label, index) in etapasLabels"
+        :key="index"
+        class="step-modern"
+        :class="{ active: etapa >= index + 1, done: etapa > index + 1 }"
+        @click="onClickStep(index + 1)"
+        style="cursor: pointer;"
+      >
         <div class="step-circle-modern">
-          <i v-if="etapa > 1" class="bi bi-check"></i>
-          <span v-else>1</span>
+          <i v-if="etapa > index + 1" class="bi bi-check"></i>
+          <span v-else>{{ index + 1 }}</span>
         </div>
-        <span class="step-label-modern">Endereço</span>
+        <span class="step-label-modern">{{ label }}</span>
       </div>
-      <div class="step-modern" :class="{ active: etapa >= 2, done: etapa > 2 }">
-        <div class="step-circle-modern">
-          <i v-if="etapa > 2" class="bi bi-check"></i>
-          <span v-else>2</span>
-        </div>
-        <span class="step-label-modern">Pagamento</span>
-      </div>
-      <div class="step-modern" :class="{ active: etapa >= 3, done: etapa > 3 }">
-        <div class="step-circle-modern">
-          <i v-if="etapa > 3" class="bi bi-check"></i>
-          <span v-else>3</span>
-        </div>
-        <span class="step-label-modern">Confirmação</span>
-      </div>
+
       <div class="progress-bar-bg-modern">
         <div class="progress-bar-fg-modern" :style="{ width: progressWidth }"></div>
       </div>
@@ -30,14 +24,36 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
-const props = defineProps({ etapa: Number });
+import { computed } from 'vue'
+
+const props = defineProps({ etapa: Number })
+const emit = defineEmits(['alterar-etapa'])
+
+const etapasLabels = ['Endereço', 'Pagamento', 'Confirmação']
+
+function onClickStep(novaEtapa) {
+  // só permite avançar/regredir se fizer sentido:
+  // permitir voltar sempre (quando novaEtapa < etapa)
+  // permitir avançar apenas até uma etapa já desbloqueada (opcional).
+  // Aqui vamos permitir voltar sempre e permitir avançar apenas se novaEtapa <= props.etapa
+  if (novaEtapa < props.etapa) {
+    emit('alterar-etapa', novaEtapa)
+    return
+  }
+
+  // Se quiser permitir clicar pra avançar (por ex. ir de 1->2), permita quando novaEtapa <= props.etapa + 1
+  // Se preferir bloquear avanço via clique (forçar fluxo), comente a linha abaixo.
+  if (novaEtapa <= props.etapa + 1) {
+    emit('alterar-etapa', novaEtapa)
+  }
+}
+
 const progressWidth = computed(() => {
-  if (props.etapa === 1) return '0%';
-  if (props.etapa === 2) return '50%';
-  if (props.etapa >= 3) return '100%';
-  return '0%';
-});
+  if (props.etapa === 1) return '0%'
+  if (props.etapa === 2) return '50%'
+  if (props.etapa >= 3) return '100%'
+  return '0%'
+})
 </script>
 
 <style scoped>

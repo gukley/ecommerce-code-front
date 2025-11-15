@@ -11,31 +11,27 @@ import {
 } from '@/services/apiService'
 import { useToast } from 'vue-toastification'
 
-// normaliza status para os valores exatos esperados pelo backend
-const VALID_STATUS_VALUES = ['PENDING', 'PROCESSING', 'SHIPPED', 'COMPLETED', 'CANCELLED'];
+const VALID_STATUS_VALUES = ['PENDENTE', 'PROCESSANDO', 'ENVIADO', 'CANCELADO'];
 
 function normalizeStatusValue(raw) {
   if (!raw && raw !== '') return raw;
-  // se já veio no formato esperado (enum), retorna em maiúsculas
   const s = String(raw).trim().toUpperCase();
-  if (VALID_STATUS_VALUES.includes(s)) return s;
 
-  // mapeamento de rótulos/variantes comuns para os valores do enum
+  // mapeia variantes inglesas para português
   const MAP = {
-    'CANCELED': 'CANCELLED',   // variante com 1 L -> backend usa CANCELLED (2 Ls)
-    'CANCELADO': 'CANCELLED',
-    'CANCELLED': 'CANCELLED',
-    'PENDENTE': 'PENDING',
-    'PENDING': 'PENDING',
-    'PROCESSANDO': 'PROCESSING',
-    'PROCESSING': 'PROCESSING',
-    'ENVIADO': 'SHIPPED',
-    'SHIPPED': 'SHIPPED',
-    'ENTREGUE': 'COMPLETED',
-    'COMPLETED': 'COMPLETED'
+    'PENDING': 'PENDENTE',
+    'PROCESSING': 'PROCESSANDO',
+    'SHIPPED': 'ENVIADO',
+    'SENT': 'ENVIADO',
+    'CANCELED': 'CANCELADO',
+    'CANCELLED': 'CANCELADO',
+    'CANCELADO': 'CANCELADO'
   };
 
-  return MAP[s] ?? s; // se desconhecido, retorna o original uppercased (será rejeitado pelo backend)
+  const normalized = MAP[s] || s;
+
+  // retorna apenas se for um valor válido
+  return VALID_STATUS_VALUES.includes(normalized) ? normalized : 'PENDENTE';
 }
 
 export const useOrderStore = defineStore('order', () => { 
@@ -181,8 +177,6 @@ export const useOrderStore = defineStore('order', () => {
       : statusData;
 
     const normalized = normalizeStatusValue(payloadStatus);
-
-    console.log('Alterando status do pedido:', orderId, '=>', payloadStatus, 'normalized =>', normalized);
 
     await updateOrderStatus(orderId, { status: normalized });
 

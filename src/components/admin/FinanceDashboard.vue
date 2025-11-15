@@ -27,12 +27,12 @@
         <div class="col-md-3 col-6">
           <div class="card finance-card summary-card">
             <div class="card-body d-flex align-items-center gap-3">
-              <div class="icon-container bg-gradient-green">
-                <i class="bi bi-credit-card-2-front"></i>
+              <div class="icon-container bg-gradient-red">
+                <i class="bi bi-x-circle"></i>
               </div>
               <div>
-                <div class="card-title">Pagamentos Confirmados</div>
-                <div class="card-value">{{ totalConfirmados }}</div>
+                <div class="card-title">Cancelados</div>
+                <div class="card-value">{{ totalCancelados }}</div>
               </div>
             </div>
           </div>
@@ -142,7 +142,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="p in pagamentosFiltrados" :key="p.id">
+              <tr v-for="p in paginatedPagamentos" :key="p.id">
                 <td>#{{ p.id }}</td>
                 <td>{{ p.customer_name || '-' }}</td>
                 <td>{{ p.customer_email || '-' }}</td>
@@ -162,13 +162,20 @@
                   </button>
                 </td>
               </tr>
-              <tr v-if="!pagamentosFiltrados.length">
+              <tr v-if="!paginatedPagamentos.length">
                 <td colspan="12" class="text-center text-muted py-4">Nenhum pagamento encontrado para os filtros selecionados.</td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
+
+      <!-- Controles de Paginação -->
+      <PaginationControls
+        :currentPage="currentPage"
+        :totalPages="totalPages"
+        @go-to-page="goToPage"
+      />
 
       <!-- Modal de detalhes -->
       <div v-if="modalPagamento" class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,0.5);">
@@ -220,10 +227,7 @@
                   </tbody>
                 </table>
               </div>
-              <div class="mt-4">
-                <h6>Dados Stripe</h6>
-                <pre class="stripe-json">{{ JSON.stringify(modalPagamento.stripe_data, null, 2) }}</pre>
-              </div>
+              
             </div>
             <div class="modal-footer">
               <button class="btn btn-secondary" @click="modalPagamento = null">Fechar</button>
@@ -238,11 +242,11 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
-import ApexCharts from 'apexcharts'
 import VueApexCharts from 'vue3-apexcharts'
+import PaginationControls from '@/components/Common/PaginationControls.vue'
 
 const loading = ref(true)
-const pagamentos = ref([]) // sempre será array
+const pagamentos = ref([])
 const modalPagamento = ref(null)
 
 // Filtros
@@ -250,22 +254,20 @@ const filtroMes = ref('')
 const filtroTipo = ref('')
 const filtroStatus = ref('')
 
-// Carregar pagamentos da API
+// Carregar pagamentos
 async function loadPayments() {
   loading.value = true
   try {
-    // Ajuste a URL para o endpoint correto do backend
     const { data } = await axios.get('http://localhost:8000/payments/finance')
-    pagamentos.value = Array.isArray(data) ? data : (data && typeof data === 'object' ? Object.values(data) : [])
+    pagamentos.value = Array.isArray(data) ? data : []
   } catch (e) {
     pagamentos.value = []
   }
   loading.value = false
 }
-
 onMounted(loadPayments)
 
-// Filtros dinâmicos
+// Meses dinâmicos
 const mesesDisponiveis = computed(() => {
   const meses = new Set()
   pagamentos.value.forEach(p => {
@@ -280,19 +282,13 @@ const mesesDisponiveis = computed(() => {
   })
 })
 
-const tiposPagamentoDisponiveis = computed(() => {
-  const tipos = new Set()
-  pagamentos.value.forEach(p => p.payment_method && tipos.add(p.payment_method))
-  return Array.from(tipos)
-})
+// ✅ Tipos de pagamento — fixo como “Cartão”
+const tiposPagamentoDisponiveis = computed(() => ['card'])
 
-const statusDisponiveis = computed(() => {
-  const stats = new Set()
-  pagamentos.value.forEach(p => p.status && stats.add(p.status))
-  return Array.from(stats)
-})
+// ✅ Status fixos
+const statusDisponiveis = computed(() => ['pending', 'processing', 'shipped', 'cancelled'])
 
-// Pagamentos filtrados
+// Filtros aplicados
 const pagamentosFiltrados = computed(() => {
   return pagamentos.value.filter(p => {
     let ok = true
@@ -307,20 +303,21 @@ const pagamentosFiltrados = computed(() => {
   })
 })
 
-// Métricas dos cards
-const receitaMes = computed(() => {
-  if (!filtroMes.value) return pagamentosFiltrados.value.reduce((sum, p) => p.amount ? sum + p.amount : sum, 0) / 100
-  return pagamentosFiltrados.value.reduce((sum, p) => p.amount ? sum + p.amount : sum, 0) / 100
-})
-const totalConfirmados = computed(() => pagamentosFiltrados.value.filter(p => 
-  p.status === 'paid' || p.status === 'succeeded' || p.status === 'orderstatus.completed'
-).length)
-const totalPendentes = computed(() => pagamentosFiltrados.value.filter(p => 
-  p.status === 'pending' || p.status === 'orderstatus.pending'
-).length)
-const totalTaxas = computed(() => pagamentosFiltrados.value.reduce((sum, p) => p.fee ? sum + p.fee : sum, 0) / 100)
+// Cards
+const receitaMes = computed(() =>
+  pagamentosFiltrados.value.reduce((sum, p) => p.amount ? sum + p.amount : sum, 0) / 100
+)
+const totalCancelados = computed(() =>
+  pagamentosFiltrados.value.filter(p => p.status === 'cancelled').length
+)
+const totalPendentes = computed(() =>
+  pagamentosFiltrados.value.filter(p => p.status === 'pending').length
+)
+const totalTaxas = computed(() =>
+  pagamentosFiltrados.value.reduce((sum, p) => p.fee ? sum + p.fee : sum, 0) / 100
+)
 
-// Gráficos
+// 📊 Gráficos
 const chartBarOptions = {
   chart: { type: 'bar', background: 'transparent', toolbar: { show: false }, fontFamily: 'Inter, sans-serif' },
   theme: { mode: 'dark' },
@@ -336,10 +333,10 @@ const chartBarOptions = {
   tooltip: { theme: 'dark', y: { formatter: val => `R$ ${val.toLocaleString('pt-BR')}` } },
   colors: ['#64b5f6']
 }
+
 const chartBarSeries = computed(() => [{
   name: 'Receita',
   data: mesesDisponiveis.value.map(m => {
-    // Soma dos pagamentos daquele mês
     const [y, mo] = m.value.split('-')
     return pagamentos.value
       .filter(p => {
@@ -350,37 +347,49 @@ const chartBarSeries = computed(() => [{
   })
 }])
 
+// Tipo de pagamento (gráfico de pizza)
 const chartPieOptions = {
   chart: { type: 'pie', background: 'transparent', toolbar: { show: false }, fontFamily: 'Inter, sans-serif' },
   theme: { mode: 'dark' },
-  labels: tiposPagamentoDisponiveis.value,
+  labels: ['Cartão'],
   legend: { labels: { colors: '#e8eaed' } },
   dataLabels: { style: { colors: ['#fff'] } },
   tooltip: { theme: 'dark', y: { formatter: val => `R$ ${val.toLocaleString('pt-BR')}` } },
-  colors: ['#64b5f6', '#43e97b', '#f9d423', '#ff6b6b', '#8f5fe8']
+  colors: ['#43e97b']
 }
-const chartPieSeries = computed(() => {
-  return tiposPagamentoDisponiveis.value.map(tipo =>
-    pagamentosFiltrados.value
-      .filter(p => p.payment_method === tipo)
-      .reduce((sum, p) => p.amount ? sum + p.amount / 100 : sum, 0)
-  )
-})
+const chartPieSeries = computed(() => [
+  pagamentosFiltrados.value.reduce((sum, p) => p.amount ? sum + p.amount / 100 : sum, 0)
+])
 
+// ✅ Status dos pagamentos (Donut)
 const chartDonutOptions = {
   chart: { type: 'donut', background: 'transparent', toolbar: { show: false }, fontFamily: 'Inter, sans-serif' },
   theme: { mode: 'dark' },
-  labels: statusDisponiveis.value,
+  labels: ['Pendente', 'Processando', 'Enviado', 'Cancelado'],
   legend: { labels: { colors: '#e8eaed' } },
   dataLabels: { style: { colors: ['#fff'] } },
   tooltip: { theme: 'dark', y: { formatter: val => `${val} pagamentos` } },
-  colors: ['#43e97b', '#f9d423', '#ff6b6b', '#8f5fe8', '#64b5f6']
+  colors: ['#f9d423', '#64b5f6', '#43e97b', '#ff6b6b']
 }
-const chartDonutSeries = computed(() => {
-  return statusDisponiveis.value.map(status =>
-    pagamentosFiltrados.value.filter(p => p.status === status).length
-  )
+
+const chartDonutSeries = computed(() => [
+  pagamentosFiltrados.value.filter(p => p.status === 'pending').length,
+  pagamentosFiltrados.value.filter(p => p.status === 'processing').length,
+  pagamentosFiltrados.value.filter(p => p.status === 'shipped').length,
+  pagamentosFiltrados.value.filter(p => p.status === 'cancelled').length
+])
+
+// Paginação
+const currentPage = ref(1)
+const pageSize = 12
+const paginatedPagamentos = computed(() => {
+  const start = (currentPage.value - 1) * pageSize
+  return pagamentosFiltrados.value.slice(start, start + pageSize)
 })
+const totalPages = computed(() => Math.ceil(pagamentosFiltrados.value.length / pageSize))
+function goToPage(page) {
+  if (page >= 1 && page <= totalPages.value) currentPage.value = page
+}
 
 // Modal
 function abrirModal(pagamento) {
@@ -396,54 +405,29 @@ function formatDate(dateString) {
     hour: '2-digit', minute: '2-digit'
   })
 }
+
 function statusBadgeClass(status) {
   switch (String(status).toLowerCase()) {
-    case 'paid':
-    case 'succeeded':
-    case 'orderstatus.completed':
-      return 'bg-success'
-    case 'pending':
-    case 'orderstatus.pending':
-      return 'bg-warning text-dark'
-    case 'processing':
-    case 'orderstatus.processing':
-      return 'bg-info'
-    case 'failed':
-    case 'canceled':
-    case 'orderstatus.cancelled':
-      return 'bg-danger'
-    case 'refunded':
-      return 'bg-info'
-    default:
-      return 'bg-secondary'
+    case 'pending': return 'bg-warning text-dark'
+    case 'processing': return 'bg-info'
+    case 'shipped': return 'bg-success'
+    case 'cancelled': return 'bg-danger'
+    default: return 'bg-secondary'
   }
 }
+
 function statusLabel(status) {
   switch (String(status).toLowerCase()) {
-    case 'paid': return 'Pago'
-    case 'succeeded': return 'Pago'
     case 'pending': return 'Pendente'
     case 'processing': return 'Processando'
-    case 'failed': return 'Falhou'
-    case 'canceled': return 'Cancelado'
-    case 'refunded': return 'Reembolsado'
-    case 'orderstatus.pending': return 'Pendente'
-    case 'orderstatus.processing': return 'Processando'
-    case 'orderstatus.completed': return 'Concluído'
-    case 'orderstatus.cancelled': return 'Cancelado'
+    case 'shipped': return 'Enviado'
+    case 'cancelled': return 'Cancelado'
     default: return status
   }
 }
 
 function paymentMethodLabel(method) {
-  switch (String(method).toLowerCase()) {
-    case 'card': return 'Cartão'
-    case 'boleto': return 'Boleto'
-    case 'pix': return 'PIX'
-    case 'credit_card': return 'Cartão de Crédito'
-    case 'bank_transfer': return 'Transferência Bancária'
-    default: return method || 'Desconhecido'
-  }
+  return 'Cartão'
 }
 
 // Exportar CSV
@@ -459,7 +443,7 @@ function exportarCSV() {
     p.customer_cpf || '',
     p.customer_phone || '',
     p.amount ? (p.amount / 100).toFixed(2) : '',
-    paymentMethodLabel(p.payment_method),
+    'Cartão',
     statusLabel(p.status),
     formatDate(p.created_at),
     p.fee ? (p.fee / 100).toFixed(2) : '',
@@ -477,6 +461,7 @@ function exportarCSV() {
   URL.revokeObjectURL(url)
 }
 </script>
+
 
 <style scoped>
 .finance-dashboard {
@@ -525,6 +510,7 @@ function exportarCSV() {
 .bg-gradient-green { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
 .bg-gradient-yellow { background: linear-gradient(135deg, #f9d423 0%, #ff4e50 100%); color: #23233a; }
 .bg-gradient-purple { background: linear-gradient(135deg, #8f5fe8 0%, #64b5f6 100%); }
+.bg-gradient-red { background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); }
 .card-title {
   font-size: 1rem;
   font-weight: 600;

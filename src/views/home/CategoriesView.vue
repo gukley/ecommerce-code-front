@@ -30,6 +30,7 @@
         </div>
       </div>
     </div>
+     <BrandsCarousel />
     <Footer />
   </div>
 </template>
@@ -41,6 +42,7 @@ import Navbar from '@/components/home/NavBar.vue';
 import Footer from '@/components/home/Footer.vue';
 import { getCategories } from '@/services/apiService';
 import { useAuthStore } from '@/stores/authStore';
+import BrandsCarousel from '@/components/home/BrandsCarousel.vue';
 
 const categorias = ref([]);
 const router = useRouter();

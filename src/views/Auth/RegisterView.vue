@@ -3,7 +3,9 @@
     <div class="login-left d-none d-md-flex flex-column justify-content-center align-items-center p-5">
       <div class="login-left-bg"></div>
       <div class="login-left-content z-index-1 w-100 d-flex flex-column justify-content-center align-items-center">
-        <h1 class="login-logo">GGTECH</h1>
+        <h1 class="ggtech-logo">
+          GG<span class="text-secondary-highlight">TECH</span>
+        </h1>
         <p class="login-slogan">
           Conecte-se à performance.<br />
           Equipe seu setup.<br />
@@ -155,15 +157,16 @@ const handleRegister = async () => {
   z-index: 1;
   text-align: center;
 }
-.login-logo {
-  font-size: 3.2rem;
-  font-weight: 700;
-  letter-spacing: 2px;
-  background: linear-gradient(90deg, #4f8cff 0%, #a362ff 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin-bottom: 1.2rem;
-  font-family: 'Poppins', 'Inter', sans-serif;
+.ggtech-logo {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 3rem; /* Aumentado de 2rem para 3rem */
+  color: #333333; /* Texto escuro */
+  letter-spacing: 1.5px; /* Aumentado para maior destaque */
+  display: inline-block;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
+}
+.text-secondary-highlight {
+  color: #399bff; /* Destaque azul */
 }
 .login-slogan {
   color: #3b3b4f;
@@ -189,7 +192,7 @@ const handleRegister = async () => {
   border-radius: 1.5rem;
   box-shadow: 0 4px 32px 0 rgba(79, 140, 255, 0.08), 0 1.5px 8px 0 rgba(163, 98, 255, 0.07);
   padding: 2.5rem 2rem 2rem 2rem;
-  max-width: 400px;
+  max-width: 450px;
   width: 100%;
   border: none;
   display: flex;

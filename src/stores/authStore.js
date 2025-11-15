@@ -20,7 +20,6 @@ export const useAuthStore = defineStore('auth', () => {
 
   const loginUser = async (email, password) => {
     const response = await apiLogin({ email, password });
-    console.log('login response raw:', response); // DEBUG temporário
 
     // normaliza formas diferentes que a API pode retornar
     const respToken =
@@ -70,13 +69,6 @@ export const useAuthStore = defineStore('auth', () => {
       localStorage.removeItem('user');
     }
 
-    // DEBUG: confirmar o que foi gravado
-    console.log('localStorage after login:', {
-      token: localStorage.getItem('token'),
-      refreshToken: localStorage.getItem('refreshToken'),
-      refresh_token: localStorage.getItem('refresh_token'),
-      user: localStorage.getItem('user')
-    });
   };
 
   const getUserProfile = async () => {

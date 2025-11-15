@@ -18,8 +18,20 @@ const isFavorited = computed(() =>
 );
 
 const toggleWishlist = () => {
-  if (produto.value) wishlist.toggle(produto.value);
+  if (produto.value) {
+    wishlist.toggle(produto.value);
+    animateFavorite();
+  }
 };
+
+// animação sutil no botão de favorito
+function animateFavorite() {
+  const btn = document.querySelector('.btn-favorite');
+  if (btn) {
+    btn.classList.add('pulse');
+    setTimeout(() => btn.classList.remove('pulse'), 300);
+  }
+}
 
 const descricaoFormatada = computed(() =>
   produto.value && produto.value.description
@@ -49,330 +61,402 @@ function adicionarAoCarrinho() {
 
 function discountedPrice(produto) {
   if (produto.discount && produto.discount.discount_percentage > 0) {
-    return (produto.price * (1 - produto.discount.discount_percentage / 100)).toFixed(2)
+    return (produto.price * (1 - produto.discount.discount_percentage / 100)).toFixed(2);
   }
-  return Number(produto.price).toFixed(2)
+  return Number(produto.price).toFixed(2);
 }
 </script>
 
 <template>
-  <div class="product-detail-page min-vh-100 py-5 d-flex align-items-center justify-content-center">
-    <div class="card-glass container p-4 shadow-lg animate__fadeIn">
+  <div class="product-detail-page">
+    <div class="container">
       <button
         @click="$router.push('/produtos')"
-        class="btn btn-outline-back mb-4 d-flex align-items-center gap-2"
+        class="btn-back"
         aria-label="Voltar para página de produtos"
       >
         <i class="bi bi-arrow-left"></i> Voltar para Produtos
       </button>
 
-      <div v-if="loading" class="text-center py-5" aria-live="polite" aria-busy="true">
-        <div class="spinner-border text-accent" role="status" aria-hidden="true"></div>
+      <div v-if="loading" class="loading-container">
+        <div class="spinner-border text-primary" role="status"></div>
         <span class="visually-hidden">Carregando...</span>
       </div>
 
-      <div v-else-if="produto" class="row g-5 align-items-start">
-        <div class="col-md-6 text-center">
-          <div class="image-glass">
+      <div v-else-if="produto" class="product-detail-content">
+        <div class="product-image-section">
+          <div class="image-container">
             <img
               :src="produto.image_path ? BASE_URL + (produto.image_path.startsWith('/') ? '' : '/') + produto.image_path : '/placeholder-product.png'"
-              class="img-fluid rounded-4 shadow-lg product-image animate__zoomIn"
+              class="product-image"
               :alt="`Imagem do produto: ${produto.name}`"
               loading="lazy"
             />
           </div>
         </div>
-        <div class="col-md-6">
-          <h2 class="fw-bold mb-3 product-title">{{ produto.name }}</h2>
-          <div class="product-price mb-3">
+
+        <div class="product-info-section">
+          <h1 class="product-title">{{ produto.name }}</h1>
+          <div class="product-price">
             <span v-if="produto.discount && produto.discount.discount_percentage > 0">
-              <span class="product-price-original">
-                <del>R$ {{ Number(produto.price).toFixed(2) }}</del>
-              </span>
-              <span class="product-price-discount ms-2">
-                R$ {{ discountedPrice(produto) }}
-              </span>
-              <span class="badge badge-discount ms-2">
-                -{{ produto.discount.discount_percentage }}%
-              </span>
+              <span class="original-price">R$ {{ Number(produto.price).toFixed(2) }}</span>
+              <span class="discounted-price">R$ {{ discountedPrice(produto) }}</span>
+              <span class="discount-badge">-{{ produto.discount.discount_percentage }}%</span>
             </span>
-            <span v-else>
-              R$ {{ Number(produto.price).toFixed(2) }}
-            </span>
-          </div>
-          <p class="mb-4 product-desc" v-html="descricaoFormatada"></p>
-
-          <div class="mb-3">
-            <span class="badge badge-stock me-2" v-if="produto.stock > 0" aria-live="polite">
-              Em estoque: {{ produto.stock }}
-            </span>
-            <span class="badge badge-outstock" v-else>Produto Esgotado</span>
+            <span v-else>R$ {{ Number(produto.price).toFixed(2) }}</span>
           </div>
 
-          <!-- Botão de favoritar -->
-          <button
-            class="btn btn-fav-detail mb-3 me-3"
-            :aria-label="isFavorited ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
-            @click="toggleWishlist"
-            :disabled="!produto"
-            type="button"
-          >
-            <i :class="isFavorited ? 'bi bi-heart-fill' : 'bi bi-heart'" class="fs-4"></i>
-          </button>
+          <p class="product-description" v-html="descricaoFormatada"></p>
 
-          <!-- Seleção de quantidade -->
-          <div class="mb-3 d-flex align-items-center gap-2">
-            <label for="qty-input" class="me-2 mb-0">Quantidade:</label>
-            <input
-              id="qty-input"
-              type="number"
-              class="form-control qty-input-detail"
-              v-model.number="quantidade"
-              :min="1"
-              :max="produto.stock"
+          <div class="stock-info">
+            <span v-if="produto.stock > 0" class="badge-stock">Em estoque: {{ produto.stock }}</span>
+            <span v-else class="badge-outstock">Produto Esgotado</span>
+          </div>
+
+          <div class="actions">
+            <div class="quantity-selector">
+              <label for="qty-input">Quantidade:</label>
+              <input
+                id="qty-input"
+                type="number"
+                v-model.number="quantidade"
+                :min="1"
+                :max="produto.stock"
+                :disabled="produto.stock === 0"
+              />
+            </div>
+
+            <button
+              class="btn-add-to-cart"
               :disabled="produto.stock === 0"
-              aria-live="polite"
-              aria-label="Quantidade do produto"
-            />
-          </div>
+              @click="adicionarAoCarrinho"
+            >
+              <i class="bi bi-cart-plus"></i> Adicionar ao Carrinho
+            </button>
 
-          <button
-            class="btn btn-main-action px-4 py-2"
-            :disabled="produto.stock === 0"
-            @click="adicionarAoCarrinho"
-            type="button"
-            aria-disabled="produto.stock === 0"
-          >
-            <span class="cart-icon-glow">
-              <i class="bi bi-cart-plus me-2"></i>
-            </span>
-            Adicionar ao Carrinho
-          </button>
+            <button
+              class="btn-favorite"
+              :class="{ active: isFavorited }"
+              :aria-label="isFavorited ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
+              @click="toggleWishlist"
+            >
+              <i :class="isFavorited ? 'bi bi-heart-fill' : 'bi bi-heart'"></i>
+            </button>
+          </div>
         </div>
       </div>
 
-      <div v-else class="alert alert-danger text-center mt-5" role="alert">
-        Produto não encontrado.
-      </div>
+      <div v-else class="alert alert-danger">Produto não encontrado.</div>
     </div>
   </div>
 </template>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@600&display=swap');
 .product-detail-page {
-  background-color: #f9f9f9; /* Fundo claro */
+  background: linear-gradient(135deg, #f8fafc 0%, #e9f1ff 50%, #f3f4fa 100%);
   min-height: 100vh;
   font-family: 'Inter', sans-serif;
+  padding: 2rem 0;
 }
 
-.card-glass {
-  background: #ffffff; /* Fundo branco */
-  border-radius: 2rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); /* Sombra leve */
-  border: 1.5px solid #e0e0e0; /* Borda cinza clara */
-  padding: 2rem;
-  transition: box-shadow 0.2s, transform 0.2s;
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
 }
 
-.image-glass {
-  background: #ffffff; /* Fundo branco */
+.btn-back {
+  background: none;
+  border: none;
+  color: #399bff;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.btn-back:hover {
+  text-decoration: underline;
+}
+
+.loading-container {
+  text-align: center;
+  margin-top: 5rem;
+}
+
+.product-detail-content {
+  display: flex;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.product-image-section {
+  flex: 1;
+}
+
+.image-container {
+  background: #ffffff;
   border-radius: 1.5rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); /* Sombra leve */
-  padding: 1rem;
-  border: 1.5px solid #e0e0e0; /* Borda cinza clara */
-  transition: box-shadow 0.22s, transform 0.22s;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1.5px solid #e0e7ff;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
 }
-.image-glass:hover {
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2); /* Sombra mais forte ao passar o mouse */
-  transform: scale(1.04) translateY(-3px);
+
+.image-container:hover {
+  box-shadow: 0 12px 40px rgba(74, 144, 226, 0.15);
+  transform: translateY(-4px);
 }
 
 .product-image {
-  max-width: 420px;
-  max-height: 420px;
-  object-fit: contain;
-  background: #f8f9fa; /* Fundo cinza claro */
-  border: 2px solid #e0e0e0; /* Borda cinza clara */
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1); /* Sombra leve */
-  transition: box-shadow 0.18s, transform 0.22s;
+  width: 100%;
+  border-radius: 0.5rem;
 }
-.product-image:hover {
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); /* Sombra mais forte */
-  transform: scale(1.05) translateY(-4px);
+
+.product-info-section {
+  flex: 1;
+  background: #ffffff;
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1.5px solid #e0e7ff;
+  padding: 2rem;
 }
 
 .product-title {
-  color: #333333; /* Texto escuro */
   font-size: 2rem;
   font-weight: 700;
-  letter-spacing: 0.5px;
-  margin-bottom: 1rem;
+  color: #232e47;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, #4a90e2 0%, #6a5ae0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .product-price {
-  color: #399bff; /* Azul para preço */
   font-size: 1.8rem;
   font-weight: 700;
-  margin-bottom: 1rem;
-}
-
-.product-price-original {
-  color: #b0b0b0; /* Cinza para preço original */
-  font-size: 1.05rem;
-  text-decoration: line-through;
-}
-.product-price-discount {
-  color: #e53935; /* Vermelho para preço com desconto */
-  font-size: 1.2rem;
-  font-weight: 700;
-}
-.badge-discount {
-  background: linear-gradient(90deg, #399bff 0%, #e53935 100%);
-  color: #ffffff; /* Texto branco */
-  font-weight: 700;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  padding: 0.3rem 0.8rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Sombra leve */
-}
-
-.product-desc {
-  color: #666666; /* Texto cinza */
-  font-size: 1.1rem;
-  line-height: 1.6;
   margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.original-price {
+  color: #b0b0b0;
+  text-decoration: line-through;
+  margin-right: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.discounted-price {
+  color: #4a90e2;
+  font-size: 2rem;
+  margin-right: 0.5rem;
+}
+
+.discount-badge {
+  background: linear-gradient(135deg, #6a5ae0 0%, #8f5fe8 100%);
+  color: #ffffff;
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(106, 90, 224, 0.3);
+}
+
+.product-description {
+  color: #4b5563;
+  line-height: 1.8;
+  margin-bottom: 2rem;
+  font-size: 1.05rem;
+}
+
+.stock-info {
+  margin-bottom: 1.5rem; /* + espaço */
 }
 
 .badge-stock {
-  background: #399bff; /* Fundo azul */
-  color: #ffffff; /* Texto branco */
-  font-weight: 700;
-  font-size: 1rem;
-  border-radius: 12px;
-  padding: 0.5rem 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Sombra leve */
-}
-.badge-outstock {
-  background: #e53935; /* Fundo vermelho */
-  color: #ffffff; /* Texto branco */
-  font-weight: 700;
-  font-size: 1rem;
-  border-radius: 12px;
-  padding: 0.5rem 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Sombra leve */
+  color: #399bff;
 }
 
-.btn-main-action {
-  background: #399bff; /* Fundo azul */
-  color: #ffffff; /* Texto branco */
-  border: none;
-  font-size: 1.1rem;
-  border-radius: 50px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra leve */
-  transition: all 0.2s;
-  font-weight: 700;
-  padding: 0.7rem 1.5rem;
+.badge-outstock {
+  color: #e53935;
 }
-.btn-main-action:disabled {
-  opacity: 0.5;
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-top: 1.5rem;
+  border-top: 2px solid #e0e7ff;
+}
+
+.quantity-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.quantity-selector input {
+  width: 60px;
+  padding: 0.3rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 0.5rem;
+}
+
+.btn-add-to-cart {
+  background: linear-gradient(135deg, #4a90e2 0%, #6a5ae0 100%);
+  color: #ffffff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1.05rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(74, 144, 226, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-add-to-cart:hover:not(:disabled) {
+  background: linear-gradient(135deg, #6a5ae0 0%, #4a90e2 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
+}
+
+.btn-add-to-cart:disabled {
+  opacity: 0.6;
   cursor: not-allowed;
 }
-.btn-main-action:hover,
-.btn-main-action:focus {
-  background: #555555; /* Fundo mais escuro ao passar o mouse */
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2); /* Sombra mais forte */
-}
 
-.btn-fav-detail {
-  background: #ffffff; /* Fundo branco */
-  border: 2px solid #399bff; /* Borda azul */
-  color: #399bff; /* Ícone azul */
+.btn-favorite {
+  background: #ffffff;
+  border: 2px solid #4a90e2;
+  color: #4a90e2;
+  font-size: 1.3rem;
+  cursor: pointer;
   border-radius: 50%;
-  width: 50px;
-  height: 50px;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Sombra leve */
-  transition: background 0.2s, color 0.2s, transform 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.2);
 }
-.btn-fav-detail:hover,
-.btn-fav-detail:focus {
-  background: #399bff; /* Fundo azul ao passar o mouse */
-  color: #ffffff; /* Ícone branco */
+
+.btn-favorite.active {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+  border-color: #ff6b6b;
+  color: white;
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+.btn-favorite:hover {
   transform: scale(1.1);
+  box-shadow: 0 4px 16px rgba(74, 144, 226, 0.3);
 }
 
-.qty-input-detail {
-  width: 90px;
-  border-radius: 1rem;
-  border: 1.5px solid #e0e0e0; /* Borda cinza clara */
-  background: #ffffff; /* Fundo branco */
-  color: #333333; /* Texto escuro */
-  font-size: 1rem;
-  padding: 0.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Sombra leve */
-  transition: border 0.2s, box-shadow 0.2s;
-}
-.qty-input-detail:focus {
-  border-color: #399bff; /* Borda azul ao focar */
-  box-shadow: 0 0 0 3px rgba(57, 155, 255, 0.2); /* Destaque azul */
-  outline: none;
+.btn-favorite.active:hover {
+  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
 }
 
-.btn-outline-back {
-  background: none;
-  border: 2px solid #399bff; /* Borda azul */
-  color: #399bff; /* Texto azul */
-  font-weight: 600;
-  border-radius: 18px;
-  padding: 0.5rem 1.2rem;
-  transition: background 0.2s, color 0.2s, border-color 0.2s;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Sombra leve */
-}
-.btn-outline-back:hover,
-.btn-outline-back:focus {
-  background: #399bff; /* Fundo azul ao passar o mouse */
-  color: #ffffff; /* Texto branco */
-  border-color: #555555; /* Borda mais escura */
+.pulse {
+  animation: pulse 0.3s ease;
 }
 
-.spinner-border.text-accent {
-  color: #a362ff;
-  border-color: #a362ff transparent #a362ff transparent;
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
 }
 
-/* Animations */
-.animate__fadeIn {
-  animation: fadeIn 0.7s;
-}
-.animate__zoomIn {
-  animation: zoomIn 0.4s;
-}
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.97);}
-  to { opacity: 1; transform: scale(1);}
-}
-@keyframes zoomIn {
-  from { opacity: 0; transform: scale(0.93);}
-  to { opacity: 1; transform: scale(1);}
-}
 
-@media (max-width: 768px) {
-  .card-glass {
-    padding: 1.2rem 0.5rem 1.5rem 0.5rem;
-    border-radius: 1.5rem;
+/* Ajustes para telas menores */
+@media (max-width: 991px) {
+  .product-detail-content {
+    flex-direction: column;
+    gap: 1.5rem;
   }
+
+  .product-image-section,
+  .product-info-section {
+    flex: none;
+    width: 100%;
+  }
+
   .product-title {
+    font-size: 1.5rem;
+  }
+
+  .product-price {
+    font-size: 1.3rem;
+  }
+
+  .product-description {
+    font-size: 0.95rem;
+  }
+
+  .quantity-selector input {
+    width: 50px;
+  }
+
+  .btn-add-to-cart {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .btn-favorite {
+    width: 36px;
+    height: 36px;
     font-size: 1.2rem;
   }
+}
+
+@media (max-width: 600px) {
+  .product-detail-page {
+    padding: 1rem 0.5rem;
+  }
+
+  .product-title {
+    font-size: 1.3rem;
+  }
+
   .product-price {
+    font-size: 1.1rem;
+  }
+
+  .product-description {
+    font-size: 0.85rem;
+  }
+
+  .quantity-selector input {
+    width: 45px;
+  }
+
+  .btn-add-to-cart {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .btn-favorite {
+    width: 32px;
+    height: 32px;
     font-size: 1rem;
   }
-  .product-image {
-    max-width: 93vw;
-    max-height: 275px;
+
+  .related-section {
+    padding-top: 1.5rem;
+  }
+
+  .related-title {
+    font-size: 1rem;
   }
 }
 </style>
