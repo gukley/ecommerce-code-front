@@ -187,6 +187,20 @@ export const createOrder = (orderData) => {
       unit_price: Number(item.unit_price)
     }));
   }
+  
+  // Se houver discount_amount (total final com desconto), usar ele como total_price
+  if (orderData.discount_amount) {
+    orderData.total_price = Number(orderData.discount_amount);
+  } else if (orderData.total_amount) {
+    orderData.total_price = Number(orderData.total_amount);
+  } else {
+    // Calcular o total dos itens como fallback
+    const itemsTotal = orderData.items.reduce((sum, item) => {
+      return sum + (Number(item.unit_price) * Number(item.quantity));
+    }, 0);
+    orderData.total_price = itemsTotal;
+  }
+  
   return api.post('/orders/', orderData).then(res => res.data);
 };
 
@@ -246,10 +260,8 @@ export const getFinance = async () => {
   return data;
 };
 
-export const deleteModerator = (id) => {
-  return api.delete(`/users/moderators/${id}`)
-}
-
+export const deleteModerator = (id) =>
+  api.delete(`/users/${id}`).then(res => res.data);
 
 // ===== Demais exports =====
 export default {
@@ -262,6 +274,7 @@ export default {
   deleteUser,
   createModerator,
   updateModerator,
+  deleteModerator,
   updateUserImage,
   getAllProducts,
   getProductById,

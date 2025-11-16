@@ -81,7 +81,7 @@
 
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
-import { getAddressById } from '@/services/apiService';
+import { getAddressById, getAllOrders } from '@/services/apiService';
 import { useAuthStore } from '@/stores/authStore';
 import { useOrderStore } from '@/stores/orderStore';
 import { storeToRefs } from 'pinia';
@@ -112,6 +112,7 @@ const selectedIds = ref(new Set());
 const selectAllOnPage = ref(false);
 const bulkStatus = ref('');
 const isLoading = ref(false);
+const error = ref(null);
 
 // Debounce helper (simple)
 let debounceTimer = null;
@@ -236,34 +237,45 @@ function handleSearchDebounced(value) {
   }, 300)();
 }
 
-// Função removida - não é mais necessária pois usamos o store diretamente
-
-// Função para carregar endereços de todos os pedidos
+// ✅ Função para carregar endereços de todos os pedidos
 const loadAddressesForOrders = async (ordersList) => {
   if (!ordersList || !Array.isArray(ordersList)) return;
-  
+
   // Carrega endereços em paralelo para melhor performance
   const addressPromises = ordersList
     .filter(order => order.address_id && !addresses.value[order.address_id])
     .map(order => getAddressData(order.address_id));
-  
+
   await Promise.all(addressPromises);
 };
 
+// ✅ Função para carregar todos os pedidos (inclui moderadores e admins)
+async function loadOrders() {
+  isLoading.value = true;
+  error.value = null;
+  try {
+    // Chama a API para buscar todos os pedidos
+    const data = await getAllOrders();
+    orders.value = Array.isArray(data) ? data : [];
+
+    // Carrega endereços para todos os pedidos
+    await loadAddressesForOrders(orders.value);
+  } catch (err) {
+    console.error('Erro ao carregar pedidos:', err);
+    error.value = 'Erro ao carregar pedidos. Tente novamente mais tarde.';
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+// Carrega os pedidos ao montar o componente
 onMounted(async () => {
   while (!authStore.user || !authStore.user.id) {
     await new Promise(resolve => setTimeout(resolve, 50));
   }
-  // Para moderadores, carrega todos os pedidos. Para admins, carrega por adminId
-  const userRole = authStore.user?.role?.toUpperCase();
-  if (userRole === 'MODERATOR') {
-    await orderStore.fetchAllOrders();
-  } else {
-    await orderStore.fetchOrdersByAdmin(authStore.user.id);
-  }
-  
-  // Carrega endereços para todos os pedidos
-  await loadAddressesForOrders(orders.value);
+
+  // Para moderadores e admins, carrega todos os pedidos
+  await loadOrders();
 });
 
 // Watch para carregar endereços quando novos pedidos chegarem
@@ -385,6 +397,24 @@ async function changeOrderStatus(orderId, statusData) {
   } catch (error) {
     console.error('Erro ao alterar status do pedido:', error)
   }
+}
+
+// ✅ CORRIGIDO: usa total_price do pedido (já vem com desconto aplicado)
+function getOrderTotal(order) {
+  if (order.total_price != null) {
+    return Number(order.total_price) // Usa o valor com desconto
+  }
+  // Fallback para total_amount
+  if (order.total_amount != null) {
+    return Number(order.total_amount)
+  }
+  // Último fallback: calcula pela soma dos produtos
+  if (!order.products || !order.products.length) return 0
+  return order.products.reduce((sum, p) => {
+    const price = Number(p.unit_price ?? p.price) || 0
+    const qty = Number(p.quantity ?? 1) || 1
+    return sum + price * qty
+  }, 0)
 }
 </script>
 

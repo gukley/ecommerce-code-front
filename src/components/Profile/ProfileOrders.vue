@@ -22,7 +22,16 @@ function formatPrice(value) {
   return Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
+// ✅ CORRIGIDO: usa total_price do pedido (já vem com desconto aplicado)
 function getOrderTotal(order) {
+  if (order.total_price != null) {
+    return Number(order.total_price) // Usa o valor com desconto
+  }
+  // Fallback para total_amount
+  if (order.total_amount != null) {
+    return Number(order.total_amount)
+  }
+  // Último fallback: calcula pela soma dos produtos
   if (!order.products || !order.products.length) return 0
   return order.products.reduce((sum, p) => {
     const price = Number(p.unit_price ?? p.price) || 0
@@ -89,12 +98,20 @@ function downloadOrderPDF(order) {
 // 🔹 Abre modal e busca detalhes do pedido, se necessário
 async function openOrderDetails(order) {
   selectedOrder.value = order
-  if (!order.address) {
+  if (!order.address || !order.address.street) {
     try {
-      const { data } = await axios.get(`${API_BASE_URL}/orders/${order.id}`)
+      const { data } = await axios.get(`${API_BASE_URL}/orders/${order.id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}` // Adiciona o token de autenticação
+        }
+      })
       selectedOrder.value = { ...order, ...data }
     } catch (error) {
-      console.error('Erro ao buscar detalhes do pedido:', error)
+      console.error('Erro ao buscar detalhes do pedido:', error.response?.data || error.message)
+      if (error.response?.status === 401) {
+        alert('Sua sessão expirou. Por favor, faça login novamente.')
+        window.location.href = '/login' // Redireciona para a página de login
+      }
     }
   }
 }
@@ -151,7 +168,7 @@ function closeOrderDetails() {
 
           <div class="d-flex justify-content-between align-items-center gap-3 mt-2">
             <span class="fw-bold text-orders fs-5">
-              Total: {{ formatPrice(order.total_amount) }}
+              Total: {{ formatPrice(getOrderTotal(order)) }}
            </span>
             <div class="d-flex gap-2">
               <button
@@ -184,10 +201,10 @@ function closeOrderDetails() {
             <div class="modal-body">
               <p><strong>Data do Pedido:</strong> {{ new Date(selectedOrder.order_date).toLocaleDateString('pt-BR') }}</p>
               <p><strong>Status:</strong> {{ translateStatus(selectedOrder.status) }}</p>
-              <p><strong>Total:</strong> {{ formatPrice(selectedOrder.total_amount ?? selectedOrder.total ?? getOrderTotal(selectedOrder)) }}</p>
+              <p><strong>Total:</strong> {{ formatPrice(getOrderTotal(selectedOrder)) }}</p>
 
               <h6 class="mt-3">Endereço de Entrega:</h6>
-              <p v-if="selectedOrder.address">
+              <p v-if="selectedOrder.address && selectedOrder.address.street">
                 <strong>Rua:</strong> {{ selectedOrder.address.street }}<br />
                 <strong>Número:</strong> {{ selectedOrder.address.number }}<br />
                 <strong>Complemento:</strong> {{ selectedOrder.address.complement || '-' }}<br />
@@ -205,8 +222,7 @@ function closeOrderDetails() {
                 >
                   {{ product.name }} - Qtd: {{ product.quantity ?? 1 }} -
                   Unitário: {{ formatPrice(product.unit_price ?? product.price) }} -
-                  SubTotal: {{ formatPrice(selectedOrder.total_amount) }}
-
+                  SubTotal: {{ formatPrice((product.unit_price ?? product.price) * (product.quantity ?? 1)) }}
                 </li>
               </ul>
             </div>
@@ -282,6 +298,16 @@ function closeOrderDetails() {
 .bg-status-delivered {
   background: linear-gradient(90deg, #43e97b, #38f9d7); /* Gradiente verde suave */
   color: #fff;
+}
+
+.bg-status-processing {
+  background: linear-gradient(90deg, #4a90e2, #007bff); /* Azul mais visível */
+  color: #fff; /* Texto branco para contraste */
+}
+
+.bg-status-shipped {
+  background: linear-gradient(90deg, #43e97b, #28a745); /* Verde mais visível */
+  color: #fff; /* Texto branco para contraste */
 }
 
 .btn-outline-info {

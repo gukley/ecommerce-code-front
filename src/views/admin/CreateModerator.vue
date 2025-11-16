@@ -1,5 +1,13 @@
 <template>
   <div class="moderator-management p-4">
+    <!-- Toast notification -->
+    <Transition name="toast">
+      <div v-if="toastMsg" class="toast-notification" :class="toastType">
+        <i :class="toastType === 'success' ? 'bi bi-check-circle-fill' : 'bi bi-exclamation-circle-fill'" class="me-2"></i>
+        {{ toastMsg }}
+      </div>
+    </Transition>
+
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-4">
       <h2 class="fw-bold text-primary-ggtech m-0">Gerenciamento de Moderadores</h2>
       <div class="d-flex align-items-center gap-3">
@@ -235,7 +243,7 @@ function showToast(msg, type = 'success') {
   toastMsg.value = msg
   toastType.value = type
   clearTimeout(toastTimeout)
-  toastTimeout = setTimeout(() => (toastMsg.value = ''), 2200)
+  toastTimeout = setTimeout(() => (toastMsg.value = ''), 3500) // aumentado para 3.5s para melhor visibilidade
 }
 
 function badgeClass(role) {
@@ -345,7 +353,6 @@ function confirmarExcluir(mod) {
 async function excluirModerador() {
   loadingExcluir.value = true
   try {
-    // Corrija aqui: use deleteUser(excluirId.value) para deletar moderador pelo ID
     await apiService.deleteModerator(excluirId.value)
     showToast('Moderador excluído!', 'success')
     await buscarModeradores()
@@ -744,6 +751,66 @@ onMounted(buscarModeradores)
   text-align: center;
 }
 
+/* Toast Notification Styles */
+.toast-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  padding: 1rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  min-width: 280px;
+  backdrop-filter: blur(10px);
+}
+
+.toast-notification.success {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  color: #0f1419;
+  border: 2px solid rgba(67, 233, 123, 0.3);
+}
+
+.toast-notification.error {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+  color: #ffffff;
+  border: 2px solid rgba(255, 107, 107, 0.3);
+}
+
+/* Toast Animation */
+.toast-enter-active {
+  animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.toast-leave-active {
+  animation: slideOutRight 0.3s ease-in;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+}
+
 /* Responsividade */
 @media (max-width: 991.98px) {
   .moderator-management {
@@ -779,6 +846,15 @@ onMounted(buscarModeradores)
     width: 32px;
     height: 32px;
     font-size: 1.1rem;
+  }
+  
+  .toast-notification {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    min-width: auto;
+    font-size: 0.9rem;
+    padding: 0.85rem 1.2rem;
   }
 }
 </style>

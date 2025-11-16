@@ -600,7 +600,7 @@ function exportarCSV() {
 @media (max-width: 991.98px) {
   .finance-card { min-height: unset; }
   .chart-card { min-height: 260px; }
-  .summary-card { min-height: 90px; }
+  .summary-card { min-height: 70px; }
 }
 @media (max-width: 600px) {
   .finance-dashboard { padding: 0.5rem 0.1rem; }

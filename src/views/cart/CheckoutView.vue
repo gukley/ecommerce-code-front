@@ -214,14 +214,29 @@ async function confirmarPedido() {
       unit_price: Number(item.product?.price ?? item.unit_price)
     }))
 
+       const subtotal = items.reduce((sum, item) => {
+      return sum + (Number(item.unit_price) * Number(item.quantity))
+    }, 0)
+
+    // Calcula o total final com desconto aplicado
+    const totalComDesconto = Number(total.value)
+    const descontoAplicado = descontoCupom.value || 0
+
+    // Monta payload coerente — envia subtotal, discount_amount e total_amount
     const orderData = {
       items,
       address_id: enderecoSelecionado.value.id,
       payment_method: metodoPagamento.value,
-      total_amount: Number(total.value),
+      subtotal_amount: subtotal,                   // subtotal sem desconto
       shipping_cost: Number(frete.value),
-      coupon_id: appliedCoupon.value?.id ?? null
+      coupon_id: appliedCoupon.value?.id ?? null,
+      discount_amount: descontoAplicado,           // CORRETO: valor do desconto
+      total_amount: totalComDesconto               // total final a ser cobrado
     }
+
+    // Opcional: log para debugging (remova em produção)
+    console.debug('Criando pedido - payload:', JSON.parse(JSON.stringify(orderData)))
+
 
     const response = await createOrder(orderData)
     if (response) {
