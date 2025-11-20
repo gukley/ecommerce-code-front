@@ -377,35 +377,35 @@ function getProductName(id) {
     padding: 0 !important;
   }
   .products-container {
-    padding: 1.5rem 0.5rem 1.2rem 0.5rem;
+    padding: 1.5rem 1rem;
     border-radius: 1.2rem;
     min-height: 350px;
   }
   .section-title {
-    font-size: 1.5rem;
-    margin-bottom: 1.2rem !important;
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem !important;
   }
 }
 
 @media (max-width: 768px) {
   .products-container {
-    padding: 1rem 0.2rem 1rem 0.2rem;
+    padding: 1.2rem 0.8rem;
     min-height: auto;
     border-radius: 1rem;
   }
   .section-title {
-    font-size: 1.2rem;
-    margin-bottom: 1rem !important;
+    font-size: 1.5rem;
+    margin-bottom: 1.2rem !important;
   }
   .search-filter-bar {
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
-    margin-bottom: 1.2rem;
+    margin-bottom: 1.5rem;
   }
   .search-bar-box {
     max-width: 100%;
-    margin-bottom: 0.7rem;
+    margin-bottom: 0;
     min-width: 0;
   }
   .filtro-ordenacao-box {
@@ -413,20 +413,69 @@ function getProductName(id) {
     min-width: 100%;
     max-width: 100%;
   }
+  .filtro-ordenacao {
+    min-width: 100%;
+    max-width: 100%;
+  }
 }
 
 @media (max-width: 576px) {
   .products-container {
-    padding: 0.7rem 0.1rem 0.7rem 0.1rem;
-    border-radius: 0.7rem;
+    padding: 1rem 0.5rem;
+    border-radius: 0.8rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   }
   .section-title {
+    font-size: 1.3rem;
+    margin-bottom: 1rem !important;
+    line-height: 1.3;
+  }
+  .row.g-4 {
+    --bs-gutter-x: 0.8rem;
+    --bs-gutter-y: 1rem;
+  }
+  .search-bar {
     font-size: 1rem;
-    margin-bottom: 0.7rem !important;
+    padding: 0.6rem 1rem 0.6rem 2.5rem;
+  }
+  .search-icon {
+    font-size: 1.1rem;
+    left: 12px;
+  }
+  .btn-search {
+    padding: 0.25rem 0.8rem;
+    font-size: 1rem;
+  }
+  .filtro-label {
+    font-size: 0.95rem;
+  }
+  .filtro-ordenacao {
+    font-size: 0.95rem;
+    padding: 0.5rem 0.9rem;
+  }
+}
+
+/* Extra small devices (muito pequenos) */
+@media (max-width: 400px) {
+  .products-container {
+    padding: 0.8rem 0.3rem;
+    border-radius: 0.6rem;
+  }
+  .section-title {
+    font-size: 1.1rem;
+    margin-bottom: 0.8rem !important;
   }
   .row.g-4 {
     --bs-gutter-x: 0.5rem;
-    --bs-gutter-y: 0.5rem;
+    --bs-gutter-y: 0.8rem;
+  }
+  .search-bar {
+    font-size: 0.9rem;
+    padding: 0.5rem 0.8rem 0.5rem 2.2rem;
+  }
+  .filtro-ordenacao {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.7rem;
   }
 }
 </style>

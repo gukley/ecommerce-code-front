@@ -17,6 +17,7 @@ const searchTerm = ref("");
 const showWishlistDrawer = ref(false);
 const wishlist = useWishlistStore();
 const toast = useToast(); // Inicialização do toast
+const showMobileMenu = ref(false);
 
 const handleUserClick = () => {
   showMenu.value = !showMenu.value;
@@ -67,6 +68,10 @@ function toggleTheme() {
   localStorage.setItem('theme', theme.value)
 }
 
+function toggleMobileMenu() {
+  showMobileMenu.value = !showMobileMenu.value;
+}
+
 onMounted(() => {
   document.addEventListener('mousedown', handleClickOutside);
   // cart.initCart();
@@ -92,15 +97,21 @@ onBeforeUnmount(() => {
         <span class="logo-gg">GG</span><span class="logo-tech">TECH</span>
       </router-link>
 
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <button 
+        class="navbar-toggler" 
+        type="button" 
+        @click="toggleMobileMenu"
+        :aria-expanded="showMobileMenu"
+        aria-label="Toggle navigation"
+      >
         <span class="navbar-toggler-icon"></span>
       </button>
 
-      <div class="collapse navbar-collapse" id="navbarNav">
+      <div class="collapse navbar-collapse" :class="{ 'show': showMobileMenu }" id="navbarNav">
         <div class="navbar-nav d-flex align-items-center gap-4 me-auto">
-          <router-link class="nav-link custom-nav-link" :to="{ name: 'Home' }" active-class="active">Home</router-link>
-          <router-link class="nav-link custom-nav-link" :to="'/produtos'" active-class="active">Produtos</router-link>
-          <router-link class="nav-link custom-nav-link" :to="'/categorias'" active-class="active">Categorias</router-link>
+          <router-link class="nav-link custom-nav-link" :to="{ name: 'Home' }" active-class="active" @click="showMobileMenu = false">Home</router-link>
+          <router-link class="nav-link custom-nav-link" :to="'/produtos'" active-class="active" @click="showMobileMenu = false">Produtos</router-link>
+          <router-link class="nav-link custom-nav-link" :to="'/categorias'" active-class="active" @click="showMobileMenu = false">Categorias</router-link>
         </div>
 
         <div class="d-flex align-items-center gap-4 ms-lg-3 mt-2 mt-lg-0">
@@ -108,7 +119,7 @@ onBeforeUnmount(() => {
           <ThemeToggle />
 
           <!-- Carrinho -->
-          <div class="position-relative nav-icon-wrapper" @click="router.push('/cart')" role="button" aria-label="Abrir carrinho">
+          <div class="position-relative nav-icon-wrapper" @click="router.push('/cart'); showMobileMenu = false" role="button" aria-label="Abrir carrinho">
             <i class="bi bi-cart3 fs-3 nav-icon"></i>
             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill cart-badge">
               {{ cart.totalItems }}
@@ -117,7 +128,7 @@ onBeforeUnmount(() => {
           </div>
 
           <!-- Wishlist -->
-          <div class="position-relative nav-icon-wrapper" @click="showWishlistDrawer = true" role="button" aria-label="Abrir wishlist">
+          <div class="position-relative nav-icon-wrapper" @click="showWishlistDrawer = true; showMobileMenu = false" role="button" aria-label="Abrir wishlist">
             <i class="bi bi-heart fs-3 nav-icon"></i>
             <span v-if="wishlist.total > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill cart-badge">
               {{ wishlist.total }}
@@ -144,6 +155,7 @@ onBeforeUnmount(() => {
             v-if="authStore.user && (authStore.user.role === 'ADMIN' || authStore.user.role === 'MODERATOR')"
             to="/admin"
             class="btn-admin-panel"
+            @click="showMobileMenu = false"
           >
             <i class="bi bi-speedometer2 me-1"></i> Painel Admin
           </router-link>
@@ -349,14 +361,42 @@ onBeforeUnmount(() => {
   transform: translateY(-1px);
 }
 
-/* Responsividade */
+/* Botão hamburger (três linhas) */
+.navbar-toggler {
+  border: none;
+  background: transparent;
+  padding: 0.5rem;
+  cursor: pointer;
+}
+
+.navbar-toggler:focus {
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(74, 167, 255, 0.25);
+}
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%23334155' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* Menu mobile */
+.navbar-collapse {
+  transition: max-height 0.3s ease-in-out;
+}
+
 @media (max-width: 991.98px) {
-  .custom-navbar {
-    padding: 0.6rem 1rem;
+  .navbar-collapse {
+    background: #ffffff;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-top: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
 
-  .navbar-brand {
-    font-size: 1.3rem !important;
+  .navbar-collapse.show {
+    display: block;
   }
 
   .navbar-nav {
@@ -364,17 +404,95 @@ onBeforeUnmount(() => {
     align-items: flex-start !important;
     margin-left: 0 !important;
     margin-top: 1rem;
-    gap: 0.3rem !important;
+    gap: 0.5rem !important;
   }
 
   .custom-nav-link {
     width: 100%;
-    padding: 0.5rem 0;
+    padding: 0.6rem 0.5rem;
+    font-size: 1rem;
   }
 
   .custom-nav-link::after {
     left: 0;
     transform: translateX(0);
+  }
+
+  .btn-admin-panel {
+    font-size: 0.9rem;
+    padding: 5px 12px;
+    width: 100%;
+    justify-content: center;
+    margin-top: 0.5rem;
+  }
+
+  .d-flex.align-items-center.gap-4 {
+    flex-wrap: wrap;
+    gap: 1rem !important;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .custom-navbar {
+    padding: 0.5rem 0.8rem;
+  }
+
+  .navbar-brand {
+    font-size: 1.4rem !important;
+  }
+
+  .nav-icon {
+    font-size: 1.5rem !important;
+  }
+
+  .nav-icon-wrapper {
+    width: 36px;
+    height: 36px;
+  }
+
+  .cart-badge {
+    font-size: 0.65rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .navbar-brand {
+    font-size: 1.3rem !important;
+  }
+
+  .custom-nav-link {
+    font-size: 0.95rem;
+    padding: 0.5rem 0.4rem;
+  }
+
+  .btn-admin-panel {
+    font-size: 0.85rem;
+    padding: 4px 10px;
+  }
+
+  .nav-icon {
+    font-size: 1.4rem !important;
+  }
+
+  .nav-icon-wrapper {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+@media (max-width: 400px) {
+  .navbar-brand {
+    font-size: 1.2rem !important;
+  }
+
+  .custom-nav-link {
+    font-size: 0.9rem;
+  }
+
+  .btn-admin-panel {
+    font-size: 0.8rem;
+    padding: 3px 8px;
   }
 }
 

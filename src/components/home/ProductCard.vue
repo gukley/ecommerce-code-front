@@ -15,7 +15,7 @@
       >
         <img
           :src="imageUrl"
-          class="card-img-top rounded-top-4"
+          class="card-img-top rounded-top-4 product-card-img"
           :alt="produto.name"
           style="height: 200px; object-fit: cover"
         />
@@ -187,6 +187,42 @@ const adicionarAoCarrinho = () => {
   box-shadow: 0 2px 8px rgba(57, 155, 255, 0.1); /* Sombra leve na imagem */
   margin-bottom: 1rem;
   margin-top: 18px;
+}
+.product-card-img {
+  width: 100%;
+  height: 200px; /* Altura fixa para desktop */
+  object-fit: contain; /* Mostra a imagem inteira sem cortar */
+  object-position: center;
+  border-radius: 12px 12px 0 0;
+  background: #ffffff;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-card:hover .product-card-img {
+  transform: scale(1.05);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsividade para telas menores */
+@media (max-width: 768px) {
+  .product-card-img {
+    height: 180px; /* Reduz a altura em tablets */
+  }
+}
+
+@media (max-width: 576px) {
+  .product-card-img {
+    height: 160px; /* Reduz a altura em smartphones */
+    object-fit: contain; /* Garante que a imagem inteira seja exibida */
+    padding: 0.5rem; /* Adiciona padding para dar espaço */
+  }
+}
+
+@media (max-width: 400px) {
+  .product-card-img {
+    height: 140px; /* Reduz ainda mais em telas muito pequenas */
+    padding: 0.3rem;
+  }
 }
 .card-title {
   color: #232e47;
