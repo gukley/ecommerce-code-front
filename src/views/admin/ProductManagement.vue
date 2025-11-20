@@ -241,14 +241,23 @@ const confirmDelete = async (productId) => {
       toast.success('Produto excluído com sucesso!');
       await fetchProducts();
     } catch (error) {
-      console.error('Erro detalhado ao excluir produto:', error);
-      
+      // NÃO logar o erro 403 no console — mostrar apenas um toast leve para o usuário
+      const status = error?.response?.status;
+      if (status === 403) {
+        // mensagem leve e não intrusiva
+        toast.warning('Você não tem permissão para excluir este produto.');
+        return;
+      }
+
       // Tratamento específico para erro de relacionamento com tags
-      if (error.response?.data?.message?.includes('tag_products') || 
-          error.message?.includes('tag_products')) {
+      const message = error?.response?.data?.message || error?.message || '';
+      if (message.includes('tag_products') || message.includes('tag_products')) {
         toast.error('Erro: Este produto possui tags associadas. Remova as tags antes de excluir o produto.');
       } else {
-        toast.error('Erro ao excluir produto: ' + (error.response?.data?.message || error.message));
+        // Para outros erros mostramos toast de erro e logamos DEBUG (não erro crítico)
+        toast.error('Erro ao excluir produto: ' + (message || 'Tente novamente.'));
+        // se quiser logar para debugging remoto, use console.debug (menos ruidoso)
+        console.debug('Erro ao excluir produto:', error);
       }
     }
   }

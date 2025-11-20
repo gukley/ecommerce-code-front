@@ -173,8 +173,22 @@ const deleteCategory = async (id) => {
       await loadCategories();
       toast.success('Categoria excluída com sucesso!');
     } catch (error) {
-      console.error("Erro ao excluir categoria:", error);
-      toast.error("Erro ao excluir categoria.");
+      // Trate 403 de forma silenciosa para o usuário (toast leve) e evite logs pesados
+      const status = error?.response?.status;
+      if (status === 403) {
+        toast.warning('Você não tem permissão para excluir esta categoria.');
+        return;
+      }
+
+      // Tratamento específico para erro de relacionamento com produtos/tags
+      const message = error?.response?.data?.message || error?.message || '';
+      if (message.includes('constraint') || message.includes('foreign key') || message.includes('product')) {
+        toast.error('Erro: Esta categoria possui produtos vinculados. Remova-os antes de excluir a categoria.');
+      } else {
+        // Para outros erros mostramos toast de erro e logamos DEBUG (menos ruidoso)
+        toast.error('Erro ao excluir categoria: ' + (message || 'Tente novamente.'));
+        console.debug('Erro ao excluir categoria:', error);
+      }
     }
   }
 };
@@ -185,7 +199,7 @@ const uploadImage = async (id, file) => {
     await loadCategories();
     toast.success('Imagem da categoria atualizada com sucesso!');
   } catch (error) {
-    console.error("Erro ao fazer upload da imagem:", error);
+    console.debug("Erro ao fazer upload da imagem:", error);
     toast.error("Erro ao fazer upload da imagem.");
   }
 };
