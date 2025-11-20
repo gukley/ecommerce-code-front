@@ -43,7 +43,7 @@
         <button @click="$emit('clear-filters')" class="btn btn-outline-secondary btn-sm me-2">
           <i class="bi bi-x-circle me-1"></i>Limpar Filtros
         </button>
-        <span class="text-muted">
+        <span class="text-info-summary">
           <i class="bi bi-info-circle me-1"></i>
           {{ filteredOrders.length }} de {{ orders.length }} pedidos |
           <strong class="text-success">Total: R$ {{ totalPedidosFiltrados.toFixed(2) }}</strong>
@@ -125,5 +125,20 @@ const totalPedidosFiltrados = computed(() => {
 
 .btn-outline-secondary:hover {
   background: #1b1b26;
+}
+
+.text-info-summary {
+  color: #e8eaed; /* Texto claro para boa visibilidade */
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.text-info-summary i {
+  color: #64b5f6; /* Ícone azul para destaque */
+}
+
+.text-info-summary strong {
+  font-weight: 600;
+  color: #43e97b; /* Verde mais visível */
 }
 </style>
