@@ -120,7 +120,7 @@ function getStatusLabel(status) {
 
 function formatAddress(address) {
   if (!address) return '-'
-  return `${address.street}, ${address.number} - ${address.bairro}, ${address.city} - ${address.state}, ${address.zip_code}`
+  return `${address.street}, ${address.number} - ${address.bairro}, ${address.city} - ${address.state}, ${address.zip}`
 }
 
 function getClientName(order) {

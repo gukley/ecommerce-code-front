@@ -32,7 +32,7 @@
           <button @click="$emit('edit', addr)" class="btn-action btn-edit" title="Editar Endereço">
             <i class="bi bi-pencil"></i>
           </button>
-          <button @click="$emit('delete', addr.id)" class="btn-action btn-delete" title="Excluir Endereço">
+          <button @click="handleDelete(addr.id)" class="btn-action btn-delete" title="Excluir Endereço">
             <i class="bi bi-trash"></i>
           </button>
         </div>
@@ -42,6 +42,12 @@
 </template>
 <script setup>
 const props = defineProps({ addresses: Array })
+const emit = defineEmits(['add', 'edit', 'delete'])
+
+// Emite o evento de exclusão com tratamento de erro melhorado
+function handleDelete(addressId) {
+  emit('delete', addressId)
+}
 </script>
 <style scoped>
 .addresses-section {

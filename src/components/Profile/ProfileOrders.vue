@@ -66,53 +66,219 @@ function getStatusClass(status) {
   }
 }
 
-// 🔹 Gera nota fiscal em PDF
+// 🔹 Gera nota fiscal em PDF com endereço e informações detalhadas
 function downloadOrderPDF(order) {
   const doc = new jsPDF()
+  
+  // Cabeçalho
   doc.setFont('helvetica', 'bold')
-  doc.setFontSize(18)
-  doc.text('Nota Fiscal - Pedido #' + order.id, 15, 20)
+  doc.setFontSize(20)
+  doc.setTextColor(74, 144, 226) // Azul
+  doc.text('NOTA FISCAL - GGTECH', 15, 20)
+  
+  // Linha separadora
+  doc.setDrawColor(74, 144, 226)
+  doc.setLineWidth(0.5)
+  doc.line(15, 25, 195, 25)
+  
+  // Informações do pedido
+  doc.setFont('helvetica', 'normal')
   doc.setFontSize(12)
-  doc.text('Data: ' + new Date(order.order_date).toLocaleDateString('pt-BR'), 15, 30)
-  doc.text('Status: ' + translateStatus(order.status), 15, 38)
-  doc.text('Total: ' + formatPrice(order.total_amount), 15, 46)
-  doc.text('Produtos:', 15, 56)
-
-  let y = 64
-  order.products?.forEach((p, idx) => {
-    doc.text(
-      `${idx + 1}. ${p.name} | Qtd: ${p.quantity ?? 1} | Unitário: ${formatPrice(p.unit_price ?? p.price)} | Subtotal: ${formatPrice((p.unit_price ?? p.price) * (p.quantity ?? 1))}`,
-      15,
-      y
-    )
+  doc.setTextColor(0, 0, 0)
+  
+  let y = 35
+  doc.text(`Pedido: #${order.id}`, 15, y)
+  y += 8
+  doc.text(`Data: ${new Date(order.order_date).toLocaleDateString('pt-BR')} às ${new Date(order.order_date).toLocaleTimeString('pt-BR')}`, 15, y)
+  y += 8
+  doc.text(`Status: ${translateStatus(order.status)}`, 15, y)
+  y += 8
+  
+  // Endereço de entrega (se disponível)
+  if (order.address) {
+    y += 5
+    doc.setFont('helvetica', 'bold')
+    doc.setTextColor(74, 144, 226)
+    doc.text('ENDEREÇO DE ENTREGA:', 15, y)
+    doc.setFont('helvetica', 'normal')
+    doc.setTextColor(0, 0, 0)
     y += 8
-    if (y > 270) {
+    
+    const endereco = [
+      `${order.address.street || '-'}, ${order.address.number || '-'}`,
+      order.address.complement ? `Complemento: ${order.address.complement}` : null,
+      `${order.address.neighborhood || order.address.bairro || '-'} - ${order.address.city || '-'}/${order.address.state || '-'}`,
+      `CEP: ${order.address.zip_code || order.address.zip || '-'}`
+    ].filter(Boolean)
+    
+    endereco.forEach(linha => {
+      doc.text(linha, 15, y)
+      y += 6
+    })
+  }
+  
+  // Linha separadora antes dos produtos
+  y += 5
+  doc.setDrawColor(200, 200, 200)
+  doc.setLineWidth(0.3)
+  doc.line(15, y, 195, y)
+  y += 10
+  
+  // Título dos produtos
+  doc.setFont('helvetica', 'bold')
+  doc.setTextColor(74, 144, 226)
+  doc.setFontSize(14)
+  doc.text('PRODUTOS:', 15, y)
+  y += 10
+  
+  // Cabeçalho da tabela de produtos
+  doc.setFontSize(10)
+  doc.setFont('helvetica', 'bold')
+  doc.setTextColor(255, 255, 255)
+  doc.setFillColor(74, 144, 226)
+  doc.rect(15, y - 5, 180, 8, 'F')
+  doc.text('Produto', 17, y)
+  doc.text('Qtd', 120, y)
+  doc.text('Unit.', 140, y)
+  doc.text('Subtotal', 165, y)
+  y += 10
+  
+  // Lista de produtos
+  doc.setFont('helvetica', 'normal')
+  doc.setTextColor(0, 0, 0)
+  doc.setFontSize(9)
+  
+  let subtotalGeral = 0
+  order.products?.forEach((p, idx) => {
+    const nomeProduto = p.name || 'Produto'
+    const quantidade = p.quantity ?? 1
+    const precoUnit = Number(p.unit_price ?? p.price) || 0
+    const subtotal = precoUnit * quantidade
+    subtotalGeral += subtotal
+    
+    // Nome do produto (com quebra de linha se necessário)
+    const maxWidth = 100
+    const linhasNome = doc.splitTextToSize(nomeProduto, maxWidth)
+    doc.text(linhasNome, 17, y)
+    
+    // Quantidade, preço unitário e subtotal
+    doc.text(String(quantidade), 120, y)
+    doc.text(formatPrice(precoUnit), 140, y)
+    doc.text(formatPrice(subtotal), 165, y)
+    
+    y += (linhasNome.length * 6) + 3
+    
+    // Linha separadora entre produtos
+    doc.setDrawColor(230, 230, 230)
+    doc.line(15, y - 1, 195, y - 1)
+    
+    // Adiciona nova página se necessário
+    if (y > 260) {
       doc.addPage()
       y = 20
     }
   })
-
+  
+  // Total do pedido
+  y += 10
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(12)
+  doc.setTextColor(74, 144, 226)
+  
+  // Subtotal
+  doc.text('Subtotal:', 120, y)
+  doc.text(formatPrice(subtotalGeral), 165, y)
+  y += 8
+  
+  // Frete (se houver)
+  if (order.shipping_cost && Number(order.shipping_cost) > 0) {
+    doc.text('Frete:', 120, y)
+    doc.text(formatPrice(Number(order.shipping_cost)), 165, y)
+    y += 8
+  }
+  
+  // Desconto (se houver)
+  if (order.discount_amount && Number(order.discount_amount) > 0) {
+    doc.setTextColor(40, 167, 69) // Verde
+    doc.text('Desconto:', 120, y)
+    doc.text(`- ${formatPrice(Number(order.discount_amount))}`, 165, y)
+    y += 8
+  }
+  
+  // Total final
+  doc.setFontSize(14)
+  doc.setTextColor(0, 0, 0)
+  doc.text('TOTAL:', 120, y)
+  doc.text(formatPrice(getOrderTotal(order)), 165, y)
+  
+  // Rodapé
+  y += 20
+  if (y > 260) {
+    doc.addPage()
+    y = 20
+  }
+  
+  doc.setFontSize(9)
+  doc.setFont('helvetica', 'italic')
+  doc.setTextColor(100, 100, 100)
+  doc.text('Obrigado por comprar na GGTECH! Para dúvidas, entre em contato conosco.', 15, y)
+  y += 6
+  doc.text(`Documento gerado em: ${new Date().toLocaleString('pt-BR')}`, 15, y)
+  
+  // Salva o PDF
   doc.save(`nota-fiscal-pedido-${order.id}.pdf`)
 }
 
-// 🔹 Abre modal e busca detalhes do pedido, se necessário
+// 🔹 Abre modal e busca detalhes do pedido, incluindo o endereço
 async function openOrderDetails(order) {
-  selectedOrder.value = order
-  if (!order.address || !order.address.street) {
+  selectedOrder.value = { ...order }
+  
+  // Se o pedido tem address_id mas não tem address completo, busca o endereço
+  if (order.address_id && !order.address) {
     try {
-      const { data } = await axios.get(`${API_BASE_URL}/orders/${order.id}`, {
+      // Busca o endereço usando o address_id
+      const { data: addressData } = await axios.get(`${API_BASE_URL}/addresses/${order.address_id}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}` // Adiciona o token de autenticação
+          Authorization: `Bearer ${localStorage.getItem('token')}`
         }
       })
-      selectedOrder.value = { ...order, ...data }
+      
+      selectedOrder.value = {
+        ...selectedOrder.value,
+        address: addressData
+      }
+      
+      console.debug('✅ Endereço carregado:', addressData)
     } catch (error) {
-      console.error('Erro ao buscar detalhes do pedido:', error.response?.data || error.message)
+      console.error('❌ Erro ao buscar endereço:', error.response?.data || error.message)
+      
       if (error.response?.status === 401) {
         alert('Sua sessão expirou. Por favor, faça login novamente.')
-        window.location.href = '/login' // Redireciona para a página de login
+        window.location.href = '/login'
+      } else {
+        console.warn('⚠️ Endereço não disponível para o pedido #' + order.id)
       }
     }
+  }
+  
+  // Tenta buscar detalhes completos do pedido (incluindo endereço se o backend retornar)
+  try {
+    const { data } = await axios.get(`${API_BASE_URL}/orders/${order.id}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+    
+    // Mescla os dados, priorizando o endereço que já foi buscado
+    selectedOrder.value = {
+      ...selectedOrder.value,
+      ...data,
+      address: selectedOrder.value.address || data.address || null
+    }
+    
+    console.debug('✅ Detalhes completos do pedido carregados:', selectedOrder.value)
+  } catch (error) {
+    console.error('❌ Erro ao buscar detalhes do pedido:', error.response?.data || error.message)
   }
 }
 
@@ -204,13 +370,13 @@ function closeOrderDetails() {
               <p><strong>Total:</strong> {{ formatPrice(getOrderTotal(selectedOrder)) }}</p>
 
               <h6 class="mt-3">Endereço de Entrega:</h6>
-              <p v-if="selectedOrder.address && selectedOrder.address.street">
-                <strong>Rua:</strong> {{ selectedOrder.address.street }}<br />
-                <strong>Número:</strong> {{ selectedOrder.address.number }}<br />
+              <p v-if="selectedOrder.address">
+                <strong>Rua:</strong> {{ selectedOrder.address.street || '-' }}<br />
+                <strong>Número:</strong> {{ selectedOrder.address.number || '-' }}<br />
                 <strong>Complemento:</strong> {{ selectedOrder.address.complement || '-' }}<br />
-                <strong>Bairro:</strong> {{ selectedOrder.address.neighborhood }}<br />
-                <strong>Cidade:</strong> {{ selectedOrder.address.city }} - {{ selectedOrder.address.state }}<br />
-                <strong>CEP:</strong> {{ selectedOrder.address.zip_code }}
+                <strong>Bairro:</strong> {{ selectedOrder.address.neighborhood || selectedOrder.address.bairro || '-' }}<br />
+                <strong>Cidade:</strong> {{ selectedOrder.address.city || '-' }} - {{ selectedOrder.address.state || '-' }}<br />
+                <strong>CEP:</strong> {{ selectedOrder.address.zip_code || selectedOrder.address.zip || '-' }}
               </p>
               <p v-else class="text-muted">Endereço não disponível.</p>
 

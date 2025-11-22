@@ -210,32 +210,42 @@ async function confirmarPedido() {
 
     const items = carrinhoAtual.map(item => ({
       product_id: item.product?.id ?? item.product_id,
-      quantity: item.quantity,
+      quantity: Number(item.quantity),
       unit_price: Number(item.product?.price ?? item.unit_price)
     }))
 
-       const subtotal = items.reduce((sum, item) => {
+    // ✅ Calcula o subtotal dos itens (SEM desconto)
+    const subtotal = items.reduce((sum, item) => {
       return sum + (Number(item.unit_price) * Number(item.quantity))
     }, 0)
 
-    // Calcula o total final com desconto aplicado
-    const totalComDesconto = Number(total.value)
-    const descontoAplicado = descontoCupom.value || 0
+    // ✅ Valores individuais
+    const freteValor = Number(frete.value) || 0
+    const descontoAplicado = Number(descontoCupom.value) || 0
 
-    // Monta payload coerente — envia subtotal, discount_amount e total_amount
+    // ✅ Total final: subtotal + frete - desconto
+    const totalFinal = subtotal + freteValor - descontoAplicado
+
+    // ✅ Monta o payload com os valores corretos
     const orderData = {
       items,
       address_id: enderecoSelecionado.value.id,
       payment_method: metodoPagamento.value,
-      subtotal_amount: subtotal,                   // subtotal sem desconto
-      shipping_cost: Number(frete.value),
+      subtotal_amount: subtotal,              // Subtotal SEM desconto
+      shipping_cost: freteValor,              // Valor do frete
       coupon_id: appliedCoupon.value?.id ?? null,
-      discount_amount: descontoAplicado,           // CORRETO: valor do desconto
-      total_amount: totalComDesconto               // total final a ser cobrado
+      discount_amount: descontoAplicado,      // Valor do desconto (importante!)
+      total_amount: totalFinal,               // Total final (subtotal + frete - desconto)
+      total_price: totalFinal                 // Garante que total_price também seja enviado
     }
 
-    // Opcional: log para debugging (remova em produção)
-    console.debug('Criando pedido - payload:', JSON.parse(JSON.stringify(orderData)))
+    console.debug('✅ Criando pedido - payload:', {
+      subtotal: subtotal.toFixed(2),
+      frete: freteValor.toFixed(2),
+      desconto: descontoAplicado.toFixed(2),
+      total_final: totalFinal.toFixed(2),
+      full_payload: orderData
+    })
 
 
     const response = await createOrder(orderData)
@@ -248,18 +258,8 @@ async function confirmarPedido() {
       setTimeout(() => voltarParaHome(), 4000)
     }
   } catch (error) {
-    console.error('Erro ao criar pedido:', error)
-    
-    // Trata erros específicos de estoque
-    const errorMessage = error.response?.data?.detail || error.message || ''
-    if (errorMessage.includes('stock') || errorMessage.includes('estoque') || errorMessage.includes('Not enough stock')) {
-      const produtoId = errorMessage.match(/produto (\d+)/i)?.[1] || 'desconhecido'
-      toast.error(`Estoque insuficiente para o produto. Por favor, verifique o carrinho e tente novamente.`)
-      // Recarrega o carrinho para atualizar os dados
-      await cartStore.initCart()
-    } else {
-      toast.error('Erro ao finalizar o pedido. Tente novamente.')
-    }
+    console.error('❌ Erro ao criar pedido:', error)
+    toast.error('Erro ao finalizar o pedido. Tente novamente.')
   }
 }
 

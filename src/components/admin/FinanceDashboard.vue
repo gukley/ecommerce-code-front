@@ -53,12 +53,12 @@
         <div class="col-md-3 col-6">
           <div class="card finance-card summary-card">
             <div class="card-body d-flex align-items-center gap-3">
-              <div class="icon-container bg-gradient-purple">
-                <i class="bi bi-percent"></i>
+              <div class="icon-container bg-gradient-green">
+                <i class="bi bi-truck"></i>
               </div>
               <div>
-                <div class="card-title">Taxas Stripe</div>
-                <div class="card-value">R$ {{ totalTaxas.toLocaleString('pt-BR', {minimumFractionDigits:2}) }}</div>
+                <div class="card-title">Enviados</div>
+                <div class="card-value">{{ totalEnviados }}</div>
               </div>
             </div>
           </div>
@@ -313,8 +313,8 @@ const totalCancelados = computed(() =>
 const totalPendentes = computed(() =>
   pagamentosFiltrados.value.filter(p => p.status === 'pending').length
 )
-const totalTaxas = computed(() =>
-  pagamentosFiltrados.value.reduce((sum, p) => p.fee ? sum + p.fee : sum, 0) / 100
+const totalEnviados = computed(() =>
+  pagamentosFiltrados.value.filter(p => p.status === 'shipped').length
 )
 
 // 📊 Gráficos

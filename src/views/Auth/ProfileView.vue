@@ -26,6 +26,7 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { useToast } from 'vue-toastification' // ✅ Importa o toast
 import Profile from '@/components/Profile/Profile.vue'
 import Navbar from '@/components/home/NavBar.vue'
 import {
@@ -38,6 +39,8 @@ import {
   deleteAddress,
   cancelOrder
 } from '@/services/apiService.js'
+
+const toast = useToast() // ✅ Inicializa o toast
 
 const user = ref(null)
 const orders = ref([])
@@ -55,29 +58,59 @@ async function fetchUserOrders() {
 async function handleAddAddress(addressData) {
   try {
     await createAddress(addressData)
+    toast.success('✅ Endereço adicionado com sucesso!')
     await fetchAddresses()
   } catch (e) {
-    // Trate o erro, ex: toast.error('Erro ao adicionar endereço')
+    toast.error('❌ Erro ao adicionar endereço. Tente novamente.')
   }
 }
 
 async function handleEditAddress(addressData) {
   try {
     await updateAddress(addressData.id, addressData)
+    toast.success('✅ Endereço atualizado com sucesso!')
     await fetchAddresses()
   } catch (e) {
-    // Trate o erro, ex: toast.error('Erro ao editar endereço')
+    toast.error('❌ Erro ao editar endereço. Tente novamente.')
   }
 }
 
 async function handleDeleteAddress(id) {
+  if (!confirm('Deseja realmente excluir este endereço?')) return
+  
   try {
-    if (confirm('Tem certeza que deseja excluir este endereço?')) {
-      await deleteAddress(id)
-      await fetchAddresses()
+    await deleteAddress(id)
+    toast.success('✅ Endereço excluído com sucesso!')
+    await fetchAddresses()
+  } catch (error) {
+    console.error('❌ Erro ao excluir endereço:', error)
+    
+    // Tratamento específico para endereço associado a pedidos
+    const errorMessage = error?.response?.data?.detail || error?.response?.data?.message || error?.message || ''
+    const status = error?.response?.status
+    
+    if (status === 400 || 
+        errorMessage.toLowerCase().includes('pedido') || 
+        errorMessage.toLowerCase().includes('order') ||
+        errorMessage.toLowerCase().includes('constraint') ||
+        errorMessage.toLowerCase().includes('foreign key') ||
+        errorMessage.toLowerCase().includes('associado')) {
+      toast.error('❌ Não é possível excluir este endereço pois ele está associado a um ou mais pedidos.', {
+        timeout: 5000
+      })
+    } else if (status === 404) {
+      toast.warning('⚠️ Endereço não encontrado.', {
+        timeout: 3000
+      })
+    } else if (status === 403) {
+      toast.error('❌ Você não tem permissão para excluir este endereço.', {
+        timeout: 4000
+      })
+    } else {
+      toast.error('❌ Erro ao excluir endereço. Tente novamente.', {
+        timeout: 4000
+      })
     }
-  } catch (e) {
-    alert('Erro ao excluir endereço. Tente novamente.')
   }
 }
 
@@ -85,10 +118,11 @@ async function handleCancelOrder(orderId) {
   try {
     if (confirm('Tem certeza que deseja cancelar este pedido?')) {
       await cancelOrder(orderId)
+      toast.success('✅ Pedido cancelado com sucesso!')
       await fetchUserOrders()
     }
   } catch (e) {
-    alert('Erro ao cancelar pedido. Tente novamente.')
+    toast.error('❌ Erro ao cancelar pedido. Tente novamente.')
   }
 }
 

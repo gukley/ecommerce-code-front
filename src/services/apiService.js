@@ -181,25 +181,42 @@ export const getOrdersById = (orderId) => api.get(`/orders/${orderId}`).then(res
 
 export const createOrder = (orderData) => {
   if (!('coupon_id' in orderData)) orderData.coupon_id = null;
+  
+  // Garante que unit_price seja número
   if (Array.isArray(orderData.items)) {
     orderData.items = orderData.items.map(item => ({
       ...item,
-      unit_price: Number(item.unit_price)
+      unit_price: Number(item.unit_price),
+      quantity: Number(item.quantity)
     }));
   }
   
-  // Se houver discount_amount (total final com desconto), usar ele como total_price
-  if (orderData.discount_amount) {
-    orderData.total_price = Number(orderData.discount_amount);
-  } else if (orderData.total_amount) {
-    orderData.total_price = Number(orderData.total_amount);
-  } else {
-    // Calcular o total dos itens como fallback
-    const itemsTotal = orderData.items.reduce((sum, item) => {
-      return sum + (Number(item.unit_price) * Number(item.quantity));
-    }, 0);
-    orderData.total_price = itemsTotal;
-  }
+  // ✅ Calcula subtotal (soma dos itens)
+  const subtotal = orderData.items.reduce((sum, item) => {
+    return sum + (Number(item.unit_price) * Number(item.quantity));
+  }, 0);
+  
+  // ✅ Valores individuais
+  const frete = Number(orderData.shipping_cost || 0);
+  const desconto = Number(orderData.discount_amount || 0);
+  
+  // ✅ Total final: subtotal + frete - desconto
+  const totalFinal = subtotal + frete - desconto;
+  
+  // ✅ Define os valores no payload
+  orderData.subtotal_amount = subtotal;
+  orderData.shipping_cost = frete;
+  orderData.discount_amount = desconto;
+  orderData.total_amount = totalFinal;
+  orderData.total_price = totalFinal; // Garante que total_price seja igual ao total_amount
+  
+  console.debug('✅ Payload final enviado ao backend:', {
+    subtotal: subtotal.toFixed(2),
+    frete: frete.toFixed(2),
+    desconto: desconto.toFixed(2),
+    total_final: totalFinal.toFixed(2),
+    coupon_id: orderData.coupon_id
+  });
   
   return api.post('/orders/', orderData).then(res => res.data);
 };
