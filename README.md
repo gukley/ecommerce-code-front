@@ -72,8 +72,8 @@ A comunicação entre o front-end e a API é feita via requisições HTTP autent
 
 ### 1️⃣ Clonar o repositório
 ```bash
-git clone https://github.com/gukley/projeto-ecommerce-code.git
-cd projeto-ecommerce-code
+git clone https://github.com/gukley/TCC-ecommerce-Front-end.git
+cd TCC=ecommerce-Front-end
 ```
 
 ### 2️⃣ Instalar dependências
