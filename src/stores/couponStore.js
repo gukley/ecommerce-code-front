@@ -153,7 +153,25 @@ export const useCouponStore = defineStore('coupon', () => {
     
     try {
       const payload = formatCouponPayload(couponData);
-      const data = await updateCoupon(couponId, payload);
+      
+      // Remove campos undefined ou null antes de enviar
+      const cleanData = Object.keys(payload).reduce((acc, key) => {
+        if (payload[key] !== undefined && payload[key] !== null && payload[key] !== '') {
+          acc[key] = payload[key]
+        }
+        return acc
+      }, {})
+      
+      // 🔹 Busca o cupom atual para verificar se o código foi alterado
+      const currentCoupon = coupons.value.find(c => c.id === couponId)
+      
+      // 🔹 Se o código não foi alterado, REMOVE do payload
+      if (currentCoupon && currentCoupon.code === cleanData.code) {
+        delete cleanData.code
+        console.debug('⚠️ Código do cupom não foi alterado, removendo do payload')
+      }
+      
+      const data = await updateCoupon(couponId, cleanData);
 
       // Atualiza o cupom na lista
       const index = coupons.value.findIndex(c => c.id === couponId);

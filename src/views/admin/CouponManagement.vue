@@ -106,11 +106,13 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useCouponStore } from '@/stores/couponStore';
+import { useToast } from 'vue-toastification'; // ✅ Importa o toast
 import CouponList from '@/components/Admin/Coupon/CouponList.vue';
 import CouponForm from '@/components/Admin/Coupon/CouponForm.vue';
 
-// Store
+// Store e Toast
 const couponStore = useCouponStore();
+const toast = useToast(); // ✅ Inicializa o toast
 
 // Estado local
 const showCouponForm = ref(false);
@@ -128,12 +130,31 @@ const handleFormSubmitted = async (formData) => {
   try {
     if (formData.id) {
       await couponStore.updateExistingCoupon(formData.id, formData);
+      toast.success('✅ Cupom atualizado com sucesso!'); // ✅ Toast de sucesso
     } else {
       await couponStore.createNewCoupon(formData);
+      toast.success('✅ Cupom criado com sucesso!'); // ✅ Toast de sucesso
     }
     closeForm();
   } catch (error) {
     console.error("Falha ao salvar o cupom:", error);
+    
+    // Tratamento de erros específicos
+    const errorMessage = error?.message || error?.response?.data?.detail || '';
+    
+    if (errorMessage.includes('já está em uso') || errorMessage.includes('already exists')) {
+      toast.error('❌ Este código de cupom já está em uso. Escolha outro código.', {
+        timeout: 5000
+      });
+    } else if (errorMessage.includes('inválido') || errorMessage.includes('invalid')) {
+      toast.error('❌ Dados inválidos. Verifique os campos e tente novamente.', {
+        timeout: 5000
+      });
+    } else {
+      toast.error('❌ Erro ao salvar cupom: ' + (errorMessage || 'Tente novamente.'), {
+        timeout: 5000
+      });
+    }
   }
 };
 
@@ -141,8 +162,12 @@ const handleDeleteCoupon = async (coupon) => {
   if (confirm(`Tem certeza que deseja excluir o cupom "${coupon.code}"?`)) {
     try {
       await couponStore.deleteExistingCoupon(coupon.id);
+      toast.success('✅ Cupom excluído com sucesso!'); // ✅ Toast de sucesso
     } catch (error) {
       console.error("Falha ao excluir o cupom:", error);
+      toast.error('❌ Erro ao excluir cupom. Tente novamente.', {
+        timeout: 4000
+      });
     }
   }
 };
