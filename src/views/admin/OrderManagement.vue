@@ -294,31 +294,206 @@ function showOrderDetail(order) {
   selectedOrder.value = order;
 }
 
-function downloadOrderPDF(order) {
-  const doc = new jsPDF();
-  doc.setFontSize(12);
-  doc.text(`Pedido #${order.id}`, 14, 22);
-  doc.setFontSize(10);
-  doc.text(`Status: ${order.status}`, 14, 32);
-  doc.text(`Cliente: ${order.user?.name || '-'}`, 14, 42);
-  doc.text(`Data do Pedido: ${order.order_date}`, 14, 52);
-  doc.text(`Total: R$ ${order.total ?? order.total_amount ?? 0}`, 14, 62);
-  // mapping: adapt to your order structure if needed
-  const tableData = (order.items || []).map(item => [
-    item.product?.name || item.name || 'Produto',
-    item.quantity || 1,
-    `R$ ${Number(item.unit_price ?? item.price ?? 0).toFixed(2)}`,
-    `R$ ${((item.quantity || 1) * Number(item.unit_price ?? item.price ?? 0)).toFixed(2)}`
-  ]);
-  autoTable(doc, {
-    startY: 70,
-    head: [['Produto', 'Quantidade', 'Preço Unitário', 'Preço Total']],
-    body: tableData,
-    theme: 'grid',
-    styles: { cellPadding: 2, fontSize: 10, halign: 'center', valign: 'middle' },
-    headStyles: { fillColor: [100, 181, 246], textColor: [0, 0, 0], fontStyle: 'bold' },
-    alternateRowStyles: { fillColor: [240, 240, 240] }
-  });
+// 🔹 Traduz status para português
+function translateStatus(status) {
+  switch ((status || '').toUpperCase()) {
+    case 'PENDING': return 'Pendente'
+    case 'PROCESSING': return 'Processando'
+    case 'SHIPPED': return 'Enviado'
+    case 'DELIVERED': return 'Entregue'
+    case 'CANCELLED': return 'Cancelado'
+    default: return status
+  }
+}
+
+// 🔹 Formata data para DD/MM/YYYY HH:MM
+function formatDate(dateString) {
+  if (!dateString) return '-'
+  const date = new Date(dateString)
+  return date.toLocaleString('pt-BR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+// 🔹 Formata preço
+function formatPrice(value) {
+  if (value == null) return '-'
+  return `R$ ${Number(value).toFixed(2)}`
+}
+
+// 🔹 Gera PDF profissional do pedido
+async function downloadOrderPDF(order) {
+  const doc = new jsPDF()
+  
+  // ✅ Cabeçalho com logo/título
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(20)
+  doc.setTextColor(74, 144, 226) // Azul
+  doc.text('NOTA FISCAL - GGTECH', 15, 20)
+  
+  // Linha separadora
+  doc.setDrawColor(74, 144, 226)
+  doc.setLineWidth(0.5)
+  doc.line(15, 25, 195, 25)
+  
+  // ✅ Informações do pedido
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(12)
+  doc.setTextColor(0, 0, 0)
+  
+  let y = 35
+  doc.text(`Pedido: #${order.id}`, 15, y)
+  y += 8
+  doc.text(`Data: ${formatDate(order.order_date)}`, 15, y)
+  y += 8
+  doc.text(`Status: ${translateStatus(order.status)}`, 15, y)
+  y += 8
+  
+  // ✅ Nome do cliente
+  const clienteNome = order.user?.name || order.customer_name || 'Cliente não informado'
+  doc.text(`Cliente: ${clienteNome}`, 15, y)
+  y += 8
+  
+  // ✅ Busca e exibe o endereço de entrega
+  if (order.address_id && addresses.value[order.address_id]) {
+    const addr = addresses.value[order.address_id]
+    y += 5
+    doc.setFont('helvetica', 'bold')
+    doc.setTextColor(74, 144, 226)
+    doc.text('ENDEREÇO DE ENTREGA:', 15, y)
+    doc.setFont('helvetica', 'normal')
+    doc.setTextColor(0, 0, 0)
+    y += 8
+    
+    const endereco = [
+      `${addr.street || '-'}, ${addr.number || '-'}`,
+      addr.complement ? `Complemento: ${addr.complement}` : null,
+      `${addr.neighborhood || addr.bairro || '-'} - ${addr.city || '-'}/${addr.state || '-'}`,
+      `CEP: ${addr.zip_code || addr.zip || '-'}`
+    ].filter(Boolean)
+    
+    endereco.forEach(linha => {
+      doc.text(linha, 15, y)
+      y += 6
+    })
+  }
+  
+  // Linha separadora antes dos produtos
+  y += 5
+  doc.setDrawColor(200, 200, 200)
+  doc.setLineWidth(0.3)
+  doc.line(15, y, 195, y)
+  y += 10
+  
+  // ✅ Título dos produtos
+  doc.setFont('helvetica', 'bold')
+  doc.setTextColor(74, 144, 226)
+  doc.setFontSize(14)
+  doc.text('PRODUTOS:', 15, y)
+  y += 10
+  
+  // ✅ Cabeçalho da tabela de produtos
+  doc.setFontSize(10)
+  doc.setFont('helvetica', 'bold')
+  doc.setTextColor(255, 255, 255)
+  doc.setFillColor(74, 144, 226)
+  doc.rect(15, y - 5, 180, 8, 'F')
+  doc.text('Produto', 17, y)
+  doc.text('Qtd', 120, y)
+  doc.text('Unit.', 140, y)
+  doc.text('Subtotal', 165, y)
+  y += 10
+  
+  // ✅ Lista de produtos
+  doc.setFont('helvetica', 'normal')
+  doc.setTextColor(0, 0, 0)
+  doc.setFontSize(9)
+  
+  let subtotalGeral = 0
+  const produtos = order.items || order.products || []
+  
+  produtos.forEach((p) => {
+    const nomeProduto = p.product?.name || p.name || 'Produto'
+    const quantidade = p.quantity ?? 1
+    const precoUnit = Number(p.unit_price ?? p.price) || 0
+    const subtotal = precoUnit * quantidade
+    subtotalGeral += subtotal
+    
+    // Nome do produto (com quebra de linha se necessário)
+    const maxWidth = 100
+    const linhasNome = doc.splitTextToSize(nomeProduto, maxWidth)
+    doc.text(linhasNome, 17, y)
+    
+    // Quantidade, preço unitário e subtotal
+    doc.text(String(quantidade), 120, y)
+    doc.text(formatPrice(precoUnit), 140, y)
+    doc.text(formatPrice(subtotal), 165, y)
+    
+    y += (linhasNome.length * 6) + 3
+    
+    // Linha separadora entre produtos
+    doc.setDrawColor(230, 230, 230)
+    doc.line(15, y - 1, 195, y - 1)
+    
+    // Adiciona nova página se necessário
+    if (y > 260) {
+      doc.addPage()
+      y = 20
+    }
+  })
+  
+  // ✅ Total do pedido
+  y += 10
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(12)
+  doc.setTextColor(74, 144, 226)
+  
+  // Subtotal
+  doc.text('Subtotal:', 120, y)
+  doc.text(formatPrice(subtotalGeral), 165, y)
+  y += 8
+  
+  // Frete (se houver)
+  if (order.shipping_cost && Number(order.shipping_cost) > 0) {
+    doc.text('Frete:', 120, y)
+    doc.text(formatPrice(Number(order.shipping_cost)), 165, y)
+    y += 8
+  }
+  
+  // Desconto (se houver)
+  if (order.discount_amount && Number(order.discount_amount) > 0) {
+    doc.setTextColor(40, 167, 69) // Verde
+    doc.text('Desconto:', 120, y)
+    doc.text(`- ${formatPrice(Number(order.discount_amount))}`, 165, y)
+    y += 8
+  }
+  
+  // ✅ Total final (corrigido)
+  doc.setFontSize(14)
+  doc.setTextColor(0, 0, 0)
+  const totalFinal = getOrderTotal(order)
+  doc.text('TOTAL:', 120, y)
+  doc.text(formatPrice(totalFinal), 165, y)
+  
+  // ✅ Rodapé
+  y += 20
+  if (y > 260) {
+    doc.addPage()
+    y = 20
+  }
+  
+  doc.setFontSize(9)
+  doc.setFont('helvetica', 'italic')
+  doc.setTextColor(100, 100, 100)
+  doc.text('Obrigado por comprar na GGTECH! Para dúvidas, entre em contato conosco.', 15, y)
+  y += 6
+  doc.text(`Documento gerado em: ${new Date().toLocaleString('pt-BR')}`, 15, y)
+  
+  // Salva o PDF
   doc.save(`pedido_${order.id}.pdf`);
 }
 

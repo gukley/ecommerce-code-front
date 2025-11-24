@@ -8,6 +8,7 @@ import {
   deleteCoupon
 } from '@/services/apiService';
 import { useToast } from 'vue-toastification';
+import { useAuthStore } from '@/stores/authStore';
 
 export const useCouponStore = defineStore('coupon', () => {
   const coupons = ref([]);
@@ -100,44 +101,10 @@ export const useCouponStore = defineStore('coupon', () => {
       const data = await createCoupon(payload);
       coupons.value.push(data);
       lastFetchTime.value = Date.now();
-      toast.success('Cupom criado com sucesso!');
+      // ✅ Removido o toast daqui (será exibido no componente)
       return data;
     } catch (err) {
-      console.error('Erro completo:', err);
-      console.error('Resposta do servidor:', err.response?.data);
-      console.error('Status:', err.response?.status);
-      
-      // Tratar erro 422 especificamente
-      if (err.response?.status === 422) {
-        const serverError = err.response.data;
-        console.error('Detalhes completos do erro 422:', serverError);
-        
-        if (serverError.detail && Array.isArray(serverError.detail)) {
-          console.error('Array de detalhes:', serverError.detail);
-          serverError.detail.forEach((error, index) => {
-            console.error(`Erro ${index + 1}:`, error);
-            console.error(`  - Campo: ${error.loc?.join('.')}`);
-            console.error(`  - Mensagem: ${error.msg}`);
-            console.error(`  - Tipo: ${error.type}`);
-            console.error(`  - Valor recebido: ${error.input}`);
-          });
-          
-          const errorMessages = serverError.detail.map(error => 
-            `${error.loc?.join('.')}: ${error.msg}`
-          ).join(', ');
-          error.value = `Erro de validação: ${errorMessages}`;
-          toast.error(`Erro de validação: ${errorMessages}`);
-        } else {
-          console.error('Estrutura inesperada do erro:', serverError);
-          error.value = 'Erro de validação: Dados inválidos';
-          toast.error('Erro de validação: Dados inválidos');
-        }
-      } else {
-        error.value = 'Erro ao criar cupom';
-        toast.error('Erro ao criar cupom');
-      }
-      
-      console.error('Erro ao criar cupom:', err);
+      console.error('Erro ao criar cupom (store):', err);
       throw err;
     } finally {
       loading.value = false;
@@ -185,51 +152,17 @@ export const useCouponStore = defineStore('coupon', () => {
       }
       
       lastFetchTime.value = Date.now();
-      toast.success('Cupom atualizado com sucesso!');
+      // ✅ Removido o toast daqui (será exibido no componente)
       return data;
     } catch (err) {
-      console.error('Erro completo:', err);
-      console.error('Resposta do servidor:', err.response?.data);
-      console.error('Status:', err.response?.status);
-      
-      // Tratar erro 422 especificamente
-      if (err.response?.status === 422) {
-        const serverError = err.response.data;
-        console.error('Detalhes completos do erro 422:', serverError);
-        
-        if (serverError.detail && Array.isArray(serverError.detail)) {
-          console.error('Array de detalhes:', serverError.detail);
-          serverError.detail.forEach((error, index) => {
-            console.error(`Erro ${index + 1}:`, error);
-            console.error(`  - Campo: ${error.loc?.join('.')}`);
-            console.error(`  - Mensagem: ${error.msg}`);
-            console.error(`  - Tipo: ${error.type}`);
-            console.error(`  - Valor recebido: ${error.input}`);
-          });
-          
-          const errorMessages = serverError.detail.map(error => 
-            `${error.loc?.join('.')}: ${error.msg}`
-          ).join(', ');
-          error.value = `Erro de validação: ${errorMessages}`;
-          toast.error(`Erro de validação: ${errorMessages}`);
-        } else {
-          console.error('Estrutura inesperada do erro:', serverError);
-          error.value = 'Erro de validação: Dados inválidos';
-          toast.error('Erro de validação: Dados inválidos');
-        }
-      } else {
-        error.value = 'Erro ao atualizar cupom';
-        toast.error('Erro ao atualizar cupom');
-      }
-      
-      console.error('Erro ao atualizar cupom:', err);
+      console.debug('Erro ao atualizar cupom (store):', err.message);
       throw err;
     } finally {
       loading.value = false;
     }
   };
 
-  // Deletar cupom
+  // Deletar cupom - ✅ SOMENTE AQUI a verificação de permissão
   const deleteExistingCoupon = async (couponId) => {
     if (loading.value) return;
     
@@ -237,6 +170,12 @@ export const useCouponStore = defineStore('coupon', () => {
     error.value = null;
     
     try {
+      // ✅ Verifica se o usuário é moderador - SOMENTE na exclusão
+      const authStore = useAuthStore()
+      if (authStore.user?.role === 'MODERATOR') {
+        throw new Error('PERMISSION_DENIED')
+      }
+
       await deleteCoupon(couponId);
       
       // Remove o cupom da lista
@@ -248,11 +187,8 @@ export const useCouponStore = defineStore('coupon', () => {
       }
       
       lastFetchTime.value = Date.now();
-      toast.success('Cupom excluído com sucesso!');
     } catch (err) {
-      error.value = 'Erro ao excluir cupom';
-      console.error('Erro ao excluir cupom:', err);
-      toast.error('Erro ao excluir cupom');
+      console.debug('Erro ao excluir cupom (store):', err.message);
       throw err;
     } finally {
       loading.value = false;

@@ -130,42 +130,87 @@ const handleFormSubmitted = async (formData) => {
   try {
     if (formData.id) {
       await couponStore.updateExistingCoupon(formData.id, formData);
-      toast.success('✅ Cupom atualizado com sucesso!'); // ✅ Toast de sucesso
+      toast.success('✅ Cupom atualizado com sucesso!');
     } else {
       await couponStore.createNewCoupon(formData);
-      toast.success('✅ Cupom criado com sucesso!'); // ✅ Toast de sucesso
+      toast.success('✅ Cupom criado com sucesso!');
     }
     closeForm();
   } catch (error) {
     console.error("Falha ao salvar o cupom:", error);
     
     // Tratamento de erros específicos
-    const errorMessage = error?.message || error?.response?.data?.detail || '';
+    const errorMessage = error?.response?.data?.detail || error?.message || '';
+    const status = error?.response?.status;
     
-    if (errorMessage.includes('já está em uso') || errorMessage.includes('already exists')) {
-      toast.error('❌ Este código de cupom já está em uso. Escolha outro código.', {
+    // ✅ Erro 403: Permissão negada
+    if (status === 403) {
+      toast.error('❌ Você não tem permissão para realizar esta ação. Entre em contato com o administrador.', {
         timeout: 5000
       });
-    } else if (errorMessage.includes('inválido') || errorMessage.includes('invalid')) {
-      toast.error('❌ Dados inválidos. Verifique os campos e tente novamente.', {
-        timeout: 5000
-      });
-    } else {
-      toast.error('❌ Erro ao salvar cupom: ' + (errorMessage || 'Tente novamente.'), {
-        timeout: 5000
-      });
+      return;
     }
+    
+    // ✅ Erro 400: Código duplicado ou dados inválidos
+    if (status === 400) {
+      if (errorMessage.includes('já está em uso') || errorMessage.includes('already exists')) {
+        toast.error('❌ Este código de cupom já está em uso. Escolha outro código.', {
+          timeout: 5000
+        });
+      } else if (errorMessage.includes('inválido') || errorMessage.includes('invalid')) {
+        toast.error('❌ Dados inválidos. Verifique os campos e tente novamente.', {
+          timeout: 5000
+        });
+      } else {
+        toast.error('❌ ' + errorMessage, {
+          timeout: 5000
+        });
+      }
+      return;
+    }
+    
+    // ✅ Erro 404: Cupom não encontrado
+    if (status === 404) {
+      toast.warning('⚠️ Cupom não encontrado.', {
+        timeout: 3000
+      });
+      return;
+    }
+    
+    // ✅ Erro genérico
+    toast.error('❌ Erro ao salvar cupom: ' + (errorMessage || 'Tente novamente.'), {
+      timeout: 5000
+    });
   }
 };
 
 const handleDeleteCoupon = async (coupon) => {
-  if (confirm(`Tem certeza que deseja excluir o cupom "${coupon.code}"?`)) {
-    try {
-      await couponStore.deleteExistingCoupon(coupon.id);
-      toast.success('✅ Cupom excluído com sucesso!'); // ✅ Toast de sucesso
-    } catch (error) {
-      console.error("Falha ao excluir o cupom:", error);
-      toast.error('❌ Erro ao excluir cupom. Tente novamente.', {
+  if (!confirm(`Tem certeza que deseja excluir o cupom "${coupon.code}"?`)) return
+  
+  try {
+    await couponStore.deleteExistingCoupon(coupon.id)
+    toast.success('✅ Cupom excluído com sucesso!')
+  } catch (error) {
+    console.error('Falha ao excluir o cupom:', error)
+    
+    // ✅ Tratamento silencioso de erro - apenas 1 toast
+    const errorMessage = error?.message || '';
+    
+    // Verifica se é erro de permissão (moderador)
+    if (errorMessage === 'PERMISSION_DENIED' || error?.response?.status === 403) {
+      toast.warning('Você não tem permissão para excluir este cupom.', {
+        timeout: 4000
+      });
+      return;
+    }
+    
+    // Para outros erros, exibe toast genérico
+    if (error?.response?.status === 404) {
+      toast.warning('⚠️ Cupom não encontrado.', {
+        timeout: 3000
+      });
+    } else {
+      toast.error('Erro ao excluir cupom. Tente novamente.', {
         timeout: 4000
       });
     }
